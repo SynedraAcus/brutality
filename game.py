@@ -19,7 +19,7 @@ atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 factory = MapObjectFactory(atlas, dispatcher)
 
 # Init game screen
-chars = [[' ' for _ in range(85)] for y in range(50)]
+chars = [[' ' for _ in range(85)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 layout = ECSLayout(chars, colors)
 dispatcher.register_listener(layout, 'all')
@@ -27,16 +27,25 @@ dispatcher.register_listener(layout, 'all')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
-barrel1 = factory.create_barrel(25, 25)
+
+# Top collider to prevent walking into BG
+collider = factory.create_invisible_collider(0, 0, (85, 15))
+layout.add_entity(collider)
+dispatcher.add_event(BearEvent(event_type='ecs_add',
+                               event_value=(collider.id,
+                                            collider.position.x,
+                                            collider.position.y)))
+barrel1 = factory.create_barrel(45, 40)
 layout.add_entity(barrel1)
 dispatcher.add_event(BearEvent(event_type='ecs_add',
                                event_value=(barrel1.id,
                                             barrel1.position.x,
                                             barrel1.position.y)))
-cop = factory.create_cop(10, 10)
+cop = factory.create_cop(10, 30)
 layout.add_entity(cop)
 dispatcher.add_event(BearEvent(event_type='ecs_add',
                                event_value=(cop.id,
                                             cop.position.x,
                                             cop.position.y)))
+
 loop.run()

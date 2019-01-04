@@ -67,6 +67,10 @@ class WalkerComponent(PositionComponent):
 
 
 class WalkerCollisionComponent(CollisionComponent):
+    """
+    A collision component that, upon colliding into something impassable,
+    moves the entity to where it came from.
+    """
     def collided_into(self, entity):
         self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
                                           self.owner.position.last_move[1] * -1)

@@ -1,6 +1,7 @@
 from bear_hug.ecs import Entity, Component, WidgetComponent, PositionComponent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 from bear_hug.event import BearEvent
+from bear_hug.bear_utilities import copy_shape
 
 from components import WalkerComponent, WalkerCollisionComponent
 
@@ -55,3 +56,22 @@ class MapObjectFactory:
         cop_entity.add_component(widget_component)
         cop_entity.add_component(collision_component)
         return cop_entity
+    
+    def create_invisible_collider(self, x, y, size):
+        """
+        Create an impassable background object
+        :param x: xpos
+        :param y: ypos
+        :param size: size tuple
+        :return:
+        """
+        bg_entity = Entity(id='Collider')
+        chars = [[' ' for _ in range(size[0])] for _ in range(size[1])]
+        colors = copy_shape(chars, 'gray')
+        widget = Widget(chars, colors)
+        bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
+                                                owner=bg_entity))
+        position_component = PositionComponent(self.dispatcher, x=x, y=y,
+                                               owner=bg_entity)
+        bg_entity.add_component(position_component)
+        return bg_entity
