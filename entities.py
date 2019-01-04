@@ -1,10 +1,12 @@
-from bear_hug.ecs import Entity, Component, WidgetComponent, PositionComponent
-from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
-from bear_hug.event import BearEvent
 from bear_hug.bear_utilities import copy_shape
+from bear_hug.ecs import Entity, WidgetComponent, PositionComponent
+from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
 from components import WalkerComponent, WalkerCollisionComponent
+from widgets import SwitchingWidget
 
+
+# TODO: remove this class
 class Character(Entity):
     """
     An entity subclass for stuff that can be characters
@@ -13,7 +15,7 @@ class Character(Entity):
         super().__init__(*args, **kwargs)
         self.direction = 'r'
     
-
+# TODO: remove the entire gamemap file
 class MapObjectFactory:
     def __init__(self, atlas, dispatcher):
         self.dispatcher = dispatcher
@@ -46,7 +48,11 @@ class MapObjectFactory:
         else:
             self.counts['Cop'] = 1
         cop_entity = Entity(id='Cop{}'.format(self.counts['Barrel']))
-        widget = Widget(*self.atlas.get_element('cop_r'))
+        widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
+                                  'r_2': self.atlas.get_element('cop_r_2'),
+                                  'l_1': self.atlas.get_element('cop_l_1'),
+                                  'l_2': self.atlas.get_element('cop_l_2')},
+                                 initial_image='r_1')
         widget_component = WidgetComponent(self.dispatcher, widget,
                                            owner=cop_entity)
         position_component = WalkerComponent(self.dispatcher, x=x, y=y,
