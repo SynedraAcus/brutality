@@ -13,14 +13,13 @@ class SwitchingWidget(Widget):
         test_shape = None
         for image in images_dict:
             if not shapes_equal(images_dict[image][0], images_dict[image][1]):
-                raise BearException(
-                    'Chars and colors of different shape for image ID {} in SwitchingWidget'.
-                        format(image))
+                raise BearException(f'Chars and colors of different shape for image ID {image} in SwitchingWidget')
             if not test_shape:
                 test_shape = (len(images_dict[image][0]),
                               len(images_dict[image][0][0]))
-            elif len(images_dict[image][0]) != test_shape[0] or len(images_dict[image][0][0]) != test_shape[1]:
-                raise BearException('Image {} in SwitchingWidget has incorrect size'.format(image))
+            elif len(images_dict[image][0]) != test_shape[0] or \
+                len(images_dict[image][0][0]) != test_shape[1]:
+                raise BearException(f'Image {image} in SwitchingWidget has incorrect size')
         if not initial_image:
             raise BearException('Initial image not set for SwitchingWidget')
         super().__init__(*images_dict[initial_image])
@@ -32,5 +31,4 @@ class SwitchingWidget(Widget):
             self.chars = self.images[image_id][0]
             self.colors = self.images[image_id][1]
         except KeyError:
-            raise BearException('Attempting to switch to incorrect image ID {}'.
-                                format(image_id))
+            raise BearException(f'Attempting to switch to incorrect image ID {image_id}')

@@ -23,10 +23,10 @@ class CollisionComponent(Component):
                 self.collided_by(event.event_value[0])
     
     def collided_into(self, entity):
-        print('Collided into {}'.format(entity))
+        print(f'Collided into {entity}')
     
     def collided_by(self, entity):
-        print('Collided by {}'.format(entity))
+        print(f'Collided by {entity}')
 
 
 class WalkerComponent(PositionComponent):
@@ -54,7 +54,6 @@ class WalkerComponent(PositionComponent):
             self.phase = '2'
         else:
             self.phase = '1'
-        # TODO: replace all formats with f-string
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):

@@ -18,7 +18,7 @@ class MapObjectFactory:
             self.counts['Barrel'] += 1
         else:
             self.counts['Barrel'] = 1
-        barrel_entity = Entity(id='Barrel{}'.format(self.counts['Barrel']))
+        barrel_entity = Entity(id=f'Barrel{self.counts["Barrel"]}')
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element(
                                                       'barrel_1'),
                                                   self.atlas.get_element(
@@ -38,7 +38,7 @@ class MapObjectFactory:
             self.counts['Cop'] += 1
         else:
             self.counts['Cop'] = 1
-        cop_entity = Entity(id='Cop{}'.format(self.counts['Barrel']))
+        cop_entity = Entity(id=f'Cop{self.counts["Cop"]}')
         widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
                                   'r_2': self.atlas.get_element('cop_r_2'),
                                   'l_1': self.atlas.get_element('cop_l_1'),
