@@ -1,12 +1,13 @@
+#! /usr/bin/env python3.6
+
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ECSLayout
 from bear_hug.event import BearEvent, BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
-from bear_hug.widgets import ClosingListener, ScrollableLayout
+from bear_hug.widgets import ClosingListener
 
 from entities import MapObjectFactory
-
 
 # Creating singletons
 t = BearTerminal(font_path='cp437_12x12.png', size='85x60',

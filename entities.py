@@ -2,7 +2,8 @@ from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs import Entity, WidgetComponent, PositionComponent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
-from components import WalkerComponent, WalkerCollisionComponent
+from components import WalkerComponent, WalkerCollisionComponent, \
+    SwitchWidgetComponent
 from widgets import SwitchingWidget
 
 
@@ -53,8 +54,8 @@ class MapObjectFactory:
                                   'l_1': self.atlas.get_element('cop_l_1'),
                                   'l_2': self.atlas.get_element('cop_l_2')},
                                  initial_image='r_1')
-        widget_component = WidgetComponent(self.dispatcher, widget,
-                                           owner=cop_entity)
+        widget_component = SwitchWidgetComponent(self.dispatcher, widget,
+                                                 owner=cop_entity)
         position_component = WalkerComponent(self.dispatcher, x=x, y=y,
                                                owner=cop_entity)
         collision_component = WalkerCollisionComponent(self.dispatcher)

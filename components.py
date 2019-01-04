@@ -1,4 +1,8 @@
-from bear_hug.ecs import Component, PositionComponent, BearEvent
+from bear_hug.bear_utilities import BearECSException
+from bear_hug.ecs import Component, PositionComponent, BearEvent, \
+    WidgetComponent
+
+from widgets import SwitchingWidget
 
 
 class CollisionComponent(Component):
@@ -30,10 +34,28 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that can change x;y on keypress
     """
     
+    # TODO: Non-moronic working animation
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down'])
         self.last_move = None
+        self.direction = 'r'
+        self.phase = '1'
+        
+    def walk(self, move):
+        self.relative_move(*move)
+        if move[0] > 0:
+            self.direction = 'r'
+        elif move[0] < 0:
+            self.direction = 'l'
+        # If move[0] == 0, the direction stays whatever it was, move is vertical
+        # TODO: Support more than two phases of movement
+        if self.phase == '1':
+            self.phase = '2'
+        else:
+            self.phase = '1'
+        # TODO: replace all formats with f-string
+        self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):
         r = []
@@ -53,7 +75,7 @@ class WalkerComponent(PositionComponent):
                 moved = True
             if moved:
                 # events
-                self.relative_move(*self.last_move)
+                self.walk(self.last_move)
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='step'))
         x = super().on_event(event)
@@ -74,3 +96,15 @@ class WalkerCollisionComponent(CollisionComponent):
     def collided_into(self, entity):
         self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
                                           self.owner.position.last_move[1] * -1)
+
+
+class SwitchWidgetComponent(WidgetComponent):
+    """
+    A widget component that supports SwitchingWidget
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not isinstance(self.widget, SwitchingWidget):
+            raise BearECSException('SwitchWidgetComponent can only be used with SwitchingWidget')
+    def switch_to_image(self, image_id):
+        self.widget.switch_to_image(image_id)
