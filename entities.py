@@ -7,16 +7,6 @@ from components import WalkerComponent, WalkerCollisionComponent, \
 from widgets import SwitchingWidget
 
 
-# TODO: remove this class
-class Character(Entity):
-    """
-    An entity subclass for stuff that can be characters
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.direction = 'r'
-    
-# TODO: remove the entire gamemap file
 class MapObjectFactory:
     def __init__(self, atlas, dispatcher):
         self.dispatcher = dispatcher
