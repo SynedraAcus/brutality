@@ -1,0 +1,121 @@
+[
+  {
+    "name": "dev_bg",
+    "x": 0,
+    "y": 0,
+    "xsize": 12,
+    "ysize": 10
+  },
+  {
+    "name": "cop_r",
+    "x": 12,
+    "y": 0,
+    "xsize": 13,
+    "ysize": 18
+  },
+  {
+    "name": "cop_l",
+    "x": 12,
+    "y": 19,
+    "xsize": 13,
+    "ysize": 18
+  },
+  {
+    "name": "nunchaku_punk_l",
+    "x": 25,
+    "y": 1,
+    "xsize": 10,
+    "ysize": 17
+  },
+  {
+    "name": "nunchaku_punk_r",
+    "x": 27,
+    "y": 20,
+    "xsize": 10,
+    "ysize": 17
+  },
+  {
+    "name": "bottle_punk_l",
+    "x": 35,
+    "y": 1,
+    "xsize": 10,
+    "ysize": 17
+  },
+  {
+    "name": "bottle_punk_r",
+    "x": 38,
+    "y": 20,
+    "xsize": 10,
+    "ysize": 17
+  },
+  {
+    "name": "barrel_1",
+    "x": 0,
+    "y": 10,
+    "xsize": 6,
+    "ysize": 9
+  },
+  {
+    "name": "barrel_2",
+    "x": 0,
+    "y": 20,
+    "xsize": 6,
+    "ysize": 9
+  },
+  {
+    "name": "shot",
+    "x": 6,
+    "y": 10,
+    "xsize": 2,
+    "ysize": 3
+  },
+  {
+    "name": "bullet_1",
+    "x": 8,
+    "y": 10,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bullet_2",
+    "x": 8,
+    "y": 11,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bullet_3",
+    "x": 8,
+    "y": 12,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bottle_ne",
+    "x": 7,
+    "y": 13,
+    "xsize": 4,
+    "ysize": 5
+  },
+  {
+    "name": "bottle_nw",
+    "x": 7,
+    "y": 18,
+    "xsize": 4,
+    "ysize": 5
+  },
+  {
+    "name": "bottle_se",
+    "x": 7,
+    "y": 23,
+    "xsize": 4,
+    "ysize": 4
+  },
+  {
+    "name": "bottle_sw",
+    "x": 7,
+    "y": 27,
+    "xsize": 4,
+    "ysize": 4
+  }
+]
