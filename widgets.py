@@ -27,8 +27,9 @@ class SwitchingWidget(Widget):
         self.current_image = initial_image
         
     def switch_to_image(self, image_id):
-        try:
-            self.chars = self.images[image_id][0]
-            self.colors = self.images[image_id][1]
-        except KeyError:
-            raise BearException(f'Attempting to switch to incorrect image ID {image_id}')
+        if image_id != self.current_image:
+            try:
+                self.chars = self.images[image_id][0]
+                self.colors = self.images[image_id][1]
+            except KeyError:
+                raise BearException(f'Attempting to switch to incorrect image ID {image_id}')
