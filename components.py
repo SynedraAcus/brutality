@@ -170,3 +170,9 @@ class SwitchWidgetComponent(WidgetComponent):
         :return:
         """
         return image_id in self.widget.images
+
+
+class SpawnerComponent(Component):
+    #TODO: create something to support ecs_create
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='spawner', **kwargs)
