@@ -8,6 +8,7 @@ from widgets import SwitchingWidget
 
 
 class MapObjectFactory:
+    #TODO: make this a nice universally-available singleton
     def __init__(self, atlas, dispatcher):
         self.dispatcher = dispatcher
         self.atlas = atlas

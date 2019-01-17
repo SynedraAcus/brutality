@@ -31,5 +31,6 @@ class SwitchingWidget(Widget):
             try:
                 self.chars = self.images[image_id][0]
                 self.colors = self.images[image_id][1]
+                self.current_image = image_id
             except KeyError:
                 raise BearException(f'Attempting to switch to incorrect image ID {image_id}')

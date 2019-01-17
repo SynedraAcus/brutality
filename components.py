@@ -41,7 +41,7 @@ class WalkerComponent(PositionComponent):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down'])
         self.last_move = None
-        self.direction = 'r'
+        self.direction = 'l'
         self.phase = '1'
         
     def walk(self, move):

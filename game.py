@@ -30,6 +30,7 @@ t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
 
 # Top collider to prevent walking into BG
+# TODO: Colliders on left and right sides
 collider = factory.create_invisible_collider(0, 0, (85, 15))
 layout.add_entity(collider)
 dispatcher.add_event(BearEvent(event_type='ecs_add',
