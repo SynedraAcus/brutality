@@ -34,7 +34,7 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that can change x;y on keypress
     """
     
-    # TODO: Non-moronic working animation
+    # TODO: Non-idiotic walking animation
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down'])

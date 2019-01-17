@@ -159,5 +159,34 @@
     "y": 27,
     "xsize": 4,
     "ysize": 4
+  },
+  {
+    "name": "target_intact",
+    "x": 15,
+    "y": 38,
+    "xsize": 7,
+    "ysize": 15
+  },
+  {
+    "name": "target_1",
+    "x": 23,
+    "y": 38,
+    "xsize": 7,
+    "ysize": 15
+  },
+  {
+    "name": "target_2",
+    "x": 31,
+    "y": 38,
+    "xsize": 7,
+    "ysize": 15
+  },
+  {
+    "name": "target_destroyed",
+    "x": 38,
+    "y": 38,
+    "xsize": 7,
+    "ysize": 15
   }
+  
 ]
