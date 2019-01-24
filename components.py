@@ -39,35 +39,8 @@ class WalkerComponent(PositionComponent):
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):
-        r = []
-        if event.event_type == 'key_down':
-            moved = False
-            if event.event_value in ('TK_D', 'TK_RIGHT'):
-                self.last_move = (1, 0)
-                moved = True
-            elif event.event_value in ('TK_A', 'TK_LEFT'):
-                self.last_move = (-1, 0)
-                moved = True
-            elif event.event_value in ('TK_S', 'TK_DOWN'):
-                self.last_move = (0, 1)
-                moved = True
-            elif event.event_value in ('TK_W', 'TK_UP'):
-                self.last_move = (0, -1)
-                moved = True
-            if moved:
-                self.walk(self.last_move)
-                r.append(BearEvent(event_type='play_sound',
-                                   event_value='step'))
-        elif event.event_type == 'tick':
+        if event.event_type == 'tick':
             self.moved_this_tick = False
-        x = super().on_event(event)
-        if x:
-            if isinstance(x, BearEvent):
-                r.append(x)
-            else:
-                # multiple return
-                r += x
-        return r
 
 
 class CollisionComponent(Component):
@@ -211,11 +184,48 @@ class SpawnerComponent(Component):
         self.factory.create_entity(item, (self.owner.position.x + relative_pos[0],
                                           self.owner.position.y + relative_pos[1]),
                                    **kwargs)
+        
 
+class InputComponent(Component):
+    """
+    A component that handles input.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='controller', **kwargs)
+        self.dispatcher.register_listener(self, 'key_down')
+        
     def on_event(self, event):
-        #TODO: create an InputComponent instead of each component listening to events
-        if event.event_type == 'key_down' and event.event_value == 'TK_SPACE':
-            if self.owner.position.direction == 'r':
-                self.spawn('bullet', (13, 5), speed=(25, 0))
-            else:
-                self.spawn('bullet', (-1, 5), speed=(-25, 0))
+        x = super().on_event(event)
+        if isinstance(x, BearEvent):
+            r = [x]
+        elif isinstance(x, list):
+            r = x
+        else:
+            r = []
+        if event.event_type == 'key_down':
+            moved = False
+            if event.event_value == 'TK_SPACE':
+                if self.owner.position.direction == 'r':
+                    self.owner.spawner.spawn('bullet', (13, 5), speed=(25, 0))
+                else:
+                    self.owner.spawner.spawn('bullet', (-1, 5), speed=(-25, 0))
+                r.append(BearEvent(event_type='play_sound',
+                                   event_value='shot'))
+            elif event.event_value in ('TK_D', 'TK_RIGHT'):
+                self.last_move = (1, 0)
+                moved = True
+            elif event.event_value in ('TK_A', 'TK_LEFT'):
+                self.last_move = (-1, 0)
+                moved = True
+            elif event.event_value in ('TK_S', 'TK_DOWN'):
+                self.last_move = (0, 1)
+                moved = True
+            elif event.event_value in ('TK_W', 'TK_UP'):
+                self.last_move = (0, -1)
+                moved = True
+            if moved:
+                self.owner.position.walk(self.last_move)
+                r.append(BearEvent(event_type='play_sound',
+                                   event_value='shot'))
+        return r
+

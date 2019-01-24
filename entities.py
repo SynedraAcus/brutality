@@ -5,7 +5,7 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    ProjectileCollisionComponent
+    ProjectileCollisionComponent, InputComponent
 from widgets import SwitchingWidget
 
 
@@ -82,6 +82,7 @@ class MapObjectFactory:
         cop_entity.add_component(widget_component)
         cop_entity.add_component(collision_component)
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        cop_entity.add_component(InputComponent(self.dispatcher))
         return cop_entity
     
     def __create_invisible_collider(self, entity_id, size=(0, 0)):
@@ -110,7 +111,6 @@ class MapObjectFactory:
         :return:
         """
         bullet_entity = Entity(id=entity_id)
-        #TODO: Debug bullet animation
         bullet_entity.add_component(WidgetComponent(self.dispatcher,
             SimpleAnimationWidget(Animation((self.atlas.get_element('bullet_1'),
                                              self.atlas.get_element('bullet_2'),
