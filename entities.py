@@ -32,7 +32,13 @@ class MapObjectFactory:
         :return:
         """
         try:
-            entity = self.object_methods[entity_type](**kwargs)
+            if entity_type in self.counts:
+                self.counts[entity_type] += 1
+            else:
+                self.counts[entity_type] = 1
+            entity = self.object_methods[entity_type](
+                        entity_id=f'{entity_type}_{self.counts[entity_type]}',
+                        **kwargs)
         except KeyError as e:
             raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
@@ -41,12 +47,8 @@ class MapObjectFactory:
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
 
-    def create_barrel(self):
-        if 'Barrel' in self.counts:
-            self.counts['Barrel'] += 1
-        else:
-            self.counts['Barrel'] = 1
-        barrel_entity = Entity(id=f'Barrel{self.counts["Barrel"]}')
+    def create_barrel(self, entity_id):
+        barrel_entity = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element(
                                                       'barrel_1'),
                                                   self.atlas.get_element(
@@ -61,12 +63,8 @@ class MapObjectFactory:
         barrel_entity.add_component(widget_component)
         return barrel_entity
     
-    def create_cop(self):
-        if 'Cop' in self.counts:
-            self.counts['Cop'] += 1
-        else:
-            self.counts['Cop'] = 1
-        cop_entity = Entity(id=f'Cop{self.counts["Cop"]}')
+    def create_cop(self, entity_id):
+        cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
                                   'r_2': self.atlas.get_element('cop_r_2'),
                                   'l_1': self.atlas.get_element('cop_l_1'),
@@ -83,7 +81,7 @@ class MapObjectFactory:
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return cop_entity
     
-    def create_invisible_collider(self, size=(0,0)):
+    def create_invisible_collider(self, entity_id, size=(0, 0)):
         """
         Create an impassable background object
         :param x: xpos
@@ -91,12 +89,8 @@ class MapObjectFactory:
         :param size: size tuple
         :return:
         """
-        if 'collider' in self.counts:
-            self.counts['collider'] += 1
-        else:
-            self.counts['collider'] = 1
-        bg_entity = Entity(id=f'collider{self.counts["collider"]}')
-        chars = [['#' for _ in range(size[0])] for _ in range(size[1])]
+        bg_entity = Entity(id=entity_id)
+        chars = [[' ' for _ in range(size[0])] for _ in range(size[1])]
         colors = copy_shape(chars, 'gray')
         widget = Widget(chars, colors)
         bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
@@ -106,17 +100,13 @@ class MapObjectFactory:
         bg_entity.add_component(position_component)
         return bg_entity
 
-    def create_bullet(self, speed=(0, 0)):
+    def create_bullet(self, entity_id, speed=(0, 0)):
         """
         Create a simple projectile
         :param speed:
         :return:
         """
-        if 'bullet' in self.counts:
-            self.counts['bullet'] += 1
-        else:
-            self.counts['bullet'] = 1
-        bullet_entity = Entity(id=f'Bullet{self.counts["bullet"]}')
+        bullet_entity = Entity(id=entity_id)
         #TODO: Debug bullet animation
         bullet_entity.add_component(WidgetComponent(self.dispatcher,
             SimpleAnimationWidget(Animation((self.atlas.get_element('bullet_1'),
@@ -128,17 +118,12 @@ class MapObjectFactory:
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
         return bullet_entity
 
-    def create_target(self):
+    def create_target(self, entity_id):
         """
         A target
         :return:
         """
-        #TODO: move counts to create_entity
-        if 'target' in self.counts:
-            self.counts['target'] += 1
-        else:
-            self.counts['target'] = 1
-        target_entity = Entity(id=f'Target{self.counts["target"]}')
+        target_entity = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={
                         'intact': self.atlas.get_element('target_intact'),
                         'slight': self.atlas.get_element('target_1'),
