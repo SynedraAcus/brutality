@@ -179,21 +179,27 @@ class SwitchWidgetComponent(WidgetComponent):
 
 
 class SpawnerComponent(Component):
-    def __init__(self, factory, *args, **kwargs):
+    """
+    A component responsible for spawning stuff near its owner
+    For projectiles and other such things
+    """
+    def __init__(self, *args, factory=None, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
         self.factory = factory
+        self.dispatcher.register_listener(self, 'key_down')
 
-    def spawn(self, item, relative_pos):
+    def spawn(self, item, relative_pos, **kwargs):
         """
         Spawn item at self.pos+self.relative_pos
         :param item:
         :param relative_pos:
         :return:
         """
-        self.factory.create_entity(item, (self.pos[0]+relative_pos[0],
-                                          self.pos[1]+relative_pos[1]))
+        self.factory.create_entity(item, (self.owner.position.x + relative_pos[0],
+                                          self.owner.position.y + relative_pos[1]),
+                                   **kwargs)
 
     def on_event(self, event):
         #TODO: create an InputComponent instead of each component listening to events
         if event.event_type == 'key_down' and event.event_value == 'TK_SPACE':
-            self.factory.create_entity('bullet', (13, 7))
+            self.spawn('bullet', (13, 5), speed=(25, 0))

@@ -1,11 +1,12 @@
 #! /usr/bin/env python3.6
+import sys
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ECSLayout
 from bear_hug.event import BearEvent, BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
-from bear_hug.widgets import ClosingListener
+from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 
@@ -25,6 +26,9 @@ colors = copy_shape(chars, 'gray')
 layout = ECSLayout(chars, colors)
 dispatcher.register_listener(layout, 'all')
 
+#Debug event logger
+logger = LoggingListener(sys.stderr)
+dispatcher.register_listener(logger, 'ecs_add')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff

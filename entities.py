@@ -4,7 +4,7 @@ from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
 from components import WalkerComponent, WalkerCollisionComponent, \
-    SwitchWidgetComponent
+    SwitchWidgetComponent, SpawnerComponent
 from widgets import SwitchingWidget
 
 
@@ -17,7 +17,8 @@ class MapObjectFactory:
         self.counts = {}
         self.object_methods = {'cop': self.create_cop,
                                'barrel': self.create_barrel,
-                               'invis': self.create_invisible_collider}
+                               'invis': self.create_invisible_collider,
+                               'bullet': self.create_bullet}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -30,8 +31,9 @@ class MapObjectFactory:
         """
         try:
             entity = self.object_methods[entity_type](**kwargs)
-        except KeyError:
+        except KeyError as e:
             raise BearECSException(f'Incorrect entity type {entity_type}')
+            raise e
         #Setting position of a child
         entity.position.move(*pos, emit_event=False)
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
@@ -48,7 +50,7 @@ class MapObjectFactory:
                                                       'barrel_1'),
                                                   self.atlas.get_element(
                                                       'barrel_2')),
-                                                  2),
+                                                  3),
                                        emit_ecs=True)
         widget_component = WidgetComponent(self.dispatcher, widget,
                                            owner=barrel_entity)
@@ -77,6 +79,7 @@ class MapObjectFactory:
         cop_entity.add_component(position_component)
         cop_entity.add_component(widget_component)
         cop_entity.add_component(collision_component)
+        cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return cop_entity
     
     def create_invisible_collider(self, size=(0,0)):
@@ -102,5 +105,23 @@ class MapObjectFactory:
         bg_entity.add_component(position_component)
         return bg_entity
 
-    def create_bullet(self):
-        pass
+    def create_bullet(self, speed=(0, 0)):
+        """
+        Create a simple projectile
+        :param speed:
+        :return:
+        """
+        if 'bullet' in self.counts:
+            self.counts['bullet'] += 1
+        else:
+            self.counts['bullet'] = 1
+        bullet_entity = Entity(id=f'Bullet{self.counts["bullet"]}')
+        #TODO: Debug bullet animation
+        bullet_entity.add_component(WidgetComponent(self.dispatcher,
+            SimpleAnimationWidget(Animation((self.atlas.get_element('bullet_1'),
+                                             self.atlas.get_element('bullet_2'),
+                                             self.atlas.get_element('bullet_3'),
+                                             ), 5))))
+        bullet_entity.add_component(PositionComponent(self.dispatcher,
+                                                      vx=speed[0], vy=speed[1]))
+        return bullet_entity
