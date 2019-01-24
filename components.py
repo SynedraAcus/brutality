@@ -17,7 +17,6 @@ class CollisionComponent(Component):
         self.dispatcher.register_listener(self, 'ecs_collision')
     
     def on_event(self, event):
-        print(event.event_type, event.event_value)
         if event.event_type == 'ecs_collision':
             if event.event_value[0] == self.owner.id:
                 self.collided_into(event.event_value[1])

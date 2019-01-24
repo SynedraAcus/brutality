@@ -33,7 +33,6 @@ class MapObjectFactory:
             entity = self.object_methods[entity_type](**kwargs)
         except KeyError as e:
             raise BearECSException(f'Incorrect entity type {entity_type}')
-            raise e
         #Setting position of a child
         entity.position.move(*pos, emit_event=False)
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
