@@ -39,13 +39,17 @@ class WalkerComponent(PositionComponent):
     # TODO: Non-idiotic walking animation
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.dispatcher.register_listener(self, ['key_down'])
+        self.dispatcher.register_listener(self, ['key_down', 'tick'])
         self.last_move = None
         self.direction = 'l'
         self.phase = '1'
+        self.moved_this_tick = False
         
     def walk(self, move):
+        if self.moved_this_tick:
+            return
         self.relative_move(*move)
+        self.moved_this_tick = True
         if move[0] > 0:
             self.direction = 'r'
         elif move[0] < 0:
@@ -79,6 +83,8 @@ class WalkerComponent(PositionComponent):
                 self.walk(self.last_move)
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='step'))
+        elif event.event_type == 'tick':
+            self.moved_this_tick = False
         x = super().on_event(event)
         if x:
             if isinstance(x, BearEvent):

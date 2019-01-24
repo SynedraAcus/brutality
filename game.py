@@ -28,8 +28,9 @@ dispatcher.register_listener(layout, 'all')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
-# Created before the loop starts
+# Created before the loop start
 factory.create_entity('cop', (10, 30))
-factory.create_entity('barrel', (45, 40))
+factory.create_entity('barrel', (0, 50))
+factory.create_entity('barrel', (10, 15))
 factory.create_sized_entity('invis', (85, 15), (0, 0))
 loop.run()
