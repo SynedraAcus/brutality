@@ -112,23 +112,44 @@
     "ysize": 3
   },
   {
-    "name": "bullet_1",
+    "name": "bullet_r_1",
     "x": 8,
     "y": 10,
     "xsize": 2,
     "ysize": 1
   },
   {
-    "name": "bullet_2",
+    "name": "bullet_r_2",
     "x": 8,
     "y": 11,
     "xsize": 2,
     "ysize": 1
   },
   {
-    "name": "bullet_3",
+    "name": "bullet_r_3",
     "x": 8,
     "y": 12,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bullet_l_1",
+    "x": 0,
+    "y": 29,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bullet_l_2",
+    "x": 2,
+    "y": 29,
+    "xsize": 2,
+    "ysize": 1
+  },
+  {
+    "name": "bullet_l_3",
+    "x": 4,
+    "y": 29,
     "xsize": 2,
     "ysize": 1
   },

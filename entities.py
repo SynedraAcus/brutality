@@ -104,7 +104,7 @@ class MapObjectFactory:
         bg_entity.add_component(position_component)
         return bg_entity
 
-    def __create_bullet(self, entity_id, speed=(0, 0)):
+    def __create_bullet(self, entity_id, speed=(0, 0), direction='r'):
         """
         Create a simple projectile
         :param speed:
@@ -112,10 +112,10 @@ class MapObjectFactory:
         """
         bullet_entity = Entity(id=entity_id)
         bullet_entity.add_component(WidgetComponent(self.dispatcher,
-            SimpleAnimationWidget(Animation((self.atlas.get_element('bullet_1'),
-                                             self.atlas.get_element('bullet_2'),
-                                             self.atlas.get_element('bullet_3'),
-                                             ), 5))))
+            SimpleAnimationWidget(Animation((self.atlas.get_element(f'bullet_{direction}_1'),
+                                             self.atlas.get_element(f'bullet_{direction}_2'),
+                                             self.atlas.get_element(f'bullet_{direction}_3'),
+                                             ), 10))))
         bullet_entity.add_component(PositionComponent(self.dispatcher,
                                                       vx=speed[0], vy=speed[1]))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))

@@ -206,9 +206,13 @@ class InputComponent(Component):
             moved = False
             if event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('bullet', (13, 5), speed=(25, 0))
+                    self.owner.spawner.spawn('bullet', (13, 5),
+                                             direction=self.owner.position.direction,
+                                             speed=(25, 0))
                 else:
-                    self.owner.spawner.spawn('bullet', (-1, 5), speed=(-25, 0))
+                    self.owner.spawner.spawn('bullet', (-1, 5),
+                                             direction=self.owner.position.direction,
+                                             speed=(-25, 0))
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
