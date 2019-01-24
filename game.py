@@ -28,28 +28,8 @@ dispatcher.register_listener(layout, 'all')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
-
-# Colliders to prevent walking outside the screen
-collider = factory.create_invisible_collider(0, 0, (85, 15))
-layout.add_entity(collider)
-left_collider = factory.create_invisible_collider(0, 15, (1, 45))
-layout.add_entity(left_collider)
-right_collider = factory.create_invisible_collider(84, 15, (1, 45))
-dispatcher.add_event(BearEvent(event_type='ecs_add',
-                               event_value=(collider.id,
-                                            collider.position.x,
-                                            collider.position.y)))
-barrel1 = factory.create_barrel(45, 40)
-layout.add_entity(barrel1)
-dispatcher.add_event(BearEvent(event_type='ecs_add',
-                               event_value=(barrel1.id,
-                                            barrel1.position.x,
-                                            barrel1.position.y)))
-cop = factory.create_cop(10, 30)
-layout.add_entity(cop)
-dispatcher.add_event(BearEvent(event_type='ecs_add',
-                               event_value=(cop.id,
-                                            cop.position.x,
-                                            cop.position.y)))
-
+# Created before the loop starts
+factory.create_entity('cop', (10, 30))
+factory.create_entity('barrel', (45, 40))
+factory.create_sized_entity('invis', (85, 15), (0, 0))
 loop.run()
