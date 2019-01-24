@@ -19,38 +19,20 @@ class MapObjectFactory:
                                'barrel': self.create_barrel,
                                'invis': self.create_invisible_collider}
 
-    def create_entity(self, entity_type, pos, emit_show=True):
+    def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
         Create entity and emit the corresponding events.
+        Kwargs, if any, are passed to the creating function.
         :param entity_type: str. Entity type code
         :param pos: Two-int position tuple
         :param emit_show: bool. If True, emits ecs_add event
         :return:
         """
         try:
-            entity = self.object_methods[entity_type]()
+            entity = self.object_methods[entity_type](**kwargs)
         except KeyError:
             raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
-        entity.position.move(*pos, emit_event=False)
-        self.dispatcher.add_event(BearEvent('ecs_create', entity))
-        if emit_show:
-            self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
-
-    def create_sized_entity(self, entity_type, size, pos, emit_show=True):
-        """
-        Same as `MapObjectFactory.create_entity()`, but for the objects that
-        can be of an arbitrary size (backgrounds and the like)
-        :param entity_type: str. Entity type code
-        :param pos: Two-int position tuple
-        :param size: Two-int size tuple
-        :param emit_show:
-        :return:
-        """
-        try:
-            entity = self.object_methods[entity_type](size)
-        except KeyError:
-            raise BearECSException(f'Incorrect entity type {entity_type}')
         entity.position.move(*pos, emit_event=False)
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
@@ -97,7 +79,7 @@ class MapObjectFactory:
         cop_entity.add_component(collision_component)
         return cop_entity
     
-    def create_invisible_collider(self, size):
+    def create_invisible_collider(self, size=(0,0)):
         """
         Create an impassable background object
         :param x: xpos
@@ -119,3 +101,6 @@ class MapObjectFactory:
                                                owner=bg_entity)
         bg_entity.add_component(position_component)
         return bg_entity
+
+    def create_bullet(self):
+        pass

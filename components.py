@@ -179,6 +179,21 @@ class SwitchWidgetComponent(WidgetComponent):
 
 
 class SpawnerComponent(Component):
-    #TODO: create something to support ecs_create
-    def __init__(self, *args, **kwargs):
+    def __init__(self, factory, *args, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
+        self.factory = factory
+
+    def spawn(self, item, relative_pos):
+        """
+        Spawn item at self.pos+self.relative_pos
+        :param item:
+        :param relative_pos:
+        :return:
+        """
+        self.factory.create_entity(item, (self.pos[0]+relative_pos[0],
+                                          self.pos[1]+relative_pos[1]))
+
+    def on_event(self, event):
+        #TODO: create an InputComponent instead of each component listening to events
+        if event.event_type == 'key_down' and event.event_value == 'TK_SPACE':
+            self.factory.create_entity('bullet', (13, 7))
