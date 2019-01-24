@@ -10,17 +10,20 @@ from widgets import SwitchingWidget
 
 
 class MapObjectFactory:
-    #TODO: make this a nice universally-available singleton
-
+    """
+    A factory that produces all objects.
+    Only `factory.create_entity()` method is available to the user,
+    the rest are internal.
+    """
     def __init__(self, atlas, dispatcher):
         self.dispatcher = dispatcher
         self.atlas = atlas
         self.counts = {}
-        self.object_methods = {'cop': self.create_cop,
-                               'barrel': self.create_barrel,
-                               'invis': self.create_invisible_collider,
-                               'bullet': self.create_bullet,
-                               'target': self.create_target}
+        self.object_methods = {'cop': self.__create_cop,
+                               'barrel': self.__create_barrel,
+                               'invis': self.__create_invisible_collider,
+                               'bullet': self.__create_bullet,
+                               'target': self.__create_target}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -47,7 +50,7 @@ class MapObjectFactory:
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
 
-    def create_barrel(self, entity_id):
+    def __create_barrel(self, entity_id):
         barrel_entity = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element(
                                                       'barrel_1'),
@@ -57,13 +60,13 @@ class MapObjectFactory:
                                        emit_ecs=True)
         widget_component = WidgetComponent(self.dispatcher, widget,
                                            owner=barrel_entity)
-        position_component = PositionComponent(self.dispatcher, #x=x, y=y,
+        position_component = PositionComponent(self.dispatcher,
                                                owner=barrel_entity)
         barrel_entity.add_component(position_component)
         barrel_entity.add_component(widget_component)
         return barrel_entity
     
-    def create_cop(self, entity_id):
+    def __create_cop(self, entity_id):
         cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
                                   'r_2': self.atlas.get_element('cop_r_2'),
@@ -72,7 +75,7 @@ class MapObjectFactory:
                                  initial_image='r_1')
         widget_component = SwitchWidgetComponent(self.dispatcher, widget,
                                                  owner=cop_entity)
-        position_component = WalkerComponent(self.dispatcher, #x=x, y=y,
+        position_component = WalkerComponent(self.dispatcher,
                                                owner=cop_entity)
         collision_component = WalkerCollisionComponent(self.dispatcher)
         cop_entity.add_component(position_component)
@@ -81,7 +84,7 @@ class MapObjectFactory:
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return cop_entity
     
-    def create_invisible_collider(self, entity_id, size=(0, 0)):
+    def __create_invisible_collider(self, entity_id, size=(0, 0)):
         """
         Create an impassable background object
         :param x: xpos
@@ -95,12 +98,12 @@ class MapObjectFactory:
         widget = Widget(chars, colors)
         bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
                                                 owner=bg_entity))
-        position_component = PositionComponent(self.dispatcher, #x=x, y=y,
+        position_component = PositionComponent(self.dispatcher,
                                                owner=bg_entity)
         bg_entity.add_component(position_component)
         return bg_entity
 
-    def create_bullet(self, entity_id, speed=(0, 0)):
+    def __create_bullet(self, entity_id, speed=(0, 0)):
         """
         Create a simple projectile
         :param speed:
@@ -118,7 +121,7 @@ class MapObjectFactory:
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
         return bullet_entity
 
-    def create_target(self, entity_id):
+    def __create_target(self, entity_id):
         """
         A target
         :return:

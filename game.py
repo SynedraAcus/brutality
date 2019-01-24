@@ -10,7 +10,7 @@ from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 
-# Creating singletons
+#Bear_hug boilerplate
 t = BearTerminal(font_path='cp437_12x12.png', size='85x60',
                  title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
@@ -27,15 +27,18 @@ colors = copy_shape(chars, 'gray')
 layout = ECSLayout(chars, colors)
 dispatcher.register_listener(layout, 'all')
 
-#Debug event logger
+# Debug event logger
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision'])
+
+# Game-specific event types
 dispatcher.register_event_type('brut_damage')
 dispatcher.register_event_type('brut_heal')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
+
 # Initial on-screen stuff
-# Created before the loop start
+# Created before the loop starts, will be added on the first tick
 factory.create_entity('cop', (10, 30))
 factory.create_entity('barrel', (0, 50))
 factory.create_entity('barrel', (10, 15))

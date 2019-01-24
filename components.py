@@ -7,8 +7,6 @@ from bear_hug.ecs import Component, PositionComponent, BearEvent, \
 from widgets import SwitchingWidget
 
 
-
-
 class WalkerComponent(PositionComponent):
     """
     A simple PositionComponent that can change x;y on keypress
@@ -19,7 +17,7 @@ class WalkerComponent(PositionComponent):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
         self.last_move = None
-        self.direction = 'l'
+        self.direction = 'r'
         self.phase = '1'
         self.moved_this_tick = False
         
@@ -57,7 +55,6 @@ class WalkerComponent(PositionComponent):
                 self.last_move = (0, -1)
                 moved = True
             if moved:
-                # events
                 self.walk(self.last_move)
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='step'))
@@ -160,7 +157,7 @@ class VisualDamageHealthComponent(HealthComponent):
     int HP to image ID. A corresponding image is shown while HP is not less than
     a dict key, but less than the next one (in increasing order).
     """
-    def __init__(self, *args, widgets_dict = {}, **kwargs):
+    def __init__(self, *args, widgets_dict={}, **kwargs):
         super().__init__(*args, **kwargs)
         self.widgets_dict = OrderedDict()
         for x in sorted(widgets_dict.keys()):
@@ -198,6 +195,7 @@ class SpawnerComponent(Component):
     A component responsible for spawning stuff near its owner
     For projectiles and other such things
     """
+    #TODO: projectile direction and bullet_left assets
     def __init__(self, *args, factory=None, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
         self.factory = factory
@@ -217,4 +215,7 @@ class SpawnerComponent(Component):
     def on_event(self, event):
         #TODO: create an InputComponent instead of each component listening to events
         if event.event_type == 'key_down' and event.event_value == 'TK_SPACE':
-            self.spawn('bullet', (13, 5), speed=(25, 0))
+            if self.owner.position.direction == 'r':
+                self.spawn('bullet', (13, 5), speed=(25, 0))
+            else:
+                self.spawn('bullet', (-1, 5), speed=(-25, 0))
