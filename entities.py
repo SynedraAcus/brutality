@@ -4,7 +4,8 @@ from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
 from components import WalkerComponent, WalkerCollisionComponent, \
-    SwitchWidgetComponent, SpawnerComponent
+    SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
+    ProjectileCollisionComponent
 from widgets import SwitchingWidget
 
 
@@ -18,7 +19,8 @@ class MapObjectFactory:
         self.object_methods = {'cop': self.create_cop,
                                'barrel': self.create_barrel,
                                'invis': self.create_invisible_collider,
-                               'bullet': self.create_bullet}
+                               'bullet': self.create_bullet,
+                               'target': self.create_target}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -123,4 +125,34 @@ class MapObjectFactory:
                                              ), 5))))
         bullet_entity.add_component(PositionComponent(self.dispatcher,
                                                       vx=speed[0], vy=speed[1]))
+        bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
         return bullet_entity
+
+    def create_target(self):
+        """
+        A target
+        :return:
+        """
+        #TODO: move counts to create_entity
+        if 'target' in self.counts:
+            self.counts['target'] += 1
+        else:
+            self.counts['target'] = 1
+        target_entity = Entity(id=f'Target{self.counts["target"]}')
+        widget = SwitchingWidget(images_dict={
+                        'intact': self.atlas.get_element('target_intact'),
+                        'slight': self.atlas.get_element('target_1'),
+                        'severe': self.atlas.get_element('target_2'),
+                        'destroyed': self.atlas.get_element('target_destroyed')},
+                                initial_image='intact')
+        target_entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                          widget))
+        target_entity.add_component(VisualDamageHealthComponent(
+                            self.dispatcher,
+                            widgets_dict={0: 'destroyed',
+                             1: 'severe',
+                             2: 'slight',
+                             3: 'intact'},
+                            hitpoints=3))
+        target_entity.add_component(PositionComponent(self.dispatcher))
+        return target_entity

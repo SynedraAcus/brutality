@@ -23,12 +23,15 @@ factory = MapObjectFactory(atlas, dispatcher)
 # Init game screen
 chars = [[' ' for _ in range(85)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
+#TODO: Generate layout bg
 layout = ECSLayout(chars, colors)
 dispatcher.register_listener(layout, 'all')
 
 #Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, 'ecs_add')
+dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision'])
+dispatcher.register_event_type('brut_damage')
+dispatcher.register_event_type('brut_heal')
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
@@ -36,5 +39,6 @@ t.add_widget(layout, (0, 0), layer=1)
 factory.create_entity('cop', (10, 30))
 factory.create_entity('barrel', (0, 50))
 factory.create_entity('barrel', (10, 15))
+factory.create_entity('target', (65, 30))
 factory.create_entity('invis', (0, 0), size=(85, 15))
 loop.run()

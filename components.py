@@ -7,27 +7,6 @@ from bear_hug.ecs import Component, PositionComponent, BearEvent, \
 from widgets import SwitchingWidget
 
 
-class CollisionComponent(Component):
-    """
-    A component responsible for processing collisions of this object
-    """
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, name='collision', **kwargs)
-        self.dispatcher.register_listener(self, 'ecs_collision')
-    
-    def on_event(self, event):
-        if event.event_type == 'ecs_collision':
-            if event.event_value[0] == self.owner.id:
-                self.collided_into(event.event_value[1])
-            elif event.event_value[1] == self.owner.id:
-                self.collided_by(event.event_value[0])
-    
-    def collided_into(self, entity):
-        print(f'Collided into {entity}')
-    
-    def collided_by(self, entity):
-        print(f'Collided by {entity}')
 
 
 class WalkerComponent(PositionComponent):
@@ -94,6 +73,29 @@ class WalkerComponent(PositionComponent):
         return r
 
 
+class CollisionComponent(Component):
+    """
+    A component responsible for processing collisions of this object
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='collision', **kwargs)
+        self.dispatcher.register_listener(self, 'ecs_collision')
+
+    def on_event(self, event):
+        if event.event_type == 'ecs_collision':
+            if event.event_value[0] == self.owner.id:
+                self.collided_into(event.event_value[1])
+            elif event.event_value[1] == self.owner.id:
+                self.collided_by(event.event_value[0])
+
+    def collided_into(self, entity):
+        print(f'Collided into {entity}')
+
+    def collided_by(self, entity):
+        print(f'Collided by {entity}')
+
+
 class WalkerCollisionComponent(CollisionComponent):
     """
     A collision component that, upon colliding into something impassable,
@@ -102,16 +104,33 @@ class WalkerCollisionComponent(CollisionComponent):
     def collided_into(self, entity):
         self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
                                           self.owner.position.last_move[1] * -1)
+
+
+class ProjectileCollisionComponent(CollisionComponent):
+    """
+    A collision component that damages whatever its owner is collided into
+    """
+    #TODO: destroy the bullet upon impact
+    def collided_into(self, entity):
+        self.dispatcher.add_event(BearEvent(event_type='brut_damage',
+                                            event_value=(entity, 1)))
         
 
 class HealthComponent(Component):
     """
     A component that monitors owner's health and updates whatever needs updating
     """
-    def __init__(self, *args, hitpoints=3, **kwargs,):
+    def __init__(self, *args, hitpoints=3, **kwargs):
         super().__init__(*args, name='health', **kwargs)
+        self.dispatcher.register_listener(self, 'brut_damage')
         self._hitpoints = hitpoints
-        
+
+    def on_event(self, event):
+        if event.event_type == 'brut_damage' and event.event_value[0] == self.owner.id:
+            self.hitpoints -= event.event_value[1]
+        elif event.event_type == 'brut_damage' and event.event_value[0] == self.owner.id:
+            self.hitpoints += event.event_value[1]
+
     @property
     def hitpoints(self):
         return self._hitpoints
@@ -141,11 +160,8 @@ class VisualDamageHealthComponent(HealthComponent):
     int HP to image ID. A corresponding image is shown while HP is not less than
     a dict key, but less than the next one (in increasing order).
     """
-    def __init__(self, widgets_dict, *args, **kwargs):
+    def __init__(self, *args, widgets_dict = {}, **kwargs):
         super().__init__(*args, **kwargs)
-        for image_id in widgets_dict.values():
-            if not self.owner.widget.validate_image(image_id):
-                raise BearECSException(f'Invalid image ID {image_id} in {owner.id}\'s VisualDamageHealthComponent')
         self.widgets_dict = OrderedDict()
         for x in sorted(widgets_dict.keys()):
             self.widgets_dict[x] = widgets_dict[x]
