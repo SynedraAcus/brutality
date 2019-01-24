@@ -168,7 +168,6 @@ class SpawnerComponent(Component):
     A component responsible for spawning stuff near its owner
     For projectiles and other such things
     """
-    #TODO: projectile direction and bullet_left assets
     def __init__(self, *args, factory=None, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
         self.factory = factory

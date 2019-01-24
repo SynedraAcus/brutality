@@ -4,11 +4,12 @@ import sys
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ECSLayout
-from bear_hug.event import BearEvent, BearEventDispatcher
+from bear_hug.event import BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
 from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
+from widgets import PatternGenerator
 
 #Bear_hug boilerplate
 t = BearTerminal(font_path='cp437_12x12.png', size='85x60',
@@ -23,8 +24,10 @@ factory = MapObjectFactory(atlas, dispatcher)
 # Init game screen
 chars = [[' ' for _ in range(85)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
-#TODO: Generate layout bg
-layout = ECSLayout(chars, colors)
+#TODO: Generate a proper layout bg (draw some tiles)
+patterns = PatternGenerator(atlas)
+bg = patterns.generate_tiled('bottle_ne', (85, 60))
+layout = ECSLayout(*bg)
 dispatcher.register_listener(layout, 'all')
 
 # Debug event logger
