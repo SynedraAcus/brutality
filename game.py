@@ -52,4 +52,9 @@ factory.create_entity('barrel', (75, 25))
 factory.create_entity('barrel', (61, 50))
 factory.create_entity('target', (65, 30))
 factory.create_entity('invis', (0, 0), size=(85, 15))
+#TODO: create a proper walkability check
+# This is important both here and for properly walking around objects
+factory.create_entity('invis', (0, 15), size=(2, 45))
+factory.create_entity('invis', (83, 15), size=(2, 45))
+factory.create_entity('invis', (0, 58), size=(80, 2))
 loop.run()

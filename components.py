@@ -206,26 +206,31 @@ class InputComponent(Component):
             moved = False
             if event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
+                    # TODO: remove speed of light in bear_hug
+                    # There is currently an upper limit on how fast anything can
+                    # move, defined in PositionComponent's on_event. It is
+                    # exactly one tile per tick, or 24 tiles/sec on default
+                    # settings. Fix is trivial, but it is in bear_hug, not here
                     self.owner.spawner.spawn('bullet', (13, 4),
                                              direction=self.owner.position.direction,
-                                             speed=(25, 0))
+                                             speed=(50, 0))
                 else:
                     self.owner.spawner.spawn('bullet', (-1, 5),
                                              direction=self.owner.position.direction,
-                                             speed=(-25, 0))
+                                             speed=(50, 0))
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
-                self.last_move = (1, 0)
+                self.last_move = (2, 0)
                 moved = True
             elif event.event_value in ('TK_A', 'TK_LEFT'):
-                self.last_move = (-1, 0)
+                self.last_move = (-2, 0)
                 moved = True
             elif event.event_value in ('TK_S', 'TK_DOWN'):
-                self.last_move = (0, 1)
+                self.last_move = (0, 2)
                 moved = True
             elif event.event_value in ('TK_W', 'TK_UP'):
-                self.last_move = (0, -1)
+                self.last_move = (0, -2)
                 moved = True
             if moved:
                 self.owner.position.walk(self.last_move)
