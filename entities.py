@@ -5,7 +5,7 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    ProjectileCollisionComponent, InputComponent
+    ProjectileCollisionComponent, InputComponent, DestructorComponent
 from widgets import SwitchingWidget
 
 
@@ -119,6 +119,7 @@ class MapObjectFactory:
         bullet_entity.add_component(PositionComponent(self.dispatcher,
                                                       vx=speed[0], vy=speed[1]))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
+        bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
 
     def __create_target(self, entity_id):

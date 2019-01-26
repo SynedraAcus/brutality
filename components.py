@@ -7,6 +7,32 @@ from bear_hug.ecs import Component, PositionComponent, BearEvent, \
 from widgets import SwitchingWidget
 
 
+class DestructorComponent(Component):
+    """
+    A component responsible for cleanly destroying its entity and everything
+    that has to do with it.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='destructor', **kwargs)
+    
+    def destroy(self):
+        """
+        Destruct this component's owner.
+        Unsubscribes owner and all its components from the queue and sends
+        'ecs_remove'. Then all components are deleted. Entity itself is left at
+        the mercy of garbage collector.
+        :return:
+        """
+        #TODO: remove_entity and 'ecs_destroy' in bear_hug.ecs_widgets.ECSLayout
+        for component in self.owner.components:
+            if component is not self.name:
+                # TODO: fix Entity.remove_component in bear_hug.ecs.Entity
+                self.dispatcher.unregister_listener(component)
+                self.owner.remove_component(component)
+        self.dispatcher.unregister_listener(self)
+        self.owner.remove_component(self)
+    
+    
 class WalkerComponent(PositionComponent):
     """
     A simple PositionComponent that can change x;y on keypress
@@ -85,6 +111,7 @@ class ProjectileCollisionComponent(CollisionComponent):
     def collided_into(self, entity):
         self.dispatcher.add_event(BearEvent(event_type='brut_damage',
                                             event_value=(entity, 1)))
+        self.owner.destructor.destroy()
         
 
 class HealthComponent(Component):
@@ -217,7 +244,7 @@ class InputComponent(Component):
                 else:
                     self.owner.spawner.spawn('bullet', (-1, 5),
                                              direction=self.owner.position.direction,
-                                             speed=(50, 0))
+                                             speed=(-50, 0))
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
