@@ -25,6 +25,7 @@ class WalkerComponent(PositionComponent):
         if self.moved_this_tick:
             return
         self.relative_move(*move)
+        self.last_move = move
         self.moved_this_tick = True
         if move[0] > 0:
             self.direction = 'r'

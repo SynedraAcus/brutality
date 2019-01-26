@@ -24,9 +24,13 @@ factory = MapObjectFactory(atlas, dispatcher)
 # Init game screen
 chars = [[' ' for _ in range(85)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
-#TODO: Generate a proper layout bg (draw some tiles)
 patterns = PatternGenerator(atlas)
-bg = patterns.generate_tiled('bottle_ne', (85, 60))
+upper_bg = patterns.generate_tiled('brick_tile', (85, 30))
+lower_bg = patterns.generate_tiled('floor_tile', (85, 30))
+bg = patterns.stack_boxes(upper_bg, lower_bg, order='vertical')
+print(bg[0])
+print(len(bg[0]), len(bg[0][0]))
+
 layout = ECSLayout(*bg)
 dispatcher.register_listener(layout, 'all')
 
@@ -43,8 +47,8 @@ t.add_widget(layout, (0, 0), layer=1)
 # Initial on-screen stuff
 # Created before the loop starts, will be added on the first tick
 factory.create_entity('cop', (10, 30))
-factory.create_entity('barrel', (0, 50))
-factory.create_entity('barrel', (10, 15))
+factory.create_entity('barrel', (75, 25))
+factory.create_entity('barrel', (61, 50))
 factory.create_entity('target', (65, 30))
 factory.create_entity('invis', (0, 0), size=(85, 15))
 loop.run()

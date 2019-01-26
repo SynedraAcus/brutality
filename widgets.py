@@ -40,9 +40,13 @@ class PatternGenerator:
     def __init__(self, atlas):
         self.atlas = atlas
     
+    # TODO: maybe it's better to generate things in a functional-ish style?
+    # The object is currently only holding the atlas reference which makes it
+    # sorta redundant; on the other hand, the rest of code is purely OOP and it
+    # would be spaghetti if this part alone was functional.
     def generate_tiled(self, pattern, size):
         """
-        Generate a chars/colors pair, tiled wit a given pattern.
+        Generate a chars/colors pair, tiled with a given pattern.
         The pattern is always aligned up and left.
         :param pattern: either str or a tuple. If a tuple, should be chars
         and colors; if str, should be a valid ID in self.atlas.
@@ -65,3 +69,50 @@ class PatternGenerator:
                 chars[y][x] = tile_chars[y % tile_height][x % tile_width]
                 colors[y][x] = tile_colors[y % tile_height][x % tile_width]
         return chars, colors
+
+    @staticmethod
+    def stack_boxes(*boxes, order='vertical'):
+        """
+        Stack several rectangular elements into a single (chars, colors) item.
+        Expects all of them to be the same size along the direction orthogonal
+        to that of stacking, ie vertically stacked elements should be equal in
+        width and horizontally stacked ones should be equal in height.
+        :param boxes: iterable, a collection of elements to stack
+        :param order: str. Either 'vertical' or 'horizontal'
+        :return:
+        """
+        for item in boxes[1:]:
+            if not shapes_equal(item, boxes[0]):
+                raise BearException('Incorrectly shaped item in stack_boxes')
+        if order == 'vertical':
+            height = sum(len(i[0]) for i in boxes)
+            chars = []
+            colors = []
+            for item in boxes:
+                # for y in range(len(item[0])):
+                # if not shapes_equal(item[0], item[1]):
+                #     raise BearException('Incorrectly shaped item')
+                chars.extend(item[0])
+                colors.extend(item[1])
+                # for y in range(len(item)):
+                #     for x in range(len(item[0])):
+                #         chars[y + running_height][x] = item[y][x]
+                #         colors[y+running_height][x] = item[y][x]
+                # running_height += len(item)
+        elif order == 'horizontal':
+            width = sum(len(i[0][0][0]) for i in boxes)
+            chars = []
+            colors = []
+            for y in range(len(boxes[0][0])):
+                chars.append([])
+                colors.append([])
+                for item in boxes:
+                    chars[y] += item[0][y]
+                    colors[y] += item[1][y]
+        else:
+            raise BearException('Stacking order should be either vertical or horizontal')
+        return chars, colors
+
+            
+            
+            

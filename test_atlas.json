@@ -9,16 +9,16 @@
   {
     "name": "cop_r_1",
     "x": 12,
-    "y": 0,
+    "y": 1,
     "xsize": 13,
-    "ysize": 18
+    "ysize": 17
   },
   {
     "name": "cop_l_1",
     "x": 12,
-    "y": 19,
+    "y": 20,
     "xsize": 13,
-    "ysize": 18
+    "ysize": 17
   },
   {
     "name": "nunchaku_punk_l_1",
@@ -51,16 +51,16 @@
   {
     "name": "cop_r_2",
     "x": 45,
-    "y": 0,
+    "y": 1,
     "xsize": 13,
-    "ysize": 18
+    "ysize": 17
   },
   {
     "name": "cop_l_2",
     "x": 48,
-    "y": 19,
+    "y": 20,
     "xsize": 13,
-    "ysize": 18
+    "ysize": 17
   },
   {
     "name": "nunchaku_punk_l_2",
@@ -208,6 +208,20 @@
     "y": 38,
     "xsize": 7,
     "ysize": 15
+  },
+  {
+    "name": "brick_tile",
+    "x": 0,
+    "y": 30,
+    "xsize": 4,
+    "ysize": 4
+  },
+  {
+    "name": "floor_tile",
+    "x": 0,
+    "y": 34,
+    "xsize": 7,
+    "ysize": 7
   }
   
 ]
