@@ -3,50 +3,9 @@ from collections import OrderedDict
 from bear_hug.bear_utilities import BearECSException
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     WidgetComponent
+from bear_hug.widgets import SwitchingWidget
 
-from widgets import SwitchingWidget
 
-
-class DestructorComponent(Component):
-    #TODO: backport to bear_hug
-    """
-    A component responsible for cleanly destroying its entity and everything
-    that has to do with it.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, name='destructor', **kwargs)
-        self.is_destroying = False
-        self.dispatcher.register_listener(self, ['service', 'tick'])
-    
-    def destroy(self):
-        """
-        Destruct this component's owner.
-        Unsubscribes owner and all its components from the queue and sends
-        'ecs_remove'. Then all components are deleted. Entity itself is left at
-        the mercy of garbage collector.
-        :return:
-        """
-        self.dispatcher.add_event(BearEvent('ecs_destroy', self.owner.id))
-        self.is_destroying = True
-        # Destroys item on the 'tick_over', so that all
-        # existing events involving owner (including 'ecs_remove' are processed
-        # normally, but unsubscribes it right now to prevent new ones from forming
-        for component in self.owner.components:
-            if component != self.name:
-                self.dispatcher.unregister_listener(self.owner.__dict__[component])
-        
-    def on_event(self, event):
-        if self.is_destroying and event.event_type == 'tick':
-            # owner.components stores IDs, not component objects themselves.
-            # Those are available only from owner.__dict__
-            victims = [x for x in self.owner.components]
-            for component in victims:
-                if component is not self.name:
-                    self.owner.remove_component(component)
-            self.dispatcher.unregister_listener(self)
-            self.owner.remove_component(self.name)
-
-    
 class WalkerComponent(PositionComponent):
     """
     A simple PositionComponent that can change x;y on keypress
@@ -121,7 +80,6 @@ class ProjectileCollisionComponent(CollisionComponent):
     """
     A collision component that damages whatever its owner is collided into
     """
-    #TODO: destroy the bullet upon impact
     def collided_into(self, entity):
         self.dispatcher.add_event(BearEvent(event_type='brut_damage',
                                             event_value=(entity, 1)))
@@ -158,7 +116,6 @@ class HealthComponent(Component):
         
     def process_hitpoint_update(self):
         """
-        Intended to be overloaded by child classes
         :return:
         """
         pass
@@ -171,6 +128,7 @@ class VisualDamageHealthComponent(HealthComponent):
     This should be in `widgets_dict` parameter to __init__ which is a dict from
     int HP to image ID. A corresponding image is shown while HP is not less than
     a dict key, but less than the next one (in increasing order).
+    If HP reaches zero and object has a Destructor component, it is destroyed
     """
     def __init__(self, *args, widgets_dict={}, **kwargs):
         super().__init__(*args, **kwargs)
@@ -179,6 +137,8 @@ class VisualDamageHealthComponent(HealthComponent):
             self.widgets_dict[x] = widgets_dict[x]
         
     def process_hitpoint_update(self):
+        if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
+            self.owner.destructor.destroy()
         for x in self.widgets_dict:
             if self.hitpoints >= x:
                 self.owner.widget.switch_to_image(self.widgets_dict[x])

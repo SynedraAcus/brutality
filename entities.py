@@ -1,12 +1,13 @@
 from bear_hug.bear_utilities import copy_shape, BearECSException
-from bear_hug.ecs import Entity, WidgetComponent, PositionComponent
+from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
+    DestructorComponent
 from bear_hug.event import BearEvent
-from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget
+from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
+    SwitchingWidget
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    ProjectileCollisionComponent, InputComponent, DestructorComponent
-from widgets import SwitchingWidget
+    ProjectileCollisionComponent, InputComponent
 
 
 class MapObjectFactory:
@@ -138,10 +139,11 @@ class MapObjectFactory:
                                                           widget))
         target_entity.add_component(VisualDamageHealthComponent(
                             self.dispatcher,
-                            widgets_dict={0: 'destroyed',
-                             1: 'severe',
-                             2: 'slight',
-                             3: 'intact'},
-                            hitpoints=3))
+                            widgets_dict={1: 'destroyed',
+                             2: 'severe',
+                             3: 'slight',
+                             4: 'intact'},
+                            hitpoints=4))
         target_entity.add_component(PositionComponent(self.dispatcher))
+        target_entity.add_component(DestructorComponent(self.dispatcher))
         return target_entity
