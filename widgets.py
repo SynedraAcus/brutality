@@ -1,3 +1,5 @@
+import random
+
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException
 from bear_hug.widgets import Widget
 
@@ -69,6 +71,90 @@ class PatternGenerator:
                 chars[y][x] = tile_chars[y % tile_height][x % tile_width]
                 colors[y][x] = tile_colors[y % tile_height][x % tile_width]
         return chars, colors
+    
+    def tile_randomly(self, *patterns, size):
+        """
+        Tile with patterns in random order
+        :param patterns:
+        :param size:
+        :return:
+        """""
+        tile_chars = []
+        tile_colors = []
+        for pattern in patterns:
+            if isinstance(pattern, str):
+                tc, tcol = self.atlas.get_element(pattern)
+                tile_chars.append(tc)
+                tile_colors.append(tcol)
+            elif isinstance(pattern, tuple):
+                if not shapes_equal(pattern[0], pattern[1]):
+                    raise BearException('Incorrect pattern')
+                tile_chars.append(pattern[0])
+                tile_colors.append(pattern[1])
+            else:
+                raise BearException(
+                    'A pattern for PatternGenerator should be either str or tuple')
+        chars = [[' ' for x in range(size[0])] for y in range(size[1])]
+        colors = copy_shape(chars, 'white')
+        tile_height = len(tile_chars[0])
+        tile_width = len(tile_chars[0][0])
+        r = False
+        for tile_y in range(size[1] // tile_height + 1):
+            for tile_x in range(size[0] // tile_width + 1):
+                running_pattern = random.randint(0, len(tile_chars) - 1)
+                for y in range(tile_height):
+                    for x in range(tile_width):
+                        try:
+                            chars[tile_y * tile_height + y] \
+                                 [tile_x * tile_width + x] = tile_chars \
+                                    [running_pattern][y][x]
+                            colors[tile_y * tile_height + y] \
+                                [tile_x * tile_width + x] = tile_colors \
+                                    [running_pattern]\
+                                    [y][x]
+                        except IndexError:
+                            r = True
+                            break
+        # for y in range(len(chars)):
+        #     for x in range(len(chars[0])):
+        #         if y % tile_height == 0 and x % tile_width == 0:
+        #             running_pattern = random.randint(0, len(tile_chars) - 1)
+        #         chars[y][x] = tile_chars[running_pattern][y % tile_height][x % tile_width]
+        #         colors[y][x] = tile_colors[running_pattern][y % tile_height][x % tile_width]
+        # # running_y = 0
+        # # done = False
+        # # while True:
+        # #     running_pattern = random.randint(0, len(tile_chars) - 1)
+        #     x = 0
+        #     y = 0
+        #     for y in range(tile_height):
+        #         for x in range(tile_width):
+        #             if running_x + x > size[0]:
+        #                 continue
+        #             try:
+        #                 chars[running_y + y][running_x + x] = tile_chars[running_pattern][y][x]
+        #                 colors[running_y + y][running_x + x] = tile_colors[running_pattern][y][x]
+        #             except IndexError:
+        #                 print(running_x, x, running_y, y)
+        #         if running_y + y >= size[1]:
+        #             done = True
+        #             break
+        #     if done:
+        #         break
+        #     else:
+        #         print(running_x, running_y)
+        #         running_x += tile_width
+        #         if running_x >= size[0]:
+        #             running_y += tile_height
+        #             running_x = 0
+        return chars, colors
+        
+        # for y in range(len(chars)):
+        #     for x in range(len(chars[0])):
+        #         chars[y][x] = tile_chars[running_pattern][y % tile_height][x % tile_width]
+        #         colors[y][x] = tile_colors[running_pattern][y % tile_height][x % tile_width]
+        return chars, colors
+        
 
     @staticmethod
     def stack_boxes(*boxes, order='vertical'):

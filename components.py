@@ -206,7 +206,7 @@ class InputComponent(Component):
             moved = False
             if event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('bullet', (13, 5),
+                    self.owner.spawner.spawn('bullet', (13, 4),
                                              direction=self.owner.position.direction,
                                              speed=(25, 0))
                 else:

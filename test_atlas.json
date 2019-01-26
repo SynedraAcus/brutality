@@ -217,11 +217,25 @@
     "ysize": 4
   },
   {
-    "name": "floor_tile",
+    "name": "floor_tile_1",
     "x": 0,
     "y": 34,
     "xsize": 7,
     "ysize": 7
+  },
+  {
+    "name": "floor_tile_2",
+    "x": 0,
+    "y": 41,
+    "xsize": 7,
+    "ysize": 7
+  },
+  {
+    "name": "floor_tile_3",
+    "x": 0,
+    "y": 48,
+    "xsize": 7,
+    "ysize": 7
   }
-  
+
 ]

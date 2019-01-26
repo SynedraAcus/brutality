@@ -26,11 +26,12 @@ chars = [[' ' for _ in range(85)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 patterns = PatternGenerator(atlas)
 upper_bg = patterns.generate_tiled('brick_tile', (85, 30))
-lower_bg = patterns.generate_tiled('floor_tile', (85, 30))
+# lower_bg = patterns.generate_tiled('floor_tile_3', (85, 30))
+lower_bg = patterns.tile_randomly('floor_tile_1',
+                                  'floor_tile_2',
+                                  'floor_tile_3',
+                                  size=(85, 30))
 bg = patterns.stack_boxes(upper_bg, lower_bg, order='vertical')
-print(bg[0])
-print(len(bg[0]), len(bg[0][0]))
-
 layout = ECSLayout(*bg)
 dispatcher.register_listener(layout, 'all')
 
