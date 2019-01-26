@@ -3,6 +3,9 @@ import random
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException
 
 
+# TODO: Scrollable ECSLayout (here or in bear_hug)
+
+
 class PatternGenerator:
     def __init__(self, atlas):
         self.atlas = atlas
@@ -80,47 +83,8 @@ class PatternGenerator:
                         except IndexError:
                             r = True
                             break
-        # for y in range(len(chars)):
-        #     for x in range(len(chars[0])):
-        #         if y % tile_height == 0 and x % tile_width == 0:
-        #             running_pattern = random.randint(0, len(tile_chars) - 1)
-        #         chars[y][x] = tile_chars[running_pattern][y % tile_height][x % tile_width]
-        #         colors[y][x] = tile_colors[running_pattern][y % tile_height][x % tile_width]
-        # # running_y = 0
-        # # done = False
-        # # while True:
-        # #     running_pattern = random.randint(0, len(tile_chars) - 1)
-        #     x = 0
-        #     y = 0
-        #     for y in range(tile_height):
-        #         for x in range(tile_width):
-        #             if running_x + x > size[0]:
-        #                 continue
-        #             try:
-        #                 chars[running_y + y][running_x + x] = tile_chars[running_pattern][y][x]
-        #                 colors[running_y + y][running_x + x] = tile_colors[running_pattern][y][x]
-        #             except IndexError:
-        #                 print(running_x, x, running_y, y)
-        #         if running_y + y >= size[1]:
-        #             done = True
-        #             break
-        #     if done:
-        #         break
-        #     else:
-        #         print(running_x, running_y)
-        #         running_x += tile_width
-        #         if running_x >= size[0]:
-        #             running_y += tile_height
-        #             running_x = 0
         return chars, colors
         
-        # for y in range(len(chars)):
-        #     for x in range(len(chars[0])):
-        #         chars[y][x] = tile_chars[running_pattern][y % tile_height][x % tile_width]
-        #         colors[y][x] = tile_colors[running_pattern][y % tile_height][x % tile_width]
-        return chars, colors
-        
-
     @staticmethod
     def stack_boxes(*boxes, order='vertical'):
         """
@@ -136,22 +100,12 @@ class PatternGenerator:
             if not shapes_equal(item, boxes[0]):
                 raise BearException('Incorrectly shaped item in stack_boxes')
         if order == 'vertical':
-            height = sum(len(i[0]) for i in boxes)
             chars = []
             colors = []
             for item in boxes:
-                # for y in range(len(item[0])):
-                # if not shapes_equal(item[0], item[1]):
-                #     raise BearException('Incorrectly shaped item')
                 chars.extend(item[0])
                 colors.extend(item[1])
-                # for y in range(len(item)):
-                #     for x in range(len(item[0])):
-                #         chars[y + running_height][x] = item[y][x]
-                #         colors[y+running_height][x] = item[y][x]
-                # running_height += len(item)
         elif order == 'horizontal':
-            width = sum(len(i[0][0][0]) for i in boxes)
             chars = []
             colors = []
             for y in range(len(boxes[0][0])):
@@ -163,7 +117,3 @@ class PatternGenerator:
         else:
             raise BearException('Stacking order should be either vertical or horizontal')
         return chars, colors
-
-            
-            
-            
