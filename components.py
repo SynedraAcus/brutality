@@ -8,12 +8,15 @@ from widgets import SwitchingWidget
 
 
 class DestructorComponent(Component):
+    #TODO: backport to bear_hug
     """
     A component responsible for cleanly destroying its entity and everything
     that has to do with it.
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='destructor', **kwargs)
+        self.is_destroying = False
+        self.dispatcher.register_listener(self, ['service', 'tick'])
     
     def destroy(self):
         """
@@ -23,15 +26,26 @@ class DestructorComponent(Component):
         the mercy of garbage collector.
         :return:
         """
-        #TODO: remove_entity and 'ecs_destroy' in bear_hug.ecs_widgets.ECSLayout
+        self.dispatcher.add_event(BearEvent('ecs_destroy', self.owner.id))
+        self.is_destroying = True
+        # Destroys item on the 'tick_over', so that all
+        # existing events involving owner (including 'ecs_remove' are processed
+        # normally, but unsubscribes it right now to prevent new ones from forming
         for component in self.owner.components:
-            if component is not self.name:
-                # TODO: fix Entity.remove_component in bear_hug.ecs.Entity
-                self.dispatcher.unregister_listener(component)
-                self.owner.remove_component(component)
-        self.dispatcher.unregister_listener(self)
-        self.owner.remove_component(self)
-    
+            if component != self.name:
+                self.dispatcher.unregister_listener(self.owner.__dict__[component])
+        
+    def on_event(self, event):
+        if self.is_destroying and event.event_type == 'tick':
+            # owner.components stores IDs, not component objects themselves.
+            # Those are available only from owner.__dict__
+            victims = [x for x in self.owner.components]
+            for component in victims:
+                if component is not self.name:
+                    self.owner.remove_component(component)
+            self.dispatcher.unregister_listener(self)
+            self.owner.remove_component(self.name)
+
     
 class WalkerComponent(PositionComponent):
     """
