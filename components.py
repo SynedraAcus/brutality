@@ -196,6 +196,7 @@ class InputComponent(Component):
         self.dispatcher.register_listener(self, 'key_down')
         
     def on_event(self, event):
+        #TODO: Support non-hardcoded actions and keys
         x = super().on_event(event)
         if isinstance(x, BearEvent):
             r = [x]
@@ -228,6 +229,21 @@ class InputComponent(Component):
             elif event.event_value in ('TK_W', 'TK_UP'):
                 self.last_move = (0, -2)
                 moved = True
+            elif event.event_value == 'TK_KP_6':
+                r.append(BearEvent(event_type='ecs_scroll_by',
+                                   event_value=(1, 0)))
+            elif event.event_value == 'TK_KP_4':
+                r.append(BearEvent(event_type='ecs_scroll_by',
+                                   event_value=(-1, 0)))
+            elif event.event_value == 'TK_KP_8':
+                r.append(BearEvent(event_type='ecs_scroll_by',
+                                   event_value=(0, -1)))
+            elif event.event_value == 'TK_KP_2':
+                r.append(BearEvent(event_type='ecs_scroll_by',
+                                   event_value=(0, 1)))
+            elif event.event_value == 'TK_KP_5':
+                r.append(BearEvent(event_type='ecs_scroll_to',
+                                   event_value=(0, 0)))
             if moved:
                 self.owner.position.walk(self.last_move)
                 r.append(BearEvent(event_type='play_sound',

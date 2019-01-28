@@ -3,9 +3,6 @@ import random
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException
 
 
-# TODO: Scrollable ECSLayout (here or in bear_hug)
-
-
 class PatternGenerator:
     def __init__(self, atlas):
         self.atlas = atlas

@@ -3,7 +3,7 @@ import sys
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
-from bear_hug.ecs_widgets import ECSLayout
+from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
 from bear_hug.widgets import ClosingListener, LoggingListener
@@ -22,17 +22,17 @@ atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 factory = MapObjectFactory(atlas, dispatcher)
 
 # Init game screen
-chars = [[' ' for _ in range(85)] for y in range(60)]
+chars = [[' ' for _ in range(100)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 patterns = PatternGenerator(atlas)
-upper_bg = patterns.generate_tiled('brick_tile', (85, 30))
+upper_bg = patterns.generate_tiled('brick_tile', (100, 30))
 # lower_bg = patterns.generate_tiled('floor_tile_3', (85, 30))
 lower_bg = patterns.tile_randomly('floor_tile_1',
                                   'floor_tile_2',
                                   'floor_tile_3',
-                                  size=(85, 30))
+                                  size=(100, 30))
 bg = patterns.stack_boxes(upper_bg, lower_bg, order='vertical')
-layout = ECSLayout(*bg)
+layout = ScrollableECSLayout(*bg, view_pos=(0, 0), view_size=(85, 60))
 dispatcher.register_listener(layout, 'all')
 
 # Debug event logger
@@ -51,10 +51,10 @@ factory.create_entity('cop', (10, 30))
 factory.create_entity('barrel', (75, 25))
 factory.create_entity('barrel', (61, 50))
 factory.create_entity('target', (65, 30))
-factory.create_entity('invis', (0, 0), size=(85, 15))
+factory.create_entity('invis', (0, 0), size=(100, 15))
 #TODO: create a proper walkability check
 # This is important both here and for properly walking around objects
 factory.create_entity('invis', (0, 15), size=(2, 45))
-factory.create_entity('invis', (83, 15), size=(2, 45))
-factory.create_entity('invis', (0, 58), size=(80, 2))
+factory.create_entity('invis', (98, 15), size=(2, 45))
+factory.create_entity('invis', (0, 58), size=(100, 2))
 loop.run()
