@@ -43,7 +43,7 @@ class MapObjectFactory:
             entity = self.object_methods[entity_type](
                         entity_id=f'{entity_type}_{self.counts[entity_type]}',
                         **kwargs)
-        except KeyError as e:
+        except KeyError:
             raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
         entity.position.move(*pos, emit_event=False)
@@ -84,6 +84,8 @@ class MapObjectFactory:
         cop_entity.add_component(collision_component)
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
+        self.dispatcher.add_event(BearEvent(event_type='brut_focus',
+                                            event_value=entity_id))
         return cop_entity
     
     def __create_invisible_collider(self, entity_id, size=(0, 0)):

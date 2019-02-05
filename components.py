@@ -217,7 +217,7 @@ class InputComponent(Component):
                                              speed=(-70, 0))
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
-                r.append(BearEvent(event_type='brut_focus',
+                r.append(BearEvent(event_type='brut_temporary_focus',
                                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)

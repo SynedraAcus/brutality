@@ -27,7 +27,6 @@ chars = [[' ' for _ in range(150)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 patterns = PatternGenerator(atlas)
 upper_bg = patterns.generate_tiled('brick_tile', (150, 30))
-# lower_bg = patterns.generate_tiled('floor_tile_3', (85, 30))
 lower_bg = patterns.tile_randomly('floor_tile_1',
                                   'floor_tile_2',
                                   'floor_tile_3',
@@ -38,14 +37,19 @@ dispatcher.register_listener(layout, 'all')
 
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision', 'ecs_move'])
+dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision'])
 
 # Game-specific event types
 dispatcher.register_event_type('brut_damage')
 dispatcher.register_event_type('brut_heal')
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
+dispatcher.register_event_type('brut_temporary_focus')
 
-dispatcher.register_listener(ScrollListener(layout=layout))
+dispatcher.register_listener(ScrollListener(layout=layout),
+                             ['brut_focus',
+                             'brut_temporary_focus',
+                             'ecs_move',
+                             'ecs_destroy'])
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 
@@ -57,7 +61,6 @@ factory.create_entity('barrel', (61, 50))
 factory.create_entity('target', (65, 30))
 factory.create_entity('invis', (0, 0), size=(150, 15))
 #TODO: create a proper walkability check
-# This is important both here and for properly walking around objects
 factory.create_entity('invis', (0, 15), size=(2, 45))
 factory.create_entity('invis', (148, 15), size=(2, 45))
 factory.create_entity('invis', (0, 58), size=(100, 2))
