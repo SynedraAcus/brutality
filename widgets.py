@@ -10,7 +10,7 @@ class PatternGenerator:
     # TODO: maybe it's better to generate things in a functional-ish style?
     # The object is currently only holding the atlas reference which makes it
     # sorta redundant; on the other hand, the rest of code is purely OOP and it
-    # would be spaghetti if this part alone was functional.
+    # would be spaghetti if this part alone was a module with functions.
     def generate_tiled(self, pattern, size):
         """
         Generate a chars/colors pair, tiled with a given pattern.
