@@ -6,6 +6,7 @@ from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
+from bear_hug.sound import SoundListener
 from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
@@ -45,6 +46,12 @@ dispatcher.register_event_type('brut_heal')
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus')
 
+# TODO: find some free sounds that actually fit the game
+jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
+                                'shot': 'sounds/dsshotgn.wav'})
+dispatcher.register_listener(jukebox, 'play_sound')
+
+# Launching the actual game
 dispatcher.register_listener(ScrollListener(layout=layout),
                              ['brut_focus',
                              'brut_temporary_focus',
