@@ -21,7 +21,6 @@ loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
 
 atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
-factory = MapObjectFactory(atlas, dispatcher)
 
 # Init game screen
 chars = [[' ' for _ in range(150)] for y in range(60)]
@@ -35,6 +34,7 @@ lower_bg = patterns.tile_randomly('floor_tile_1',
 bg = patterns.stack_boxes(upper_bg, lower_bg, order='vertical')
 layout = ScrollableECSLayout(*bg, view_pos=(0, 0), view_size=(85, 60))
 dispatcher.register_listener(layout, 'all')
+factory = MapObjectFactory(atlas, dispatcher, layout)
 
 # Debug event logger
 logger = LoggingListener(sys.stderr)

@@ -1,8 +1,9 @@
 from collections import OrderedDict
 
-from bear_hug.bear_utilities import BearECSException
+from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     WidgetComponent
+from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
 
 
@@ -71,9 +72,33 @@ class WalkerCollisionComponent(CollisionComponent):
     A collision component that, upon colliding into something impassable,
     moves the entity to where it came from.
     """
+    def __init__(self, *args, layout=None, **kwargs):
+        # TODO: design some way for components to access other entities by ID
+        # This is the first component that needs it, but probably not the last.
+        # A reasonable way would be to define some singleton that stores the
+        # layout reference and provides API to access `layout.entities`
+        if not layout or not isinstance(layout, (ECSLayout, ScrollableECSLayout)):
+            raise BearECSException('WalkerCollisionComponent needs a valid layout to work')
+        super().__init__(*args, **kwargs)
+        self.layout = layout
+        
     def collided_into(self, entity):
-        self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
-                                          self.owner.position.last_move[1] * -1)
+        if entity is not None:
+            other = self.layout.entities[entity]
+            if 'passability' in self.owner.__dict__ and  'passability' in other.__dict__:
+                if rectangles_collide((self.owner.position.x + self.owner.passability.shadow_pos[0],
+                                       self.owner.position.y + self.owner.passability.shadow_pos[1]),
+                                      self.owner.passability.shadow_size,
+                                      (other.position.x + other.passability.shadow_pos[0],
+                                       other.position.y + other.passability.shadow_pos[1]),
+                                      other.passability.shadow_size):
+                    self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
+                                                      self.owner.position.last_move[1] * -1)
+        else:
+            # Processing collisions with screen edges without involving passability
+            self.owner.position.relative_move(
+                self.owner.position.last_move[0] * -1,
+                self.owner.position.last_move[1] * -1)
 
 
 class ProjectileCollisionComponent(CollisionComponent):
@@ -86,6 +111,40 @@ class ProjectileCollisionComponent(CollisionComponent):
         self.owner.destructor.destroy()
         
 
+class PassingComponent(Component):
+    """
+    A component responsible for knowing whether items can or cannot be walked
+    through.
+    
+    Unlike collisions of eg projectiles, walkers can easily collide with screen
+    items and each other provided they are "behind" or "anead" of each other. To
+    check for that, PassingComponent stores a sort of hitbox (basically the
+    projection on the surface, something like lowest three rows for a
+    human-sized object). Then, WalkerCollisionComponent uses those to define
+    if walk attempt was unsuccessful.
+    
+    All entities that do not have this component are assumed to be passable.
+    """
+    def __init__(self, *args, shadow_pos=(0, 0), shadow_size=None, **kwargs):
+        super().__init__(*args, name='passability', **kwargs)
+        self.shadow_pos = shadow_pos
+        self._shadow_size = shadow_size
+            
+    @property
+    def shadow_size(self):
+        #TODO: remove the ugly shadow size hack
+        # The idea is that shadow size can be set to owner's widget size by
+        # default. The only issue is that owner may not be set, or may not have
+        # a widget yet, when this component is created. Thus, this hack.
+        # Hopefully no one will try and walk into the object before it is shown
+        # on screen. Alas, it requires calling a method for a frequently used
+        # property and is generally pretty ugly. Remove this if I ever get to
+        # optimizing and manage to think of something better.
+        if self._shadow_size is None:
+            self._shadow_size = self.owner.widget.size
+        return self._shadow_size
+    
+    
 class HealthComponent(Component):
     """
     A component that monitors owner's health and updates whatever needs updating
@@ -248,6 +307,6 @@ class InputComponent(Component):
                                    event_value=(0, 0)))
             if moved:
                 self.owner.position.walk(self.last_move)
-                r.append(BearEvent(event_type='play_sound',
-                                   event_value='step'))
+                # r.append(BearEvent(event_type='play_sound',
+                #                    event_value='step'))
         return r

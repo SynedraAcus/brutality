@@ -7,7 +7,7 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    ProjectileCollisionComponent, InputComponent
+    ProjectileCollisionComponent, InputComponent, PassingComponent
 
 
 class MapObjectFactory:
@@ -16,9 +16,10 @@ class MapObjectFactory:
     Only `factory.create_entity()` method is available to the user,
     the rest are internal.
     """
-    def __init__(self, atlas, dispatcher):
+    def __init__(self, atlas, dispatcher, layout):
         self.dispatcher = dispatcher
         self.atlas = atlas
+        self.layout = layout
         self.counts = {}
         self.object_methods = {'cop': self.__create_cop,
                                'barrel': self.__create_barrel,
@@ -63,8 +64,11 @@ class MapObjectFactory:
                                            owner=barrel_entity)
         position_component = PositionComponent(self.dispatcher,
                                                owner=barrel_entity)
+        passability = PassingComponent(self.dispatcher, shadow_pos=(0, 7),
+                                       shadow_size=(6, 2))
         barrel_entity.add_component(position_component)
         barrel_entity.add_component(widget_component)
+        barrel_entity.add_component(passability)
         return barrel_entity
     
     def __create_cop(self, entity_id):
@@ -78,10 +82,14 @@ class MapObjectFactory:
                                                  owner=cop_entity)
         position_component = WalkerComponent(self.dispatcher,
                                                owner=cop_entity)
-        collision_component = WalkerCollisionComponent(self.dispatcher)
+        collision_component = WalkerCollisionComponent(self.dispatcher,
+                                                       layout=self.layout)
+        passability = PassingComponent(self.dispatcher, shadow_pos=(0, 15),
+                                       shadow_size=(13, 3))
         cop_entity.add_component(position_component)
         cop_entity.add_component(widget_component)
         cop_entity.add_component(collision_component)
+        cop_entity.add_component(passability)
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
@@ -105,6 +113,7 @@ class MapObjectFactory:
         position_component = PositionComponent(self.dispatcher,
                                                owner=bg_entity)
         bg_entity.add_component(position_component)
+        bg_entity.add_component(PassingComponent(self.dispatcher))
         return bg_entity
 
     def __create_bullet(self, entity_id, speed=(0, 0), direction='r'):
