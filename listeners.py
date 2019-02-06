@@ -87,12 +87,12 @@ class ScrollListener(Listener):
             x = event.event_value[1]
             if x <= self.layout.view_pos[0] + self.distance:
                 return BearEvent(event_type='ecs_scroll_by',
-                                 event_value=(x - self.layout.view_pos[0], 0))
+                                 event_value=(x - self.distance - self.layout.view_pos[0], 0))
             elif x >= self.layout.view_pos[0] + self.layout.view_size[0] \
                        - self.layout.entities[self.target_entity].widget.size[0] \
                        - self.distance:
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x + self.layout.entities[self.target_entity].widget.size[0] \
-                                              - self.layout.view_pos[0] \
+                                              - self.layout.view_pos[0] + self.distance \
                                                 - self.layout.view_size[0],
                                               0))
