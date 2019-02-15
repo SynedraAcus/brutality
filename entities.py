@@ -26,7 +26,8 @@ class MapObjectFactory:
                                'barrel': self.__create_barrel,
                                'invis': self.__create_invisible_collider,
                                'bullet': self.__create_bullet,
-                               'target': self.__create_target}
+                               'target': self.__create_target,
+                               'muzzle_flash': self._create_muzzle_flash}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -158,6 +159,19 @@ class MapObjectFactory:
                             hitpoints=4))
         target_entity.add_component(PositionComponent(self.dispatcher))
         target_entity.add_component(DestructorComponent(self.dispatcher))
-        target_entity.add_component(DecayComponent(self.dispatcher,
-                                               destroy_condition='keypress'))
         return target_entity
+
+    def _create_muzzle_flash(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        if direction == 'r':
+            chars, colors = self.atlas.get_element('shot_r')
+        else:
+            chars, colors = self.atlas.get_element('shot_l')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.1))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity

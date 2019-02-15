@@ -105,9 +105,16 @@
     "ysize": 9
   },
   {
-    "name": "shot",
+    "name": "shot_r",
     "x": 6,
     "y": 10,
+    "xsize": 2,
+    "ysize": 3
+  },
+  {
+    "name": "shot_l",
+    "x": 4,
+    "y": 30,
     "xsize": 2,
     "ysize": 3
   },

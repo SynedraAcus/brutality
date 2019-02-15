@@ -268,12 +268,16 @@ class InputComponent(Component):
             if event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('bullet', (13, 4),
-                                             direction=self.owner.position.direction,
+                                             direction='r',
                                              speed=(70, 0))
+                    self.owner.spawner.spawn('muzzle_flash', (13, 3),
+                                             direction='r')
                 else:
-                    self.owner.spawner.spawn('bullet', (-1, 5),
-                                             direction=self.owner.position.direction,
+                    self.owner.spawner.spawn('bullet', (-1, 4),
+                                             direction='l',
                                              speed=(-70, 0))
+                    self.owner.spawner.spawn('muzzle_flash', (-2, 3),
+                                             direction='l')
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
                 r.append(BearEvent(event_type='brut_temporary_focus',
