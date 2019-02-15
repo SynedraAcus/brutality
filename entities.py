@@ -7,7 +7,8 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    ProjectileCollisionComponent, InputComponent, PassingComponent
+    ProjectileCollisionComponent, InputComponent, PassingComponent, \
+    DecayComponent
 
 
 class MapObjectFactory:
@@ -157,4 +158,6 @@ class MapObjectFactory:
                             hitpoints=4))
         target_entity.add_component(PositionComponent(self.dispatcher))
         target_entity.add_component(DestructorComponent(self.dispatcher))
+        target_entity.add_component(DecayComponent(self.dispatcher,
+                                               destroy_condition='keypress'))
         return target_entity

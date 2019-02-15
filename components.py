@@ -310,3 +310,33 @@ class InputComponent(Component):
                 # r.append(BearEvent(event_type='play_sound',
                 #                    event_value='step'))
         return r
+
+
+class DecayComponent(Component):
+    """
+    Attaches to an entity and destroys it when conditions are met.
+    
+    Currently supported destroy conditions are 'keypress' and 'timeout'. If the
+    latter is set, you can supply the lifetime (defaults to 1.0 sec)
+    """
+    
+    def __init__(self, *args, destroy_condition='keypress', lifetime=1.0,
+                 **kwargs):
+        super().__init__(*args, name='decay', **kwargs)
+        if destroy_condition == 'keypress':
+            self.dispatcher.register_listener(self, 'key_down')
+        elif destroy_condition == 'timeout':
+            self.dispatcher.register_listener(self, 'tick')
+            self.lifetime = lifetime
+            self.age = 0
+        else:
+            raise ValueError(f'destroy_condition should be either keypress or timeout')
+        self.destroy_condition = destroy_condition
+
+    def on_event(self, event):
+        if self.destroy_condition == 'keypress' and event.event_type == 'key_down':
+            self.owner.destructor.destroy()
+        elif self.destroy_condition == 'timeout' and event.event_type == 'tick':
+            self.age += event.event_value
+            if self.age >= self.lifetime:
+                self.owner.destructor.destroy()

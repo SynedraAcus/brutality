@@ -66,7 +66,7 @@ factory.create_entity('cop', (10, 30))
 factory.create_entity('barrel', (75, 25))
 factory.create_entity('barrel', (61, 50))
 factory.create_entity('target', (65, 30))
-factory.create_entity('invis', (0, 0), size=(150, 15))
+factory.create_entity('invis', (0, 0), size=(150, 30))
 #TODO: create a proper walkability check
 factory.create_entity('invis', (0, 15), size=(2, 45))
 factory.create_entity('invis', (148, 15), size=(2, 45))
