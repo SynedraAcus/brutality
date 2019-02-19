@@ -105,10 +105,15 @@ class ProjectileCollisionComponent(CollisionComponent):
     """
     A collision component that damages whatever its owner is collided into
     """
+    
+    def __init__(self, *args, damage=1, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.damage = damage
+        
     #TODO: set damage for various projectiles
     def collided_into(self, entity):
         self.dispatcher.add_event(BearEvent(event_type='brut_damage',
-                                            event_value=(entity, 1)))
+                                            event_value=(entity, self.damage)))
         self.owner.destructor.destroy()
         
 
@@ -290,7 +295,7 @@ class InputComponent(Component):
                                              speed=(50, 0))
                 else:
                     self.owner.spawner.spawn('punch', (-1, 4),
-                                             direction='r',
+                                             direction='l',
                                              speed=(-50, 0))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)

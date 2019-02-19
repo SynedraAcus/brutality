@@ -135,7 +135,8 @@ class MapObjectFactory:
                                              ), 10))))
         bullet_entity.add_component(PositionComponent(self.dispatcher,
                                                       vx=speed[0], vy=speed[1]))
-        bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
+        bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher,
+                                                                 damage=1))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
     
@@ -153,7 +154,8 @@ class MapObjectFactory:
                                     f'punch_{direction}'))))
         punch.add_component(PositionComponent(self.dispatcher,
                                                       vx=speed[0], vy=speed[1]))
-        punch.add_component(ProjectileCollisionComponent(self.dispatcher))
+        punch.add_component(ProjectileCollisionComponent(self.dispatcher,
+                                                         damage=3))
         punch.add_component(DestructorComponent(self.dispatcher))
         punch.add_component(DecayComponent(self.dispatcher,
                                            destroy_condition='timeout',
