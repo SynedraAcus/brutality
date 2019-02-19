@@ -201,3 +201,4 @@ class MapObjectFactory:
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
+

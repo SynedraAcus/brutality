@@ -10,7 +10,7 @@ from bear_hug.sound import SoundListener
 from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
-from listeners import ScrollListener
+from listeners import ScrollListener, EntityTracker
 from widgets import PatternGenerator
 
 #Bear_hug boilerplate
@@ -57,6 +57,7 @@ dispatcher.register_listener(ScrollListener(layout=layout),
                              'brut_temporary_focus',
                              'ecs_move',
                              'ecs_destroy'])
+dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 

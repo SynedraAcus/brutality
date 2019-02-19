@@ -96,3 +96,48 @@ class ScrollListener(Listener):
                                               - self.layout.view_pos[0] + self.distance \
                                                 - self.layout.view_size[0],
                                               0))
+
+
+# Copypasting SO is the only correct way to program
+# https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+class Singleton(type):
+    _instances = {}
+    
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args,
+                                                                 **kwargs)
+        return cls._instances[cls]
+
+
+class EntityTracker(Listener, metaclass=Singleton):
+    """
+    Listens to the ecs_add and ecs_destroy events and keeps track of all the
+    currently existing entities.
+    
+    This tracker is used for entity lookup, eg by Components that need to find
+    all possible entities that fulfill certain criteria
+    """
+    def __init__(self):
+        super().__init__()
+        self.entities = {}
+        
+    def on_event(self, event):
+        if event.event_type == 'ecs_create':
+            self.entities[event.event_value.id] = event.event_value
+        elif event.event_type == 'ecs_destroy':
+            del self.entities[event.event_value]
+            
+    def filter_entities(self, key=lambda x: x):
+        """
+        Return all entities for which key evaluates to True.
+        
+        Note that this method returns entity objects themselves, not the IDs.
+        :param key: A single-arg callable
+        :return:
+        """
+        if not hasattr(key, '__call__'):
+            raise ValueError('EntityTracker requires callable for a key')
+        for entity_id in self.entities:
+            if key(self.entities[entity_id]):
+                yield self.entities[entity_id]

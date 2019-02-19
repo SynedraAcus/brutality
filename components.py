@@ -339,7 +339,7 @@ class FactionComponent(Component):
     to allow for things such as alliances, varying levels of agression, etc.
     """
     def __init__(self, *args, faction='items', **kwargs):
-        super().__init__(self, *args, name='faction', **kwargs)
+        super().__init__(*args, name='faction', **kwargs)
         self.faction = faction
 
 
