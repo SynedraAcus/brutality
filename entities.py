@@ -27,7 +27,8 @@ class MapObjectFactory:
                                'invis': self.__create_invisible_collider,
                                'bullet': self.__create_bullet,
                                'target': self.__create_target,
-                               'muzzle_flash': self._create_muzzle_flash}
+                               'muzzle_flash': self._create_muzzle_flash,
+                               'punch': self.__create_punch}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -74,6 +75,8 @@ class MapObjectFactory:
         return barrel_entity
     
     def __create_cop(self, entity_id):
+        # TODO: redraw the cop without the gun sticking too far out
+        # TODO: cop attack animations
         cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
                                   'r_2': self.atlas.get_element('cop_r_2'),
@@ -135,6 +138,27 @@ class MapObjectFactory:
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
+    
+    def __create_punch(self, entity_id, speed=(0,0), direction='r'):
+        """
+        Send a punch
+        :param entity_id:
+        :param speed:
+        :param direction:
+        :return:
+        """
+        punch = Entity(id=entity_id)
+        punch.add_component(WidgetComponent(self.dispatcher,
+                                Widget(*self.atlas.get_element(
+                                    f'punch_{direction}'))))
+        punch.add_component(PositionComponent(self.dispatcher,
+                                                      vx=speed[0], vy=speed[1]))
+        punch.add_component(ProjectileCollisionComponent(self.dispatcher))
+        punch.add_component(DestructorComponent(self.dispatcher))
+        punch.add_component(DecayComponent(self.dispatcher,
+                                           destroy_condition='timeout',
+                                           lifetime=0.2))
+        return punch
 
     def __create_target(self, entity_id):
         """

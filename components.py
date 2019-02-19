@@ -105,6 +105,7 @@ class ProjectileCollisionComponent(CollisionComponent):
     """
     A collision component that damages whatever its owner is collided into
     """
+    #TODO: set damage for various projectiles
     def collided_into(self, entity):
         self.dispatcher.add_event(BearEvent(event_type='brut_damage',
                                             event_value=(entity, 1)))
@@ -282,6 +283,15 @@ class InputComponent(Component):
                                    event_value='shot'))
                 r.append(BearEvent(event_type='brut_temporary_focus',
                                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
+            elif event.event_value == 'TK_Q':
+                if self.owner.position.direction == 'r':
+                    self.owner.spawner.spawn('punch', (13, 4),
+                                             direction='r',
+                                             speed=(50, 0))
+                else:
+                    self.owner.spawner.spawn('punch', (-1, 4),
+                                             direction='r',
+                                             speed=(-50, 0))
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)
                 moved = True
