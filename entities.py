@@ -7,8 +7,9 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 
 from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
+    DestructorHealthComponent, FactionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
-    DecayComponent
+    DecayComponent, MeleeControllerComponent
 
 
 class MapObjectFactory:
@@ -28,7 +29,8 @@ class MapObjectFactory:
                                'bullet': self.__create_bullet,
                                'target': self.__create_target,
                                'muzzle_flash': self._create_muzzle_flash,
-                               'punch': self.__create_punch}
+                               'punch': self.__create_punch,
+                               'nunchaku_punk': self.__create_nunchaku_punk}
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -97,9 +99,35 @@ class MapObjectFactory:
         cop_entity.add_component(passability)
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
+        cop_entity.add_component(FactionComponent(self.dispatcher,
+                                                  faction='police'))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
+    
+    def __create_nunchaku_punk(self, entity_id):
+        nunchaku = Entity(id=entity_id)
+        widget = SwitchingWidget({'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
+                                  'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
+                                  'l_1': self.atlas.get_element('nunchaku_punk_l_1'),
+                                  'l_2': self.atlas.get_element('nunchaku_punk_l_2'),
+                                  },
+                                 initial_image='l_1')
+        nunchaku.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        nunchaku.add_component(WalkerComponent(self.dispatcher))
+        nunchaku.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                       layout=self.layout))
+        nunchaku.add_component(PassingComponent(self.dispatcher,
+                                                shadow_pos=(0, 15),
+                                                shadow_size=(13, 3)))
+        nunchaku.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        nunchaku.add_component(DestructorComponent(self.dispatcher))
+        nunchaku.add_component(DestructorHealthComponent(self.dispatcher,
+                                                         hitpoints=5))
+        nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
+        nunchaku.add_component(FactionComponent(self.dispatcher,
+                                                  faction='punks'))
+        return nunchaku
     
     def __create_invisible_collider(self, entity_id, size=(0, 0)):
         """

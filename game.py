@@ -36,9 +36,7 @@ layout = ScrollableECSLayout(*bg, view_pos=(0, 0), view_size=(85, 60))
 dispatcher.register_listener(layout, 'all')
 factory = MapObjectFactory(atlas, dispatcher, layout)
 
-# Debug event logger
-logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision'])
+
 
 # Game-specific event types
 dispatcher.register_event_type('brut_damage')
@@ -54,19 +52,24 @@ dispatcher.register_listener(jukebox, 'play_sound')
 # Launching the actual game
 dispatcher.register_listener(ScrollListener(layout=layout),
                              ['brut_focus',
-                             'brut_temporary_focus',
+                              'brut_temporary_focus',
                              'ecs_move',
                              'ecs_destroy'])
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
 
+# Debug event logger
+logger = LoggingListener(sys.stderr)
+dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision', 'brut_damage'])
+
 # Initial on-screen stuff
 # Created before the loop starts, will be added on the first tick
 factory.create_entity('cop', (10, 30))
 factory.create_entity('barrel', (75, 25))
 factory.create_entity('barrel', (61, 50))
-factory.create_entity('target', (65, 30))
+factory.create_entity('nunchaku_punk', (65, 30))
+# factory.create_entity('target', (65, 30))
 factory.create_entity('invis', (0, 0), size=(150, 15))
 factory.create_entity('invis', (0, 15), size=(2, 45))
 factory.create_entity('invis', (148, 15), size=(2, 45))

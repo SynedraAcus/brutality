@@ -1,10 +1,14 @@
 from collections import OrderedDict
+from math import sqrt
+from random import randint
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     WidgetComponent
 from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
+
+from listeners import EntityTracker
 
 
 class WalkerComponent(PositionComponent):
@@ -61,10 +65,10 @@ class CollisionComponent(Component):
                 self.collided_by(event.event_value[0])
 
     def collided_into(self, entity):
-        print(f'Collided into {entity}')
-
+        pass
+    
     def collided_by(self, entity):
-        print(f'Collided by {entity}')
+        pass
 
 
 class WalkerCollisionComponent(CollisionComponent):
@@ -94,6 +98,7 @@ class WalkerCollisionComponent(CollisionComponent):
                                       other.passability.shadow_size):
                     self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
                                                       self.owner.position.last_move[1] * -1)
+            # TODO: collide widgets when there is no passability component
         else:
             # Processing collisions with screen edges without involving passability
             self.owner.position.relative_move(
@@ -183,7 +188,17 @@ class HealthComponent(Component):
         """
         :return:
         """
-        pass
+        raise NotImplementedError('HP update processing should be overridden')
+
+
+class DestructorHealthComponent(HealthComponent):
+    """
+    Destroys entity upon reaching zero HP
+    """
+    def process_hitpoint_update(self):
+        if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
+            print(self.hitpoints)
+            self.owner.destructor.destroy()
 
 
 class VisualDamageHealthComponent(HealthComponent):
@@ -250,8 +265,21 @@ class SpawnerComponent(Component):
         self.factory.create_entity(item, (self.owner.position.x + relative_pos[0],
                                           self.owner.position.y + relative_pos[1]),
                                    **kwargs)
-        
 
+
+class FactionComponent(Component):
+    """
+    Stores the faction data to see who should attack whom.
+
+    Currently just contains a single string, but later will probably be extended
+    to allow for things such as alliances, varying levels of agression, etc.
+    """
+    
+    def __init__(self, *args, faction='items', **kwargs):
+        super().__init__(*args, name='faction', **kwargs)
+        self.faction = faction
+        
+        
 class InputComponent(Component):
     """
     A component that handles input.
@@ -331,24 +359,65 @@ class InputComponent(Component):
         return r
 
 
-class FactionComponent(Component):
-    """
-    Stores the faction data to see who should attack whom.
-    
-    Currently just contains a single string, but later will probably be extended
-    to allow for things such as alliances, varying levels of agression, etc.
-    """
-    def __init__(self, *args, faction='items', **kwargs):
-        super().__init__(*args, name='faction', **kwargs)
-        self.faction = faction
-
-
 class MeleeControllerComponent(Component):
     """
     Looks for objects with factions different from its own, moves towards them,
     and when in range, punches them.
+    
+    Assumes that the owner has SpawnerComponent and WalkerComponent
     """
-    pass
+    def __init__(self, *args, action_delay=0.5, perception_distance=150, **kwargs):
+        #TODO: separate cooldowns for move and attack(s)
+        # Maybe this will not be necessary until I make attack class or smth
+        super().__init__(*args, name='controller', **kwargs)
+        self.dispatcher.register_listener(self, 'tick')
+        self.action_delay = action_delay
+        self.action_cooldown = 0
+        self.perception_distance = perception_distance
+        
+    def on_event(self, event):
+        if event.event_type == 'tick':
+            # If on cooldown, be cooling down. Else, try and act
+            if self.action_cooldown > 0:
+                self.action_cooldown -= event.event_value
+            if self.action_cooldown <= 0:
+                enemies = list(EntityTracker().filter_entities(
+                    lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
+                current_closest = None
+                min_dist = None
+                for enemy in enemies:
+                    dx = self.owner.position.x - enemy.position.x
+                    dy = self.owner.position.y - enemy.position.y
+                    dist = sqrt(dx**2 + dy**2)
+                    if (not min_dist or min_dist > dist) and dist < self.perception_distance:
+                        current_closest = enemy
+                # Probably easier to recalculate for the selected enemy rather
+                # than bother caching, creating the dict and all that
+                target = current_closest
+                dx = self.owner.position.x - enemy.position.x
+                dy = self.owner.position.y - enemy.position.y
+                dist = sqrt(dx**2 + dy**2)
+                if abs(dx) <= 20 and abs(dy) <= 10:
+                    # Someone is in range, try a punch
+                    if self.owner.position.direction == 'r':
+                        self.owner.spawner.spawn('punch', (13, 4),
+                                                 direction='r',
+                                                 speed=(50, 0))
+                    else:
+                        self.owner.spawner.spawn('punch', (-1, 4),
+                                                 direction='l',
+                                                 speed=(-50, 0))
+                    self.action_cooldown = self.action_delay
+                else:
+                    i = randint(0, abs(dx) + abs(dy))
+                    if i <= abs(dx):
+                        self.owner.position.walk((dx < 0 and 1 or -1, 0))
+                    else:
+                        self.owner.position.walk((0, dy < 0 and 1 or -1))
+                    self.action_cooldown = self.action_delay
+                    
+                
+    
 
 
 class RangedControlComponent(Component):
