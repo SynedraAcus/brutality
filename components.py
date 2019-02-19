@@ -16,7 +16,6 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that can change x;y on keypress
     """
     
-    # TODO: Non-idiotic walking animation
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
@@ -77,10 +76,6 @@ class WalkerCollisionComponent(CollisionComponent):
     moves the entity to where it came from.
     """
     def __init__(self, *args, layout=None, **kwargs):
-        # TODO: design some way for components to access other entities by ID
-        # This is the first component that needs it, but probably not the last.
-        # A reasonable way would be to define some singleton that stores the
-        # layout reference and provides API to access `layout.entities`
         if not layout or not isinstance(layout, (ECSLayout, ScrollableECSLayout)):
             raise BearECSException('WalkerCollisionComponent needs a valid layout to work')
         super().__init__(*args, **kwargs)
@@ -88,7 +83,7 @@ class WalkerCollisionComponent(CollisionComponent):
         
     def collided_into(self, entity):
         if entity is not None:
-            other = self.layout.entities[entity]
+            other = EntityTracker().entities[entity]
             if 'passability' in self.owner.__dict__ and  'passability' in other.__dict__:
                 if rectangles_collide((self.owner.position.x + self.owner.passability.shadow_pos[0],
                                        self.owner.position.y + self.owner.passability.shadow_pos[1]),
@@ -98,7 +93,6 @@ class WalkerCollisionComponent(CollisionComponent):
                                       other.passability.shadow_size):
                     self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
                                                       self.owner.position.last_move[1] * -1)
-            # TODO: collide widgets when there is no passability component
         else:
             # Processing collisions with screen edges without involving passability
             self.owner.position.relative_move(
@@ -115,7 +109,6 @@ class ProjectileCollisionComponent(CollisionComponent):
         super().__init__(*args, **kwargs)
         self.damage = damage
         
-    #TODO: set damage for various projectiles
     def collided_into(self, entity):
         self.dispatcher.add_event(BearEvent(event_type='brut_damage',
                                             event_value=(entity, self.damage)))
@@ -197,7 +190,6 @@ class DestructorHealthComponent(HealthComponent):
     """
     def process_hitpoint_update(self):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
-            print(self.hitpoints)
             self.owner.destructor.destroy()
 
 
@@ -426,6 +418,7 @@ class RangedControlComponent(Component):
     a clear line of sight and shoots when it can. Does not move towards target
     along x; when dx is too small, tries to run away
     """
+    # TODO: make a bottle punk
     pass
 
 

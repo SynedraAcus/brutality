@@ -79,6 +79,8 @@ class MapObjectFactory:
     def __create_cop(self, entity_id):
         # TODO: redraw the cop without the gun sticking too far out
         # TODO: cop attack animations
+        # TODO: separate widgets/entities for equipped items
+        # This one obviously requires having an equipment system in place
         cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
                                   'r_2': self.atlas.get_element('cop_r_2'),
