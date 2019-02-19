@@ -119,6 +119,20 @@
     "ysize": 3
   },
   {
+    "name": "punch_r",
+    "x": 7,
+    "y": 31,
+    "xsize": 2,
+    "ysize": 6
+  },
+  {
+    "name": "punch_l",
+    "x": 9,
+    "y": 31,
+    "xsize": 2,
+    "ysize": 6
+  },
+  {
     "name": "bullet_r_1",
     "x": 8,
     "y": 10,
