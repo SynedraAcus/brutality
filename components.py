@@ -331,6 +331,35 @@ class InputComponent(Component):
         return r
 
 
+class FactionComponent(Component):
+    """
+    Stores the faction data to see who should attack whom.
+    
+    Currently just contains a single string, but later will probably be extended
+    to allow for things such as alliances, varying levels of agression, etc.
+    """
+    def __init__(self, *args, faction='items', **kwargs):
+        super().__init__(self, *args, name='faction', **kwargs)
+        self.faction = faction
+
+
+class MeleeControllerComponent(Component):
+    """
+    Looks for objects with factions different from its own, moves towards them,
+    and when in range, punches them.
+    """
+    pass
+
+
+class RangedControlComponent(Component):
+    """
+    Looks for objects with factions different from its own, tries to establish
+    a clear line of sight and shoots when it can. Does not move towards target
+    along x; when dx is too small, tries to run away
+    """
+    pass
+
+
 class DecayComponent(Component):
     """
     Attaches to an entity and destroys it when conditions are met.
