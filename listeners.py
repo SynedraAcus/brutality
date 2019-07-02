@@ -136,7 +136,6 @@ class EntityTracker(Listener, metaclass=Singleton):
         :param key: A single-arg callable
         :return:
         """
-        # TODO: quickly and quietly skip checks for nonexistent components
         if not hasattr(key, '__call__'):
             raise ValueError('EntityTracker requires callable for a key')
         for entity_id in self.entities:

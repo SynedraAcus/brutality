@@ -6,11 +6,7 @@ from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException
 class PatternGenerator:
     def __init__(self, atlas):
         self.atlas = atlas
-    
-    # TODO: maybe it's better to generate things in a functional-ish style?
-    # The object is currently only holding the atlas reference which makes it
-    # sorta redundant; on the other hand, the rest of code is purely OOP and it
-    # would be spaghetti if this part alone was a module with functions.
+
     def generate_tiled(self, pattern, size):
         """
         Generate a chars/colors pair, tiled with a given pattern.
