@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from json import dumps, loads
 from math import sqrt
 from random import randint
 
@@ -16,12 +17,12 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that can change x;y on keypress
     """
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, direction='r', initial_phase='1', *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
         self.last_move = None
-        self.direction = 'r'
-        self.phase = '1'
+        self.direction = direction
+        self.phase = initial_phase
         self.moved_this_tick = False
         
     def walk(self, move):
@@ -45,6 +46,12 @@ class WalkerComponent(PositionComponent):
     def on_event(self, event):
         if event.event_type == 'tick':
             self.moved_this_tick = False
+            
+    def __repr__(self):
+        d = loads(repr(super()))
+        {}.update({'direction': self.direction,
+                   'initial_phase': self.phase})
+        return dumps(d)
 
 
 class CollisionComponent(Component):
@@ -75,6 +82,18 @@ class WalkerCollisionComponent(CollisionComponent):
     A collision component that, upon colliding into something impassable,
     moves the entity to where it came from.
     """
+    # TODO: serialize WalkerCollisionComponent
+    # The tricky part is that it requires a layout which is not serializable.
+    # It requires some architectural decision and all I can think of right now
+    # is to bloat deserialize_component with special exceptions for every kind
+    # of component. This is unacceptable because there should be some way of
+    # providing the deserializer necessary pointers without forcing the user to
+    # hack library sources.
+    #
+    # Probably a ComponentDeserializer class? Such that the user could extend it
+    # with whatever logic his components require? It should accept pretty much
+    # everything it can (terminal, layout, dispatcher, atlas, entity factory,
+    # maybe something else) on creation.
     def __init__(self, *args, layout=None, **kwargs):
         if not layout or not isinstance(layout, (ECSLayout, ScrollableECSLayout)):
             raise BearECSException('WalkerCollisionComponent needs a valid layout to work')
@@ -114,6 +133,10 @@ class ProjectileCollisionComponent(CollisionComponent):
                                             event_value=(entity, self.damage)))
         self.owner.destructor.destroy()
         
+    def __repr__(self):
+        d = loads(repr(super()))
+        d['damage'] = self.damage
+        return dumps(d)
 
 class PassingComponent(Component):
     """
@@ -121,7 +144,7 @@ class PassingComponent(Component):
     through.
     
     Unlike collisions of eg projectiles, walkers can easily collide with screen
-    items and each other provided they are "behind" or "anead" of each other. To
+    items and each other provided they are "behind" or "ahead" of each other. To
     check for that, PassingComponent stores a sort of hitbox (basically the
     projection on the surface, something like lowest three rows for a
     human-sized object). Then, WalkerCollisionComponent uses those to define
@@ -147,6 +170,12 @@ class PassingComponent(Component):
         if self._shadow_size is None:
             self._shadow_size = self.owner.widget.size
         return self._shadow_size
+    
+    def __repr__(self):
+        d = {'class': self.__class__.__name__,
+             'shadow_size': self._shadow_size,
+             'shadow_pos': self.shadow_pos}
+        return dumps(d)
     
     
 class HealthComponent(Component):
@@ -182,6 +211,10 @@ class HealthComponent(Component):
         :return:
         """
         raise NotImplementedError('HP update processing should be overridden')
+    
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'hitpoints': self.hitpoints})
 
 
 class DestructorHealthComponent(HealthComponent):
@@ -214,6 +247,18 @@ class VisualDamageHealthComponent(HealthComponent):
         for x in self.widgets_dict:
             if self.hitpoints >= x:
                 self.owner.widget.switch_to_image(self.widgets_dict[x])
+                
+    def __repr__(self):
+        # TODO: correctly deserialize widgets_dict
+        # Again, this requires that the logic of component deserializer were
+        # extensible. Widgets_dict is a dict of widgets (which need to
+        # deserialize), but the default deserialize_component only uses 'widget'
+        # key to read widgets
+        #
+        # Also, this part could support storing widgets by ID
+        d = loads(repr(super()))
+        d.['widgets_dict'] = {x: repr(x) for x in self.widgets_dict}
+        return dumps(d)
     
     
 class SwitchWidgetComponent(WidgetComponent):
@@ -270,6 +315,10 @@ class FactionComponent(Component):
     def __init__(self, *args, faction='items', **kwargs):
         super().__init__(*args, name='faction', **kwargs)
         self.faction = faction
+        
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'faction': self.faction})
         
         
 class InputComponent(Component):
@@ -408,9 +457,11 @@ class MeleeControllerComponent(Component):
                         self.owner.position.walk((0, dy < 0 and 1 or -1))
                     self.action_cooldown = self.action_delay
                     
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'action_delay': self.action_delay,
+                      'perception_distance': self.perception_distance})
                 
-    
-
 
 class RangedControlComponent(Component):
     """
@@ -450,3 +501,9 @@ class DecayComponent(Component):
             self.age += event.event_value
             if self.age >= self.lifetime:
                 self.owner.destructor.destroy()
+
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'destroy_condition': self.destroy_condition,
+                      'lifetime': self.lifetime})
+        
