@@ -45,9 +45,11 @@ dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus')
 
 # TODO: find some free sounds that actually fit the game
-jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
-                                'shot': 'sounds/dsshotgn.wav'})
-dispatcher.register_listener(jukebox, 'play_sound')
+# TODO: re-enable audio
+# Sound temporarily disabled to develop without simpleaudio
+# jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
+#                                 'shot': 'sounds/dsshotgn.wav'})
+# dispatcher.register_listener(jukebox, 'play_sound')
 
 # Launching the actual game
 dispatcher.register_listener(ScrollListener(layout=layout),
