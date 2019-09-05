@@ -234,15 +234,8 @@ class VisualDamageHealthComponent(HealthComponent):
                 self.owner.widget.switch_to_image(self.widgets_dict[x])
                 
     def __repr__(self):
-        # TODO: correctly deserialize widgets_dict
-        # Again, this requires that the logic of component deserializer were
-        # extensible. Widgets_dict is a dict of widgets (which need to
-        # deserialize), but the default deserialize_component only uses 'widget'
-        # key to read widgets
-        #
-        # Also, this part could support storing widgets by ID
         d = loads(repr(super()))
-        d['widgets_dict'] = {x: repr(x) for x in self.widgets_dict}
+        d['widgets_dict'] = self.widgets_dict
         return dumps(d)
     
     
@@ -325,7 +318,7 @@ class InputComponent(Component):
             r = []
         if event.event_type == 'key_down':
             moved = False
-            if event.event_value == 'TK_SPACE':
+            if event.event_value == 'TK_Q':
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('bullet', (13, 4),
                                              direction='r',
@@ -342,7 +335,7 @@ class InputComponent(Component):
                                    event_value='shot'))
                 r.append(BearEvent(event_type='brut_temporary_focus',
                                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
-            elif event.event_value == 'TK_Q':
+            elif event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('punch', (13, 4),
                                              direction='r',

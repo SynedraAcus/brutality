@@ -77,7 +77,6 @@ class MapObjectFactory:
         return barrel_entity
     
     def __create_cop(self, entity_id):
-        # TODO: redraw the cop without the gun sticking too far out
         # TODO: cop attack animations
         # TODO: separate widgets/entities for equipped items
         # This one obviously requires having an equipment system in place
@@ -91,8 +90,7 @@ class MapObjectFactory:
                                                  owner=cop_entity)
         position_component = WalkerComponent(self.dispatcher,
                                                owner=cop_entity)
-        collision_component = WalkerCollisionComponent(self.dispatcher,
-                                                       layout=self.layout)
+        collision_component = WalkerCollisionComponent(self.dispatcher)
         passability = PassingComponent(self.dispatcher, shadow_pos=(0, 15),
                                        shadow_size=(13, 3))
         cop_entity.add_component(position_component)
@@ -117,8 +115,7 @@ class MapObjectFactory:
                                  initial_image='l_1')
         nunchaku.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         nunchaku.add_component(WalkerComponent(self.dispatcher))
-        nunchaku.add_component(WalkerCollisionComponent(self.dispatcher,
-                                                       layout=self.layout))
+        nunchaku.add_component(WalkerCollisionComponent(self.dispatcher))
         nunchaku.add_component(PassingComponent(self.dispatcher,
                                                 shadow_pos=(0, 15),
                                                 shadow_size=(13, 3)))
