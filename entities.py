@@ -44,6 +44,13 @@ class MapObjectFactory:
         """
         entity = deserialize_entity(json_string, self.dispatcher)
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
+        # TODO: make factory respond to events
+        # Following hack is necessary because the SpawnerComponent adresses the
+        # factory directly. If the factory could respond to events, the
+        # component wouldn't need to know anything about it and will become a
+        # simple event emitter
+        if hasattr(entity, 'spawner'):
+            entity.spawner.factory = self
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id,
                                                             entity.position.x,
