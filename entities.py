@@ -1,6 +1,6 @@
 from bear_hug.bear_utilities import copy_shape, BearECSException
 from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
-    DestructorComponent
+    DestructorComponent, deserialize_entity
 from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget
@@ -31,6 +31,23 @@ class MapObjectFactory:
                                'muzzle_flash': self._create_muzzle_flash,
                                'punch': self.__create_punch,
                                'nunchaku_punk': self.__create_nunchaku_punk}
+
+    def load_entity_from_JSON(self, json_string, emit_show=True):
+        """
+        Create the entity described by a JSON string
+        This method does not check or correct anything, instead assuming that
+        the JSON file contains all necessary data. Emits 'ecs_create', 'ecs_add'
+        and, if `emit_show` is set to True, 'ecs_show'
+        :param json_string:
+        :param emit_show:
+        :return:
+        """
+        entity = deserialize_entity(json_string, self.dispatcher)
+        self.dispatcher.add_event(BearEvent('ecs_create', entity))
+        if emit_show:
+            self.dispatcher.add_event(BearEvent('ecs_add', (entity.id,
+                                                            entity.position.x,
+                                                            entity.position.y)))
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -81,10 +98,10 @@ class MapObjectFactory:
         # TODO: separate widgets/entities for equipped items
         # This one obviously requires having an equipment system in place
         cop_entity = Entity(id=entity_id)
-        widget = SwitchingWidget({'r_1': self.atlas.get_element('cop_r_1'),
-                                  'r_2': self.atlas.get_element('cop_r_2'),
-                                  'l_1': self.atlas.get_element('cop_l_1'),
-                                  'l_2': self.atlas.get_element('cop_l_2')},
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
+                                              'r_2': self.atlas.get_element('cop_r_2'),
+                                              'l_1': self.atlas.get_element('cop_l_1'),
+                                              'l_2': self.atlas.get_element('cop_l_2')},
                                  initial_image='r_1')
         widget_component = SwitchWidgetComponent(self.dispatcher, widget,
                                                  owner=cop_entity)
@@ -107,10 +124,10 @@ class MapObjectFactory:
     
     def __create_nunchaku_punk(self, entity_id):
         nunchaku = Entity(id=entity_id)
-        widget = SwitchingWidget({'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
-                                  'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
-                                  'l_1': self.atlas.get_element('nunchaku_punk_l_1'),
-                                  'l_2': self.atlas.get_element('nunchaku_punk_l_2'),
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
+                                              'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
+                                              'l_1': self.atlas.get_element('nunchaku_punk_l_1'),
+                                              'l_2': self.atlas.get_element('nunchaku_punk_l_2'),
                                   },
                                  initial_image='l_1')
         nunchaku.add_component(SwitchWidgetComponent(self.dispatcher, widget))
@@ -228,4 +245,3 @@ class MapObjectFactory:
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
-

@@ -48,7 +48,7 @@ class WalkerComponent(PositionComponent):
             self.moved_this_tick = False
             
     def __repr__(self):
-        d = loads(repr(super()))
+        d = loads(super().__repr__())
         {}.update({'direction': self.direction,
                    'initial_phase': self.phase})
         return dumps(d)
@@ -118,7 +118,7 @@ class ProjectileCollisionComponent(CollisionComponent):
         self.owner.destructor.destroy()
         
     def __repr__(self):
-        d = loads(repr(super()))
+        d = loads(super().__repr__())
         d['damage'] = self.damage
         return dumps(d)
 
@@ -234,7 +234,7 @@ class VisualDamageHealthComponent(HealthComponent):
                 self.owner.widget.switch_to_image(self.widgets_dict[x])
                 
     def __repr__(self):
-        d = loads(repr(super()))
+        d = loads(super().__repr__())
         d['widgets_dict'] = self.widgets_dict
         return dumps(d)
     
