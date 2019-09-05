@@ -17,7 +17,7 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that can change x;y on keypress
     """
     
-    def __init__(self, direction='r', initial_phase='1', *args, **kwargs):
+    def __init__(self, *args, direction='r', initial_phase='1', **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
         self.last_move = None
@@ -80,30 +80,14 @@ class CollisionComponent(Component):
 class WalkerCollisionComponent(CollisionComponent):
     """
     A collision component that, upon colliding into something impassable,
-    moves the entity to where it came from.
+    moves the entity to where it came from. Expects both entities involved to
+    have a PassabilityComponent
     """
-    # TODO: serialize WalkerCollisionComponent
-    # The tricky part is that it requires a layout which is not serializable.
-    # It requires some architectural decision and all I can think of right now
-    # is to bloat deserialize_component with special exceptions for every kind
-    # of component. This is unacceptable because there should be some way of
-    # providing the deserializer necessary pointers without forcing the user to
-    # hack library sources.
-    #
-    # Probably a ComponentDeserializer class? Such that the user could extend it
-    # with whatever logic his components require? It should accept pretty much
-    # everything it can (terminal, layout, dispatcher, atlas, entity factory,
-    # maybe something else) on creation.
-    def __init__(self, *args, layout=None, **kwargs):
-        if not layout or not isinstance(layout, (ECSLayout, ScrollableECSLayout)):
-            raise BearECSException('WalkerCollisionComponent needs a valid layout to work')
-        super().__init__(*args, **kwargs)
-        self.layout = layout
-        
+
     def collided_into(self, entity):
         if entity is not None:
             other = EntityTracker().entities[entity]
-            if 'passability' in self.owner.__dict__ and  'passability' in other.__dict__:
+            if 'passability' in self.owner.__dict__ and 'passability' in other.__dict__:
                 if rectangles_collide((self.owner.position.x + self.owner.passability.shadow_pos[0],
                                        self.owner.position.y + self.owner.passability.shadow_pos[1]),
                                       self.owner.passability.shadow_size,
@@ -137,6 +121,7 @@ class ProjectileCollisionComponent(CollisionComponent):
         d = loads(repr(super()))
         d['damage'] = self.damage
         return dumps(d)
+
 
 class PassingComponent(Component):
     """
@@ -257,7 +242,7 @@ class VisualDamageHealthComponent(HealthComponent):
         #
         # Also, this part could support storing widgets by ID
         d = loads(repr(super()))
-        d.['widgets_dict'] = {x: repr(x) for x in self.widgets_dict}
+        d['widgets_dict'] = {x: repr(x) for x in self.widgets_dict}
         return dumps(d)
     
     

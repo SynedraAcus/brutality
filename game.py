@@ -6,7 +6,7 @@ from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher
 from bear_hug.resources import Atlas, XpLoader
-from bear_hug.sound import SoundListener
+#from bear_hug.sound import SoundListener
 from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
