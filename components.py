@@ -113,9 +113,12 @@ class ProjectileCollisionComponent(CollisionComponent):
         self.damage = damage
         
     def collided_into(self, entity):
-        self.dispatcher.add_event(BearEvent(event_type='brut_damage',
-                                            event_value=(entity, self.damage)))
-        self.owner.destructor.destroy()
+        if not entity:
+            self.owner.destructor.destroy()
+        elif hasattr(EntityTracker().entities[entity], 'collision'):
+            self.dispatcher.add_event(BearEvent(event_type='brut_damage',
+                                                event_value=(entity, self.damage)))
+            self.owner.destructor.destroy()
         
     def __repr__(self):
         d = loads(super().__repr__())
