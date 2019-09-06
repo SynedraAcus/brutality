@@ -35,6 +35,34 @@
     "ysize": 17
   },
   {
+    "name": "cop_shooting_r",
+    "x": 64,
+    "y": 1,
+    "xsize": 9,
+    "ysize": 2
+  },
+  {
+    "name": "cop_shooting_l",
+    "x": 64,
+    "y": 4,
+    "xsize": 9,
+    "ysize": 2
+  },
+  {
+    "name": "cop_fist_r",
+    "x": 64,
+    "y": 7,
+    "xsize": 5,
+    "ysize": 2
+  },
+  {
+    "name":"cop_fist_l",
+    "x": 64,
+    "y": 10,
+    "xsize": 5,
+    "ysize": 2
+  },
+  {
     "name": "nunchaku_punk_l_1",
     "x": 23,
     "y": 19,

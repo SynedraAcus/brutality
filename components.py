@@ -331,11 +331,15 @@ class InputComponent(Component):
                                              speed=(70, 0))
                     self.owner.spawner.spawn('muzzle_flash', (13, 3),
                                              direction='r')
+                    self.owner.spawner.spawn('cop_pistol_hand', (0, 5),
+                                             direction='r')
                 else:
                     self.owner.spawner.spawn('bullet', (-1, 4),
                                              direction='l',
                                              speed=(-70, 0))
                     self.owner.spawner.spawn('muzzle_flash', (-2, 3),
+                                             direction='l')
+                    self.owner.spawner.spawn('cop_pistol_hand', (-8, 4),
                                              direction='l')
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='shot'))
@@ -343,13 +347,17 @@ class InputComponent(Component):
                                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
             elif event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('punch', (13, 4),
+                    self.owner.spawner.spawn('punch', (3, 3),
                                              direction='r',
                                              speed=(50, 0))
+                    self.owner.spawner.spawn('cop_fist_hand', (0, 5),
+                                             direction='r')
                 else:
-                    self.owner.spawner.spawn('punch', (-1, 4),
+                    self.owner.spawner.spawn('punch', (-1, 3),
                                              direction='l',
                                              speed=(-50, 0))
+                    self.owner.spawner.spawn('cop_fist_hand', (-4, 4),
+                                             direction='l')
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)
                 moved = True

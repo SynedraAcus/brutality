@@ -84,7 +84,6 @@ class MapObjectFactory:
 
     def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
-        # TODO: Un-hardcode BG wall and floor sizes
         widget = Widget(*self.patterns.generate_tiled('brick_tile', size))
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))
@@ -118,7 +117,7 @@ class MapObjectFactory:
         return barrel_entity
     
     def _create_cop(self, entity_id):
-        # TODO: cop attack animations
+        # TODO: redraw cop attack animations
         # TODO: separate widgets/entities for equipped items
         # This one obviously requires having an equipment system in place
         cop_entity = Entity(id=entity_id)
@@ -141,6 +140,7 @@ class MapObjectFactory:
         return cop_entity
     
     def _create_nunchaku_punk(self, entity_id):
+        # TODO: punk attack animations
         nunchaku = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
                                               'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
@@ -248,6 +248,7 @@ class MapObjectFactory:
         target_entity.add_component(CollisionComponent(self.dispatcher))
         return target_entity
 
+    # TODO: some common method for spawning single-use attack animations.
     def _create_muzzle_flash(self, entity_id, direction='r'):
         entity = Entity(entity_id)
         if direction == 'r':
@@ -259,6 +260,30 @@ class MapObjectFactory:
         entity.add_component(DecayComponent(self.dispatcher,
                                             destroy_condition='timeout',
                                             lifetime=0.1))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
+
+    def _create_cop_pistol_hand(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'cop_shooting_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.25))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
+
+    def _create_cop_fist_hand(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'cop_fist_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.25))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
