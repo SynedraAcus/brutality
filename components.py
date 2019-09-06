@@ -224,7 +224,10 @@ class VisualDamageHealthComponent(HealthComponent):
         super().__init__(*args, **kwargs)
         self.widgets_dict = OrderedDict()
         for x in sorted(widgets_dict.keys()):
-            self.widgets_dict[x] = widgets_dict[x]
+            # Int conversion useful when loading from JSON, where dict keys get
+            # converted to str due to some weird bug. Does nothing during
+            # normal Component creation
+            self.widgets_dict[int(x)] = widgets_dict[x]
         
     def process_hitpoint_update(self):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):

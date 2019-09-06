@@ -23,6 +23,9 @@ class MapObjectFactory:
         self.atlas = atlas
         self.layout = layout
         self.counts = {}
+        # TODO: call "__create_{}" methods
+        # self.object_methods is really unnecessary if there is some naming
+        # convention for creating methods.
         self.object_methods = {'cop': self.__create_cop,
                                'barrel': self.__create_barrel,
                                'invis': self.__create_invisible_collider,

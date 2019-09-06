@@ -38,10 +38,6 @@ class ScrollListener(Listener):
      are necessary for this Listener to work, but should not be used to interact
      with it.
     """
-    #TODO: remove distinction between brut_focus and brut_temporary_focus
-    # Brut_focus will get stuck if the focused entity is destroyed; it is
-    # probably better to have only brut_temporary_focus, but extend it with
-    # potentially infinite chain of old targets a-la call stack
     def __init__(self, *args, layout=None, distance=10, **kwargs):
         super().__init__(*args, **kwargs)
         self._entity_id = None
@@ -152,7 +148,8 @@ class SavingListener(Listener):
     upon getting this signal, attempts to serialize all entities available
     from EntityTracker()
     """
-
+    # TODO: save game state besides entities
+    # Stuff like screen scroll position, settings and so on.
     def on_event(self, event):
         if event.event_type == 'key_down' and event.event_value == 'TK_F5':
             with open('save.json', mode='w') as savefile:
