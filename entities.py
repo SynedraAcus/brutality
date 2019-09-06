@@ -16,8 +16,15 @@ from widgets import PatternGenerator
 class MapObjectFactory:
     """
     A factory that produces all objects.
-    Only `factory.create_entity()` method is available to the user,
-    the rest are internal.
+    Only `factory.create_entity()` and `load_entity_from_JSON()` are exposed;
+    other methods are internal.
+
+    This class (or its subclass) is expected to have a method for each kind of
+    entity it creates. This method should have the name `factory._create_{item}`
+    and will be called with item ID as a first argument. Kwargs from the
+    `create_entity` call, if any, will be passed to the creator method. Since
+    creator methods typically rely on `self.dispatcher` and other factory
+    attributes, they shouldn't be static or classmethods.
     """
     def __init__(self, atlas, dispatcher, layout):
         self.dispatcher = dispatcher
@@ -25,19 +32,6 @@ class MapObjectFactory:
         self.layout = layout
         self.patterns = PatternGenerator(self.atlas)
         self.counts = {}
-        # TODO: call "__create_{}" methods
-        # self.object_methods is really unnecessary if there is some naming
-        # convention for creating methods.
-        self.object_methods = {'cop': self.__create_cop,
-                               'barrel': self.__create_barrel,
-                               'invis': self.__create_invisible_collider,
-                               'bullet': self.__create_bullet,
-                               'target': self.__create_target,
-                               'muzzle_flash': self._create_muzzle_flash,
-                               'punch': self.__create_punch,
-                               'nunchaku_punk': self.__create_nunchaku_punk,
-                               'wall': self.__create_wall,
-                               'floor': self.__create_floor}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -77,10 +71,10 @@ class MapObjectFactory:
                 self.counts[entity_type] += 1
             else:
                 self.counts[entity_type] = 1
-            entity = self.object_methods[entity_type](
-                        entity_id=f'{entity_type}_{self.counts[entity_type]}',
-                        **kwargs)
-        except KeyError:
+            entity = getattr(self, f'_create_{entity_type}')(
+                entity_id=f'{entity_type}_{self.counts[entity_type]}',
+                **kwargs)
+        except AttributeError:
             raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
         entity.position.move(*pos, emit_event=False)
@@ -88,7 +82,7 @@ class MapObjectFactory:
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
 
-    def __create_wall(self, entity_id, size=(50, 30)):
+    def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
         # TODO: Un-hardcode BG wall and floor sizes
         widget = Widget(*self.patterns.generate_tiled('brick_tile', size))
@@ -97,7 +91,7 @@ class MapObjectFactory:
         wall.add_component(PassingComponent(self.dispatcher))
         return wall
 
-    def __create_floor(self, entity_id, size=(150, 30)):
+    def _create_floor(self, entity_id, size=(150, 30)):
         floor = Entity(id=entity_id)
         widget = Widget(*self.patterns.tile_randomly('floor_tile_1',
                                                      'floor_tile_2',
@@ -107,7 +101,7 @@ class MapObjectFactory:
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         return floor
 
-    def __create_barrel(self, entity_id):
+    def _create_barrel(self, entity_id):
         barrel_entity = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element(
                                                       'barrel_1'),
@@ -123,7 +117,7 @@ class MapObjectFactory:
         barrel_entity.add_component(CollisionComponent(self.dispatcher))
         return barrel_entity
     
-    def __create_cop(self, entity_id):
+    def _create_cop(self, entity_id):
         # TODO: cop attack animations
         # TODO: separate widgets/entities for equipped items
         # This one obviously requires having an equipment system in place
@@ -146,7 +140,7 @@ class MapObjectFactory:
                                             event_value=entity_id))
         return cop_entity
     
-    def __create_nunchaku_punk(self, entity_id):
+    def _create_nunchaku_punk(self, entity_id):
         nunchaku = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
                                               'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
@@ -169,7 +163,7 @@ class MapObjectFactory:
                                                   faction='punks'))
         return nunchaku
     
-    def __create_invisible_collider(self, entity_id, size=(0, 0)):
+    def _create_invis(self, entity_id, size=(0, 0)):
         """
         Create an impassable background object
         :param x: xpos
@@ -187,7 +181,7 @@ class MapObjectFactory:
         bg_entity.add_component(PassingComponent(self.dispatcher))
         return bg_entity
 
-    def __create_bullet(self, entity_id, speed=(0, 0), direction='r'):
+    def _create_bullet(self, entity_id, speed=(0, 0), direction='r'):
         """
         Create a simple projectile
         :param speed:
@@ -206,7 +200,7 @@ class MapObjectFactory:
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
     
-    def __create_punch(self, entity_id, speed=(0, 0), direction='r'):
+    def _create_punch(self, entity_id, speed=(0, 0), direction='r'):
         """
         Send a punch
         :param entity_id:
@@ -228,7 +222,7 @@ class MapObjectFactory:
                                            lifetime=0.2))
         return punch
 
-    def __create_target(self, entity_id):
+    def _create_target(self, entity_id):
         """
         A target
         :return:
