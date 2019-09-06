@@ -10,6 +10,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     DestructorHealthComponent, FactionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent
+from widgets import PatternGenerator
 
 
 class MapObjectFactory:
@@ -22,6 +23,7 @@ class MapObjectFactory:
         self.dispatcher = dispatcher
         self.atlas = atlas
         self.layout = layout
+        self.patterns = PatternGenerator(self.atlas)
         self.counts = {}
         # TODO: call "__create_{}" methods
         # self.object_methods is really unnecessary if there is some naming
@@ -33,7 +35,9 @@ class MapObjectFactory:
                                'target': self.__create_target,
                                'muzzle_flash': self._create_muzzle_flash,
                                'punch': self.__create_punch,
-                               'nunchaku_punk': self.__create_nunchaku_punk}
+                               'nunchaku_punk': self.__create_nunchaku_punk,
+                               'wall': self.__create_wall,
+                               'floor': self.__create_floor}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -83,6 +87,29 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
+
+    def __create_wall(self, entity_id, size=(50, 30)):
+        wall = Entity(id=entity_id)
+        # TODO: Un-hardcode BG wall and floor sizes
+        widget = Widget(*self.patterns.generate_tiled('brick_tile', size))
+        widget_component = WidgetComponent(self.dispatcher, widget)
+        position = PositionComponent(self.dispatcher)
+        passability = PassingComponent(self.dispatcher)
+        wall.add_component(widget_component)
+        wall.add_component(position)
+        wall.add_component(passability)
+        return wall
+
+    def __create_floor(self, entity_id, size=(150, 30)):
+        floor = Entity(id=entity_id)
+        widget = Widget(*self.patterns.tile_randomly('floor_tile_1',
+                                                     'floor_tile_2',
+                                                     'floor_tile_3',
+                                                      size=size))
+        floor.add_component(PositionComponent(self.dispatcher))
+        floor.add_component(WidgetComponent(self.dispatcher, widget))
+        return floor
+
 
     def __create_barrel(self, entity_id):
         barrel_entity = Entity(id=entity_id)

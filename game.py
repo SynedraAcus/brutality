@@ -35,15 +35,7 @@ atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 # Init game screen
 chars = [[' ' for _ in range(150)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
-patterns = PatternGenerator(atlas)
-# TODO: use proper entities for wall BG
-upper_bg = patterns.generate_tiled('brick_tile', (150, 30))
-lower_bg = patterns.tile_randomly('floor_tile_1',
-                                  'floor_tile_2',
-                                  'floor_tile_3',
-                                  size=(150, 30))
-bg = patterns.stack_boxes(upper_bg, lower_bg, order='vertical')
-layout = ScrollableECSLayout(*bg, view_pos=(0, 0), view_size=(85, 60))
+layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(85, 60))
 dispatcher.register_listener(layout, 'all')
 factory = MapObjectFactory(atlas, dispatcher, layout)
 
@@ -95,12 +87,14 @@ if args.s:
 
 else:
     # Created before the loop starts, will be added on the first tick
+    factory.create_entity('wall', (0, 0), size=(150, 30))
+    factory.create_entity('floor', (0, 30), size=(150, 30))
     factory.create_entity('cop', (10, 30))
     factory.create_entity('barrel', (75, 25))
     factory.create_entity('barrel', (61, 50))
     #factory.create_entity('nunchaku_punk', (65, 30))
     factory.create_entity('target', (65, 30))
-    factory.create_entity('invis', (0, 0), size=(150, 15))
+    # factory.create_entity('invis', (0, 0), size=(150, 15))
     factory.create_entity('invis', (0, 15), size=(2, 45))
     factory.create_entity('invis', (148, 15), size=(2, 45))
     factory.create_entity('invis', (0, 58), size=(100, 2))
