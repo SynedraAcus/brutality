@@ -5,19 +5,17 @@ import sys
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
-from bear_hug.ecs import deserialize_entity
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, XpLoader
-#from bear_hug.sound import SoundListener
 from bear_hug.widgets import ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 from listeners import ScrollListener, EntityTracker, SavingListener
-from widgets import PatternGenerator
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
+parser.add_argument('--disable_sound', action='store_true')
 args = parser.parse_args()
 
 ################################################################################
@@ -46,7 +44,6 @@ dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus')
 
 
-
 ################################################################################
 # Starting various listeners
 ################################################################################
@@ -59,16 +56,17 @@ dispatcher.register_listener(ScrollListener(layout=layout),
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['ecs_add', 'ecs_collision', 'brut_damage'])
+dispatcher.register_listener(logger, ['play_sound', 'brut_damage'])
 # Save test
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
 # TODO: find some free sounds that actually fit the game
-# TODO: re-enable audio
-# Sound temporarily disabled to develop without simpleaudio
-# jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
-#                                 'shot': 'sounds/dsshotgn.wav'})
-# dispatcher.register_listener(jukebox, 'play_sound')
+if not args.disable_sound:
+    from bear_hug.sound import SoundListener
+    jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
+                                    'shot': 'sounds/dsshotgn.wav'})
+    dispatcher.register_listener(jukebox, 'play_sound')
+
 
 ################################################################################
 # Starting the game terminal and adding main ECSLayout
