@@ -49,18 +49,32 @@
     "ysize": 2
   },
   {
-    "name": "cop_fist_r",
+    "name": "cop_fist_back_r",
     "x": 64,
     "y": 7,
     "xsize": 5,
     "ysize": 2
   },
   {
-    "name":"cop_fist_l",
+    "name":"cop_fist_back_l",
     "x": 64,
     "y": 10,
     "xsize": 5,
     "ysize": 2
+  },
+  {
+    "name":  "cop_fist_forward_r",
+    "x": 70,
+    "y": 7,
+    "xsize": 8,
+    "ysize": 5
+  },
+  {
+    "name": "cop_fist_forward_l",
+    "x": 69,
+    "y": 13,
+    "xsize": 8,
+    "ysize": 5
   },
   {
     "name": "nunchaku_punk_l_1",

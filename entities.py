@@ -276,9 +276,21 @@ class MapObjectFactory:
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
 
-    def _create_cop_fist_hand(self, entity_id, direction='r'):
+    def _create_cop_fist_back(self, entity_id, direction='r'):
         entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_fist_{direction}')
+        chars, colors = self.atlas.get_element(f'cop_fist_back_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.25))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
+
+    def _create_cop_fist_forward(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'cop_fist_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
         entity.add_component(DecayComponent(self.dispatcher,

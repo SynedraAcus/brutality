@@ -325,38 +325,65 @@ class InputComponent(Component):
         if event.event_type == 'key_down':
             moved = False
             if event.event_value == 'TK_Q':
+                # left-handed punch
                 if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('bullet', (13, 4),
+                    self.owner.spawner.spawn('punch', (3, 3),
                                              direction='r',
-                                             speed=(70, 0))
-                    self.owner.spawner.spawn('muzzle_flash', (13, 3),
+                                             speed=(50, 0))
+                    self.owner.spawner.spawn('cop_fist_back', (3, 4),
                                              direction='r')
-                    self.owner.spawner.spawn('cop_pistol_hand', (0, 5),
+                    # TODO: move shooting code where it belongs
+                    # self.owner.spawner.spawn('bullet', (13, 4),
+                    #                          direction='r',
+                    #                          speed=(70, 0))
+                    # self.owner.spawner.spawn('muzzle_flash', (13, 3),
+                    #                          direction='r')
+                    # self.owner.spawner.spawn('cop_pistol_hand', (0, 5),
+                    #                          direction='r')
+                else:
+                    self.owner.spawner.spawn('punch', (-3, 3),
+                                             direction='l',
+                                             speed=(-50, 0))
+                    self.owner.spawner.spawn('cop_fist_forward', (-3, 5),
+                                             direction='l')
+                    # More old shooting code
+                    # self.owner.spawner.spawn('bullet', (-1, 4),
+                    #                          direction='l',
+                    #                          speed=(-70, 0))
+                    # self.owner.spawner.spawn('muzzle_flash', (-2, 3),
+                    #                          direction='l')
+                    # self.owner.spawner.spawn('cop_pistol_hand', (-8, 4),
+                    #                          direction='l')
+                # r.append(BearEvent(event_type='play_sound',
+                #                    event_value='shot'))
+                # r.append(BearEvent(event_type='brut_temporary_focus',
+                #                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
+            elif event.event_value == 'TK_E':
+                # Right-handed attack
+                if self.owner.position.direction == 'r':
+                    self.owner.spawner.spawn('punch', (3, 3),
+                                             direction='r',
+                                             speed=(50, 0))
+                    self.owner.spawner.spawn('cop_fist_forward', (0, 5),
                                              direction='r')
                 else:
-                    self.owner.spawner.spawn('bullet', (-1, 4),
+                    self.owner.spawner.spawn('punch', (-3, 3),
                                              direction='l',
-                                             speed=(-70, 0))
-                    self.owner.spawner.spawn('muzzle_flash', (-2, 3),
+                                             speed=(-50, 0))
+                    self.owner.spawner.spawn('cop_fist_back', (-3, 4),
                                              direction='l')
-                    self.owner.spawner.spawn('cop_pistol_hand', (-8, 4),
-                                             direction='l')
-                r.append(BearEvent(event_type='play_sound',
-                                   event_value='shot'))
-                r.append(BearEvent(event_type='brut_temporary_focus',
-                                   event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
             elif event.event_value == 'TK_SPACE':
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('punch', (3, 3),
                                              direction='r',
                                              speed=(50, 0))
-                    self.owner.spawner.spawn('cop_fist_hand', (0, 5),
+                    self.owner.spawner.spawn('cop_fist_forward', (0, 5),
                                              direction='r')
                 else:
                     self.owner.spawner.spawn('punch', (-1, 3),
                                              direction='l',
                                              speed=(-50, 0))
-                    self.owner.spawner.spawn('cop_fist_hand', (-4, 4),
+                    self.owner.spawner.spawn('cop_fist_forward', (-3, 5),
                                              direction='l')
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)
