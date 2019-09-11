@@ -9,7 +9,8 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
     DestructorHealthComponent, FactionComponent, CollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
-    DecayComponent, MeleeControllerComponent, HidingComponent
+    DecayComponent, MeleeControllerComponent, HidingComponent,\
+    HandInterfaceComponent
 from widgets import PatternGenerator
 
 
@@ -117,7 +118,6 @@ class MapObjectFactory:
         return barrel_entity
     
     def _create_cop(self, entity_id):
-        # TODO: redraw cop attack animations
         # TODO: separate widgets/entities for equipped items
         # This one obviously requires having an equipment system in place
         cop_entity = Entity(id=entity_id)
@@ -135,6 +135,31 @@ class MapObjectFactory:
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
                                                   faction='police'))
+        # Creating hand entities
+        f_l = self._create_cop_fist_forward(f'{entity_id}_hand_fl',
+                                            direction='l')
+        f_r = self._create_cop_fist_forward(f'{entity_id}_hand_fr',
+                                            direction='r')
+        b_l = self._create_cop_fist_back(f'{entity_id}_hand_bl',
+                                         direction='l')
+        b_r = self._create_cop_fist_back(f'{entity_id}_hand_br',
+                                         direction='r')
+        self.dispatcher.add_event(BearEvent('ecs_create', f_l))
+        self.dispatcher.add_event(BearEvent('ecs_create', f_r))
+        self.dispatcher.add_event(BearEvent('ecs_create', b_l))
+        self.dispatcher.add_event(BearEvent('ecs_create', b_r))
+        cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
+                                                        hand_entities={
+                                                            'forward_l': f_l.id,
+                                                            'forward_r': f_r.id,
+                                                            'back_l': b_l.id,
+                                                            'back_r': b_r.id},
+                                                        hands_offsets={
+                                                            'forward_l': (-3, 5),
+                                                            'forward_r': (0, 5),
+                                                            'back_l': (-3, 4),
+                                                            'back_r': (3, 4)
+                                                        }))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
@@ -281,11 +306,12 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'cop_fist_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=0.25))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
         return entity
 
     def _create_cop_fist_forward(self, entity_id, direction='r'):
@@ -293,9 +319,10 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'cop_fist_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=0.25))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
         return entity

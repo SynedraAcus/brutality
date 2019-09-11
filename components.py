@@ -326,12 +326,11 @@ class InputComponent(Component):
             moved = False
             if event.event_value == 'TK_Q':
                 # left-handed punch
+                self.owner.hands.use_left_hand()
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('punch', (3, 3),
                                              direction='r',
                                              speed=(50, 0))
-                    self.owner.spawner.spawn('cop_fist_back', (3, 4),
-                                             direction='r')
                     # TODO: move shooting code where it belongs
                     # self.owner.spawner.spawn('bullet', (13, 4),
                     #                          direction='r',
@@ -344,8 +343,6 @@ class InputComponent(Component):
                     self.owner.spawner.spawn('punch', (-3, 3),
                                              direction='l',
                                              speed=(-50, 0))
-                    self.owner.spawner.spawn('cop_fist_forward', (-3, 5),
-                                             direction='l')
                     # More old shooting code
                     # self.owner.spawner.spawn('bullet', (-1, 4),
                     #                          direction='l',
@@ -360,31 +357,20 @@ class InputComponent(Component):
                 #                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
             elif event.event_value == 'TK_E':
                 # Right-handed attack
+                self.owner.hands.use_right_hand()
                 if self.owner.position.direction == 'r':
                     self.owner.spawner.spawn('punch', (3, 3),
                                              direction='r',
                                              speed=(50, 0))
-                    self.owner.spawner.spawn('cop_fist_forward', (0, 5),
-                                             direction='r')
                 else:
                     self.owner.spawner.spawn('punch', (-3, 3),
                                              direction='l',
                                              speed=(-50, 0))
-                    self.owner.spawner.spawn('cop_fist_back', (-3, 4),
-                                             direction='l')
+                    # self.owner.spawner.spawn('cop_fist_back', (-3, 4),
+                    #                          direction='l')
             elif event.event_value == 'TK_SPACE':
-                if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('punch', (3, 3),
-                                             direction='r',
-                                             speed=(50, 0))
-                    self.owner.spawner.spawn('cop_fist_forward', (0, 5),
-                                             direction='r')
-                else:
-                    self.owner.spawner.spawn('punch', (-1, 3),
-                                             direction='l',
-                                             speed=(-50, 0))
-                    self.owner.spawner.spawn('cop_fist_forward', (-3, 5),
-                                             direction='l')
+                # Mostly debug. Eventually will be the rush or jump command
+                pass
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 self.last_move = (2, 0)
                 moved = True
@@ -583,6 +569,60 @@ class HidingComponent(Component):
                       'age': self.age,
                       'is_working': self.is_working})
         
+
+class HandInterfaceComponent(Component):
+    """
+    A Component that allows human characters to use hands.
+
+    Shows the correct hand when buttons are pressed. When created, requires two
+    dicts:
+
+    `hands_dict` should be a dict with the following
+    keys: 'forward_l', 'forward_r', 'back_l', and 'back_r', which should have
+    entity IDs as corresponding values. These should be the Entities with a
+    foreground hand pointed left, foreground hand pointing right, background
+    hand pointed left and a background hand pointed right (left, right, right
+    and left hands of the character respectively). Other keys, if any, are
+    ignored.  All hand entities are expected to have HidingComponent.
+
+    `hands_offsets` should have the positions of these hands relative to the
+    owner's widget, as a tuple of ints.
+
+    Expects owner to have a PositionComponent.
+    """
+    def __init__(self, *args, hand_entities, hands_offsets, **kwargs):
+        super().__init__(*args, name='hands', **kwargs)
+        self.hand_entities = hand_entities
+        self.hand_offsets = hands_offsets
+
+    def use_left_hand(self):
+        # Move the appropriate left hand widget to a position and show it
+        if self.owner.position.direction == 'r':
+            hand = 'back_r'
+        else:
+            hand = 'forward_l'
+        EntityTracker().entities[self.hand_entities[hand]].hiding.show()
+        hand_x = self.owner.position.x + self.hand_offsets[hand][0]
+        hand_y = self.owner.position.y + self.hand_offsets[hand][1]
+        self.dispatcher.add_event(BearEvent(event_type='ecs_move',
+                                            event_value=(self.hand_entities[hand],
+                                                         hand_x, hand_y)))
+        # Have to call the HidingComponent directly because show/hide logic does
+        # not use the event for communication
+
+    def use_right_hand(self):
+        if self.owner.position.direction == 'r':
+            hand = 'forward_r'
+        else:
+            hand = 'back_l'
+        EntityTracker().entities[self.hand_entities[hand]].hiding.show()
+        hand_x = self.owner.position.x + self.hand_offsets[hand][0]
+        hand_y = self.owner.position.y + self.hand_offsets[hand][1]
+        self.dispatcher.add_event(BearEvent(event_type='ecs_move',
+                                            event_value=(
+                                                self.hand_entities[hand],
+                                                hand_x, hand_y)))
+
 
 class ItemBehaviourComponent(Component):
     """
