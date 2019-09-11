@@ -271,6 +271,8 @@ class SpawnerComponent(Component):
     A component responsible for spawning stuff near its owner
     For projectiles and other such things
     """
+    # TODO: overhaul spawner logic
+    #  here and in SpawningItemBehaviourComponent
     def __init__(self, *args, factory=None, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
         self.factory = factory
@@ -574,8 +576,8 @@ class HandInterfaceComponent(Component):
     """
     A Component that allows human characters to use hands.
 
-    Shows the correct hand when buttons are pressed. When created, requires two
-    dicts:
+    Shows the correct hand and calls the corresponding item when buttons are
+    pressed. When created, requires two dicts:
 
     `hands_dict` should be a dict with the following
     keys: 'forward_l', 'forward_r', 'back_l', and 'back_r', which should have
@@ -590,10 +592,16 @@ class HandInterfaceComponent(Component):
 
     Expects owner to have a PositionComponent.
     """
-    def __init__(self, *args, hand_entities, hands_offsets, **kwargs):
+    #TODO: HandInterfaceComponent repr
+    def __init__(self, *args, hand_entities, hands_offsets,
+                 left_item=None,
+                 right_item=None,
+                 **kwargs):
         super().__init__(*args, name='hands', **kwargs)
         self.hand_entities = hand_entities
         self.hand_offsets = hands_offsets
+        self.left_item = left_item
+        self.right_item = right_item
 
     def use_left_hand(self):
         # Move the appropriate left hand widget to a position and show it
@@ -601,14 +609,22 @@ class HandInterfaceComponent(Component):
             hand = 'back_r'
         else:
             hand = 'forward_l'
+        # Have to call the HidingComponent directly because show/hide logic does
+        # not use the event for communication
         EntityTracker().entities[self.hand_entities[hand]].hiding.show()
         hand_x = self.owner.position.x + self.hand_offsets[hand][0]
         hand_y = self.owner.position.y + self.hand_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
                                             event_value=(self.hand_entities[hand],
                                                          hand_x, hand_y)))
-        # Have to call the HidingComponent directly because show/hide logic does
-        # not use the event for communication
+        # TODO: copy to right item
+        # TODO: offsets of item relative to hand
+        if self.left_item:
+            EntityTracker().entities[self.left_item].hiding.show()
+            EntityTracker().entities[self.left_item].position.move(hand_x,
+                                                                   hand_y)
+            self.dispatcher.add_event(BearEvent('brut_use_item', self.left_item))
+
 
     def use_right_hand(self):
         if self.owner.position.direction == 'r':
@@ -629,22 +645,42 @@ class ItemBehaviourComponent(Component):
     A component that makes its Entity an owned item.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, owning_entity=None, **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
+        # Actual entity (ie character) who uses the item. Not to be mistaken
+        # for self.owner, which is item
+        self.owning_entity = owning_entity
+        self.dispatcher.register_listener(self, 'brut_use_item')
+
+    def use_item(self):
+        raise NotImplementedError('ItemBehaviourComponent.use_item should be overridden')
+
+    def on_event(self, event):
+        if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:
+            self.use_item()
 
 
-class InventoryComponent(Component):
+class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     """
-    A component that allows its entity to own and use items.
+    An ItemBehaviour that uses the Spawner.
 
-    Assumes that owner has a PositionComponent
+    Spawned entity inherits direction from self.owning_entity and therefore
+    this class expects it to have PositionComponent.
+
+    Expects owner to have PositionComponent and SpawnerComponent. Expects
+    owner's widget to be SwitchWidgetComponent
     """
+    def __init__(self, *args, spawned_item='bullet',
+                 relative_pos={'r': (0, 0),
+                               'l': (0, 0)},
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.spawned_item = spawned_item
+        self.relative_pos = relative_pos
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, name='inventory', **kwargs)
-        self.items = []
-
-    def use_item(self, item_id):
-        self.dispatcher.add_event(BearEvent(event_type='brut_use_item',
-                                            event_value=(item_id,
-                                                         self.owner)))
+    def use_item(self):
+        direction = self.owning_entity.position.direction
+        self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
+                                 # TODO: store and pass spawn speed properly
+                                 speed = (50, 0),
+                                 direction=direction)

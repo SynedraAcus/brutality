@@ -38,11 +38,11 @@ dispatcher.register_listener(layout, 'all')
 factory = MapObjectFactory(atlas, dispatcher, layout)
 
 # Game-specific event types
-dispatcher.register_event_type('brut_damage')
-dispatcher.register_event_type('brut_heal')
+dispatcher.register_event_type('brut_damage') # value (int)
+dispatcher.register_event_type('brut_heal') # value (int)
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
-dispatcher.register_event_type('brut_temporary_focus')
-dispatcher.register_event_type('brut_item_use')
+dispatcher.register_event_type('brut_temporary_focus') # Entity ID
+dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 
 
 ################################################################################

@@ -10,7 +10,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     DestructorHealthComponent, FactionComponent, CollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
-    HandInterfaceComponent
+    HandInterfaceComponent, SpawningItemBehaviourComponent
 from widgets import PatternGenerator
 
 
@@ -148,6 +148,9 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
+        pistol = self._create_pistol(f'{entity_id}_pistol',
+                                     owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', pistol))
         cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
                                                         hand_entities={
                                                             'forward_l': f_l.id,
@@ -158,8 +161,8 @@ class MapObjectFactory:
                                                             'forward_l': (-3, 5),
                                                             'forward_r': (0, 5),
                                                             'back_l': (-3, 4),
-                                                            'back_r': (3, 4)
-                                                        }))
+                                                            'back_r': (3, 4)},
+                                                        left_item=pistol.id))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
@@ -325,4 +328,25 @@ class MapObjectFactory:
                                              hide_condition='timeout',
                                              lifetime=0.25,
                                              is_working=False))
+        return entity
+
+    def _create_pistol(self, entity_id, owning_entity=None):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(images_dict={'l': self.atlas.get_element('pistol_l'),
+                                              'r': self.atlas.get_element('pistol_r')},
+                                 initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                   widget))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_item='bullet',
+                                                            relative_pos={'r': (0, 0),
+                                                                          'l': (-2, 0)}))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.4,
+                                             is_working=False))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
