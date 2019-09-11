@@ -525,4 +525,77 @@ class DecayComponent(Component):
         return dumps({'class': self.__class__.__name__,
                       'destroy_condition': self.destroy_condition,
                       'lifetime': self.lifetime})
+
+
+class HidingComponent(Component):
+    """
+    Hides the widget for a given entity on the condition, but does not
+    destroy the entity itself.
+
+    Expects owner to have PositionComponent and WidgetComponent
+    """
+    def __init__(self, *args, hide_condition='keypress', lifetime=1.0,
+                 **kwargs):
+        super().__init__(*args, name='hiding', **kwargs)
+        if hide_condition == 'keypress':
+            self.dispatcher.register_listener(self, 'key_down')
+        elif hide_condition == 'timeout':
+            self.dispatcher.register_listener(self, 'tick')
+            self.lifetime = lifetime
+            self.age = 0
+        else:
+            raise ValueError('hide_condition should be either keypress or timeout')
+        # This is set to True whenever the owner's widget is actually shown, to
+        # avoid triggering when the Entity is already hidden
+        self.is_working = True
+        self.hide_condition = hide_condition
+
+    def hide(self):
+        self.is_working = False
+        self.dispatcher.add_event(BearEvent(event_type='ecs_remove',
+                                            event_value=self.owner.id))
+
+    def show(self):
+        self.is_working = True
+        self.dispatcher.add_event(BearEvent(event_type='ecs_add',
+                                            event_value=(self.owner.id,
+                                                         self.owner.position.x,
+                                                         self.owner.position.y)))
+        if self.hide_condition == 'timeout':
+            self.age = 0
+
+    def on_event(self, event):
+        if not self.is_working:
+            return
+        if self.hide_condition == 'keypress' and event.event_type == 'key_down':
+            self.hide()
+        elif self.hide_condition == 'timeout' and event.event_type == 'tick':
+            self.age += event.event_value
+            if self.age >= self.lifetime:
+                self.hide()
         
+
+class ItemBehaviourComponent(Component):
+    """
+    A component that makes its Entity an owned item.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='item_behaviour', **kwargs)
+
+
+class InventoryComponent(Component):
+    """
+    A component that allows its entity to own and use items.
+
+    Assumes that owner has a PositionComponent
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='inventory', **kwargs)
+        self.items = []
+
+    def use_item(self, item_id):
+        self.dispatcher.add_event(BearEvent(event_type='brut_use_item',
+                                            event_value=(item_id,
+                                                         self.owner)))

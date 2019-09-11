@@ -9,7 +9,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
     DestructorHealthComponent, FactionComponent, CollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
-    DecayComponent, MeleeControllerComponent
+    DecayComponent, MeleeControllerComponent, HidingComponent
 from widgets import PatternGenerator
 
 
