@@ -500,7 +500,7 @@ class DecayComponent(Component):
     latter is set, you can supply the lifetime (defaults to 1.0 sec)
     """
     
-    def __init__(self, *args, destroy_condition='keypress', lifetime=1.0,
+    def __init__(self, *args, destroy_condition='keypress', lifetime=1.0, age=0,
                  **kwargs):
         super().__init__(*args, name='decay', **kwargs)
         if destroy_condition == 'keypress':
@@ -508,7 +508,7 @@ class DecayComponent(Component):
         elif destroy_condition == 'timeout':
             self.dispatcher.register_listener(self, 'tick')
             self.lifetime = lifetime
-            self.age = 0
+            self.age = age
         else:
             raise ValueError(f'destroy_condition should be either keypress or timeout')
         self.destroy_condition = destroy_condition
@@ -524,7 +524,8 @@ class DecayComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'destroy_condition': self.destroy_condition,
-                      'lifetime': self.lifetime})
+                      'lifetime': self.lifetime,
+                      'age': self.age})
 
 
 class HidingComponent(Component):
@@ -534,7 +535,8 @@ class HidingComponent(Component):
 
     Expects owner to have PositionComponent and WidgetComponent
     """
-    def __init__(self, *args, hide_condition='keypress', lifetime=1.0,
+    def __init__(self, *args, hide_condition='keypress',
+                 lifetime=1.0, age=0, is_working=True,
                  **kwargs):
         super().__init__(*args, name='hiding', **kwargs)
         if hide_condition == 'keypress':
@@ -542,12 +544,12 @@ class HidingComponent(Component):
         elif hide_condition == 'timeout':
             self.dispatcher.register_listener(self, 'tick')
             self.lifetime = lifetime
-            self.age = 0
+            self.age = age
         else:
             raise ValueError('hide_condition should be either keypress or timeout')
         # This is set to True whenever the owner's widget is actually shown, to
         # avoid triggering when the Entity is already hidden
-        self.is_working = True
+        self.is_working = is_working
         self.hide_condition = hide_condition
 
     def hide(self):
@@ -573,6 +575,13 @@ class HidingComponent(Component):
             self.age += event.event_value
             if self.age >= self.lifetime:
                 self.hide()
+
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'hide_condition': self.hide_condition,
+                      'lifetime': self.lifetime,
+                      'age': self.age,
+                      'is_working': self.is_working})
         
 
 class ItemBehaviourComponent(Component):
