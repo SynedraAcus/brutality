@@ -329,47 +329,19 @@ class InputComponent(Component):
             if event.event_value == 'TK_Q':
                 # left-handed punch
                 self.owner.hands.use_left_hand()
-                if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('punch', (3, 3),
-                                             direction='r',
-                                             speed=(50, 0))
-                    # TODO: move shooting code where it belongs
-                    # self.owner.spawner.spawn('bullet', (13, 4),
-                    #                          direction='r',
-                    #                          speed=(70, 0))
-                    # self.owner.spawner.spawn('muzzle_flash', (13, 3),
-                    #                          direction='r')
-                    # self.owner.spawner.spawn('cop_pistol_hand', (0, 5),
-                    #                          direction='r')
-                else:
-                    self.owner.spawner.spawn('punch', (-3, 3),
-                                             direction='l',
-                                             speed=(-50, 0))
-                    # More old shooting code
-                    # self.owner.spawner.spawn('bullet', (-1, 4),
-                    #                          direction='l',
-                    #                          speed=(-70, 0))
-                    # self.owner.spawner.spawn('muzzle_flash', (-2, 3),
-                    #                          direction='l')
-                    # self.owner.spawner.spawn('cop_pistol_hand', (-8, 4),
-                    #                          direction='l')
-                # r.append(BearEvent(event_type='play_sound',
-                #                    event_value='shot'))
-                # r.append(BearEvent(event_type='brut_temporary_focus',
-                #                    event_value=f"bullet_{self.owner.spawner.factory.counts['bullet']}"))
             elif event.event_value == 'TK_E':
                 # Right-handed attack
                 self.owner.hands.use_right_hand()
-                if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('punch', (3, 3),
-                                             direction='r',
-                                             speed=(50, 0))
-                else:
-                    self.owner.spawner.spawn('punch', (-3, 3),
-                                             direction='l',
-                                             speed=(-50, 0))
-                    # self.owner.spawner.spawn('cop_fist_back', (-3, 4),
-                    #                          direction='l')
+                # if self.owner.position.direction == 'r':
+                #     self.owner.spawner.spawn('punch', (3, 3),
+                #                              direction='r',
+                #                              speed=(50, 0))
+                # else:
+                #     self.owner.spawner.spawn('punch', (-3, 3),
+                #                              direction='l',
+                #                              speed=(-50, 0))
+                #     # self.owner.spawner.spawn('cop_fist_back', (-3, 4),
+                #     #                          direction='l')
             elif event.event_value == 'TK_SPACE':
                 # Mostly debug. Eventually will be the rush or jump command
                 pass
@@ -591,15 +563,21 @@ class HandInterfaceComponent(Component):
     owner's widget, as a tuple of ints.
 
     Expects owner to have a PositionComponent.
+
     """
     #TODO: HandInterfaceComponent repr
-    def __init__(self, *args, hand_entities, hands_offsets,
+    def __init__(self, *args, hand_entities, hands_offsets, item_offsets,
                  left_item=None,
                  right_item=None,
                  **kwargs):
         super().__init__(*args, name='hands', **kwargs)
         self.hand_entities = hand_entities
+        # Offsets of hands relative to the character
         self.hand_offsets = hands_offsets
+        # Offsets of items relative to the hand, ie the position of the
+        # outer tip of the hand. For left-facing items, *right edge* of the item
+        # should be at this position
+        self.item_offsets = item_offsets
         self.left_item = left_item
         self.right_item = right_item
 
@@ -617,14 +595,20 @@ class HandInterfaceComponent(Component):
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
                                             event_value=(self.hand_entities[hand],
                                                          hand_x, hand_y)))
-        # TODO: copy to right item
-        # TODO: offsets of item relative to hand
+        # TODO: communicate hands with items via events
+        # Currently there are several ways in which HandInterfaceComponent
+        # calls the methods of items directly. It may cause bugs later
         if self.left_item:
-            EntityTracker().entities[self.left_item].hiding.show()
-            EntityTracker().entities[self.left_item].position.move(hand_x,
-                                                                   hand_y)
+            item = EntityTracker().entities[self.left_item]
+            item.widget.switch_to_image(self.owner.position.direction)
+            item.hiding.show()
+            item_x = hand_x + self.item_offsets[hand][0]
+            item_y = hand_y + self.item_offsets[hand][1]
+            if self.owner.position.direction == 'l':
+                item_x -= item.widget.width
+            EntityTracker().entities[self.left_item].position.move(item_x,
+                                                                   item_y)
             self.dispatcher.add_event(BearEvent('brut_use_item', self.left_item))
-
 
     def use_right_hand(self):
         if self.owner.position.direction == 'r':
@@ -638,6 +622,17 @@ class HandInterfaceComponent(Component):
                                             event_value=(
                                                 self.hand_entities[hand],
                                                 hand_x, hand_y)))
+        if self.right_item:
+            item = EntityTracker().entities[self.right_item]
+            item.widget.switch_to_image(self.owner.position.direction)
+            item.hiding.show()
+            item_x = hand_x + self.item_offsets[hand][0]
+            item_y = hand_y + self.item_offsets[hand][1]
+            if self.owner.position.direction == 'l':
+                item_x -= item.widget.width
+            EntityTracker().entities[self.right_item].position.move(item_x,
+                                                                   item_y)
+            self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
 
 
 class ItemBehaviourComponent(Component):
@@ -680,7 +675,8 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
 
     def use_item(self):
         direction = self.owning_entity.position.direction
+        # TODO: store and pass spawn speed properly
+        x_speed = direction == 'r' and 50 or -50
         self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
-                                 # TODO: store and pass spawn speed properly
-                                 speed = (50, 0),
+                                 speed=(x_speed, 0),
                                  direction=direction)

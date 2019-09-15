@@ -130,7 +130,7 @@ class MapObjectFactory:
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         cop_entity.add_component(WalkerCollisionComponent(self.dispatcher))
         cop_entity.add_component(PassingComponent(self.dispatcher, shadow_pos=(0, 15),
-                                       shadow_size=(13, 3)))
+                                                  shadow_size=(13, 3)))
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
@@ -148,9 +148,12 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
-        pistol = self._create_pistol(f'{entity_id}_pistol',
+        pistol = self._create_pistol(f'{entity_id}_left_pistol',
                                      owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', pistol))
+        pistol2 = self._create_pistol(f'{entity_id}_right_pistol',
+                                      owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', pistol2))
         cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
                                                         hand_entities={
                                                             'forward_l': f_l.id,
@@ -162,7 +165,13 @@ class MapObjectFactory:
                                                             'forward_r': (0, 5),
                                                             'back_l': (-3, 4),
                                                             'back_r': (3, 4)},
-                                                        left_item=pistol.id))
+                                                        item_offsets={
+                                                            'forward_l': (1, 0),
+                                                            'forward_r': (7, 0),
+                                                            'back_l': (1, 0),
+                                                            'back_r': (4, 0)},
+                                                        left_item=pistol.id,
+                                                        right_item=pistol2.id))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
@@ -344,7 +353,7 @@ class MapObjectFactory:
                                                                           'l': (-2, 0)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
-                                             lifetime=0.4,
+                                             lifetime=0.25,
                                              is_working=False))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
