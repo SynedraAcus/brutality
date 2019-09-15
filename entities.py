@@ -10,7 +10,8 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     DestructorHealthComponent, FactionComponent, CollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
-    HandInterfaceComponent, SpawningItemBehaviourComponent
+    HandInterfaceComponent, SpawningItemBehaviourComponent,\
+    GravityPositionComponent
 from widgets import PatternGenerator
 
 
@@ -371,7 +372,8 @@ class MapObjectFactory:
                                                       8),
                                            emit_ecs=True)
         entity.add_component(WidgetComponent(self.dispatcher, widget))
-        entity.add_component(PositionComponent(self.dispatcher,
+        entity.add_component(GravityPositionComponent(self.dispatcher,
+                                               acceleration=30,
                                                vx=speed[0], vy=speed[1]))
         entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))

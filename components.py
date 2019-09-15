@@ -46,11 +46,41 @@ class WalkerComponent(PositionComponent):
     def on_event(self, event):
         if event.event_type == 'tick':
             self.moved_this_tick = False
+        return super().on_event(event)
             
     def __repr__(self):
         d = loads(super().__repr__())
         {}.update({'direction': self.direction,
                    'initial_phase': self.phase})
+        return dumps(d)
+
+
+class GravityPositionComponent(PositionComponent):
+    """
+    A PositionComponent that maintains a constant downward acceleration.
+
+    accepts `acceleration` (in characters per second squared) as a kwarg.
+    Defaults to 10.0
+    """
+    def __init__(self, *args, acceleration=10.0, have_waited=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.acceleration = acceleration
+        self.update_freq = 1/acceleration
+        self.have_waited = have_waited
+        self.dispatcher.register_listener(self, 'tick')
+
+    def on_event(self, event):
+        if event.event_type == 'tick':
+            self.have_waited += event.event_value
+        if self.have_waited >= self.update_freq:
+            self.vy += 1
+            self.have_waited = 0
+        return super().on_event(event)
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        {}.update({'acceleration': self.acceleration,
+                   'have_waited': self.have_waited})
         return dumps(d)
 
 
@@ -671,7 +701,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     def use_item(self):
         direction = self.owning_entity.position.direction
         # TODO: store and pass spawn speed properly
-        x_speed = direction == 'r' and 50 or -50
+        x_speed = direction == 'r' and 10 or -10
         self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
-                                 speed=(x_speed, 0),
+                                 speed=(x_speed, -40),
                                  direction=direction)

@@ -57,7 +57,7 @@ dispatcher.register_listener(ScrollListener(layout=layout),
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['play_sound', 'brut_damage'])
+dispatcher.register_listener(logger, ['play_sound', 'brut_damage', 'ecs_destroy'])
 # Save test
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
@@ -89,6 +89,7 @@ else:
     factory.create_entity('wall', (0, 0), size=(150, 30))
     factory.create_entity('floor', (0, 30), size=(150, 30))
     # factory.create_entity('cop', (10, 30))
+    # factory.create_entity('nunchaku_punk', (60, 30))
     factory.create_entity('barrel', (75, 25))
     factory.create_entity('barrel', (61, 50))
     factory.create_entity('bottle_punk', (60, 30))
