@@ -472,7 +472,7 @@ class RangedControlComponent(Component):
     a clear line of sight and shoots when it can. Does not move towards target
     along x; when dx is too small, tries to run away
     """
-    # TODO: make a bottle punk
+    # TODO: make a bottle punk controller
     pass
 
 
@@ -678,6 +678,8 @@ class ItemBehaviourComponent(Component):
     def on_event(self, event):
         if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:
             self.use_item()
+
+    # TODO: ItemBehaviourComponent repr
 
 
 class SpawningItemBehaviourComponent(ItemBehaviourComponent):
