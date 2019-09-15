@@ -106,30 +106,30 @@
   },
   {
     "name": "nunchaku_punk_l_1",
-    "x": 23,
+    "x": 30,
     "y": 19,
-    "xsize": 10,
+    "xsize": 8,
+    "ysize": 17
+  },
+  {
+    "name": "nunchaku_punk_l_2",
+    "x": 39,
+    "y": 19,
+    "xsize": 8,
     "ysize": 17
   },
   {
     "name": "nunchaku_punk_r_1",
     "x": 12,
     "y": 19,
-    "xsize": 10,
-    "ysize": 17
-  },
-  {
-    "name": "nunchaku_punk_l_2",
-    "x": 45,
-    "y": 19,
-    "xsize": 10,
+    "xsize": 8,
     "ysize": 17
   },
   {
     "name": "nunchaku_punk_r_2",
-    "x": 34,
+    "x": 21,
     "y": 19,
-    "xsize": 10,
+    "xsize": 8,
     "ysize": 17
   },
   {

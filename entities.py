@@ -118,8 +118,6 @@ class MapObjectFactory:
         return barrel_entity
     
     def _create_cop(self, entity_id):
-        # TODO: separate widgets/entities for equipped items
-        # This one obviously requires having an equipment system in place
         cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
                                               'r_2': self.atlas.get_element('cop_r_2'),
