@@ -136,13 +136,13 @@ class MapObjectFactory:
         cop_entity.add_component(FactionComponent(self.dispatcher,
                                                   faction='police'))
         # Creating hand entities
-        f_l = self._create_cop_fist_forward(f'{entity_id}_hand_fl',
+        f_l = self._create_cop_hand_forward(f'{entity_id}_hand_fl',
                                             direction='l')
-        f_r = self._create_cop_fist_forward(f'{entity_id}_hand_fr',
+        f_r = self._create_cop_hand_forward(f'{entity_id}_hand_fr',
                                             direction='r')
-        b_l = self._create_cop_fist_back(f'{entity_id}_hand_bl',
+        b_l = self._create_cop_hand_back(f'{entity_id}_hand_bl',
                                          direction='l')
-        b_r = self._create_cop_fist_back(f'{entity_id}_hand_br',
+        b_r = self._create_cop_hand_back(f'{entity_id}_hand_br',
                                          direction='r')
         self.dispatcher.add_event(BearEvent('ecs_create', f_l))
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
@@ -151,9 +151,9 @@ class MapObjectFactory:
         pistol = self._create_pistol(f'{entity_id}_left_pistol',
                                      owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', pistol))
-        pistol2 = self._create_pistol(f'{entity_id}_right_pistol',
-                                      owning_entity=cop_entity)
-        self.dispatcher.add_event(BearEvent('ecs_create', pistol2))
+        fist = self._create_fist(f'{entity_id}_fist',
+                                 owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', fist))
         cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
                                                         hand_entities={
                                                             'forward_l': f_l.id,
@@ -166,12 +166,12 @@ class MapObjectFactory:
                                                             'back_l': (-3, 4),
                                                             'back_r': (3, 4)},
                                                         item_offsets={
-                                                            'forward_l': (1, 0),
+                                                            'forward_l': (0, 0),
                                                             'forward_r': (7, 0),
-                                                            'back_l': (1, 0),
+                                                            'back_l': (0, 0),
                                                             'back_r': (4, 0)},
-                                                        left_item=pistol.id,
-                                                        right_item=pistol2.id))
+                                                        left_item=fist.id,
+                                                        right_item=pistol.id))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
@@ -301,21 +301,9 @@ class MapObjectFactory:
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
 
-    def _create_cop_pistol_hand(self, entity_id, direction='r'):
+    def _create_cop_hand_back(self, entity_id, direction='r'):
         entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_shooting_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=0.25))
-        entity.add_component(PositionComponent(self.dispatcher))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        return entity
-
-    def _create_cop_fist_back(self, entity_id, direction='r'):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_fist_back_{direction}')
+        chars, colors = self.atlas.get_element(f'cop_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
         entity.add_component(PositionComponent(self.dispatcher))
@@ -326,9 +314,9 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_cop_fist_forward(self, entity_id, direction='r'):
+    def _create_cop_hand_forward(self, entity_id, direction='r'):
         entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_fist_forward_{direction}')
+        chars, colors = self.atlas.get_element(f'cop_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
         entity.add_component(PositionComponent(self.dispatcher))
@@ -351,6 +339,30 @@ class MapObjectFactory:
                                                             spawned_item='bullet',
                                                             relative_pos={'r': (0, 0),
                                                                           'l': (-2, 0)}))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return entity
+
+    def _create_fist(self, entity_id, owning_entity=None):
+        entity = Entity(entity_id)
+        print(self.atlas.get_element('fist_l'))
+        widget = SwitchingWidget(
+            images_dict={'l': self.atlas.get_element('fist_l'),
+                         'r': self.atlas.get_element('fist_r')},
+            initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                   widget))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_item='punch',
+                                                            relative_pos={
+                                                                'r': (0, -2),
+                                                                'l': (-1, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,

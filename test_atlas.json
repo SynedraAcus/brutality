@@ -49,45 +49,59 @@
     "ysize": 2
   },
   {
-    "name": "cop_fist_back_r",
+    "name": "cop_hand_back_r",
     "x": 64,
-    "y": 7,
-    "xsize": 5,
+    "y": 1,
+    "xsize": 4,
     "ysize": 2
   },
   {
-    "name":"cop_fist_back_l",
+    "name":"cop_hand_back_l",
     "x": 64,
-    "y": 10,
-    "xsize": 5,
+    "y": 1,
+    "xsize": 4,
     "ysize": 2
   },
   {
-    "name":  "cop_fist_forward_r",
-    "x": 70,
-    "y": 7,
-    "xsize": 8,
+    "name":  "cop_hand_forward_r",
+    "x": 64,
+    "y": 4,
+    "xsize": 7,
     "ysize": 5
   },
   {
-    "name": "cop_fist_forward_l",
-    "x": 69,
-    "y": 13,
-    "xsize": 8,
+    "name": "cop_hand_forward_l",
+    "x": 64,
+    "y": 10,
+    "xsize": 7,
     "ysize": 5
   },
   {
     "name": "pistol_r",
-    "x": 68,
-    "y": 1,
+    "x": 7,
+    "y": 37,
     "xsize": 5,
     "ysize": 2
   },
   {
     "name": "pistol_l",
-    "x": 64,
-    "y": 4,
+    "x": 7,
+    "y": 39,
     "xsize": 5,
+    "ysize": 2
+  },
+  {
+    "name": "fist_r",
+    "x": 7,
+    "y": 41,
+    "xsize": 1,
+    "ysize": 2
+  },
+  {
+    "name": "fist_l",
+    "x": 7,
+    "y": 41,
+    "xsize": 1,
     "ysize": 2
   },
   {

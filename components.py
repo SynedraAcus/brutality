@@ -518,13 +518,14 @@ class HidingComponent(Component):
                                             event_value=self.owner.id))
 
     def show(self):
-        self.is_working = True
-        self.dispatcher.add_event(BearEvent(event_type='ecs_add',
-                                            event_value=(self.owner.id,
-                                                         self.owner.position.x,
-                                                         self.owner.position.y)))
-        if self.hide_condition == 'timeout':
-            self.age = 0
+        if not self.is_working:
+            self.is_working = True
+            self.dispatcher.add_event(BearEvent(event_type='ecs_add',
+                                                event_value=(self.owner.id,
+                                                             self.owner.position.x,
+                                                             self.owner.position.y)))
+            if self.hide_condition == 'timeout':
+                self.age = 0
 
     def on_event(self, event):
         if not self.is_working:
