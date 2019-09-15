@@ -190,31 +190,59 @@
   },
   {
     "name": "bottle_punk_l_1",
-    "x": 34,
+    "x": 28,
     "y": 54,
-    "xsize": 10,
+    "xsize": 7,
     "ysize": 17
   },
   {
     "name": "bottle_punk_l_2",
-    "x": 45,
+    "x": 36,
     "y": 54,
-    "xsize": 10,
+    "xsize": 7,
     "ysize": 17
   },
   {
     "name": "bottle_punk_r_1",
-    "x": 12,
+    "x": 11,
     "y": 54,
-    "xsize": 10,
+    "xsize": 7,
     "ysize": 17
   },
   {
     "name": "bottle_punk_r_2",
-    "x": 23,
+    "x": 19,
     "y": 54,
-    "xsize": 10,
+    "xsize": 7,
     "ysize": 17
+  },
+  {
+    "name": "bottle_punk_hand_forward_r",
+    "x": 44,
+    "y": 54,
+    "xsize": 5,
+    "ysize": 7
+  },
+  {
+    "name": "bottle_punk_hand_forward_l",
+    "x": 44,
+    "y": 62,
+    "xsize": 5,
+    "ysize": 5
+  },
+  {
+    "name": "bottle_punk_hand_back_r",
+    "x": 50,
+    "y": 61,
+    "xsize": 6,
+    "ysize": 5
+  },
+  {
+    "name": "bottle_punk_hand_back_l",
+    "x": 50,
+    "y": 54,
+    "xsize": 5,
+    "ysize": 6
   },
   {
     "name": "barrel_1",
