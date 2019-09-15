@@ -267,6 +267,9 @@ class MapObjectFactory:
         fist = self._create_fist(f'{entity_id}_fist',
                                  owning_entity=punk)
         self.dispatcher.add_event(BearEvent('ecs_create', fist))
+        launcher = self._create_bottle_launcher(f'{entity_id}_bottle_launcher',
+                                                owning_entity=punk)
+        self.dispatcher.add_event(BearEvent('ecs_create', launcher))
         punk.add_component(HandInterfaceComponent(self.dispatcher,
                                                       hand_entities={
                                                           'forward_l': f_l.id,
@@ -284,7 +287,7 @@ class MapObjectFactory:
                                                           'back_l': (0, 0),
                                                           'back_r': (6, 0)},
                                                       left_item=fist.id,
-                                                      right_item=fist.id))
+                                                      right_item=launcher.id))
         return punk
     
     def _create_invis(self, entity_id, size=(0, 0)):
@@ -337,7 +340,7 @@ class MapObjectFactory:
                                 Widget(*self.atlas.get_element(
                                     f'punch_{direction}'))))
         punch.add_component(PositionComponent(self.dispatcher,
-                                                      vx=speed[0], vy=speed[1]))
+                                              vx=speed[0], vy=speed[1]))
         punch.add_component(ProjectileCollisionComponent(self.dispatcher,
                                                          damage=3))
         punch.add_component(DestructorComponent(self.dispatcher))
@@ -345,6 +348,34 @@ class MapObjectFactory:
                                            destroy_condition='timeout',
                                            lifetime=0.2))
         return punch
+
+    def _create_bottle(self, entity_id, speed=(0, 0), direction='r'):
+        """
+        A rotating flying bottle
+        :param entity_id:
+        :return:
+        """
+        entity = Entity(id=entity_id)
+        if direction == 'r':
+            widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_ne'),
+                                                      self.atlas.get_element('bottle_se'),
+                                                      self.atlas.get_element('bottle_sw'),
+                                                      self.atlas.get_element('bottle_nw')),
+                                                      8),
+                                           emit_ecs=True)
+        else:
+            widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_nw'),
+                                                      self.atlas.get_element('bottle_sw'),
+                                                      self.atlas.get_element('bottle_se'),
+                                                      self.atlas.get_element('bottle_ne')),
+                                                      8),
+                                           emit_ecs=True)
+        entity.add_component(WidgetComponent(self.dispatcher, widget))
+        entity.add_component(PositionComponent(self.dispatcher,
+                                               vx=speed[0], vy=speed[1]))
+        entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
 
     def _create_target(self, entity_id):
         """
@@ -540,6 +571,29 @@ class MapObjectFactory:
                                                             relative_pos={
                                                                 'r': (8, -1),
                                                                 'l': (-1, -2)}))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return entity
+
+    def _create_bottle_launcher(self, entity_id, owning_entity=None):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(
+            images_dict={'l': self.atlas.get_element('fist_l'),
+                         'r': self.atlas.get_element('fist_r')},
+            initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                   widget))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_item='bottle',
+                                                            relative_pos={
+                                                                'r': (2, -2),
+                                                                'l': (-3, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,

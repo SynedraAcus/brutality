@@ -204,7 +204,7 @@
   },
   {
     "name": "bottle_punk_r_1",
-    "x": 11,
+    "x": 12,
     "y": 54,
     "xsize": 7,
     "ysize": 17
@@ -330,31 +330,31 @@
   },
   {
     "name": "bottle_ne",
-    "x": 7,
-    "y": 13,
+    "x": 8,
+    "y": 43,
     "xsize": 4,
     "ysize": 5
   },
   {
     "name": "bottle_nw",
-    "x": 7,
-    "y": 18,
+    "x": 8,
+    "y": 48,
     "xsize": 4,
     "ysize": 5
   },
   {
     "name": "bottle_se",
-    "x": 7,
-    "y": 23,
+    "x": 8,
+    "y": 53,
     "xsize": 4,
-    "ysize": 4
+    "ysize": 5
   },
   {
     "name": "bottle_sw",
-    "x": 7,
-    "y": 27,
+    "x": 8,
+    "y": 58,
     "xsize": 4,
-    "ysize": 4
+    "ysize": 5
   },
   {
     "name": "target_intact",
