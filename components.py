@@ -382,7 +382,7 @@ class InputComponent(Component):
 class MeleeControllerComponent(Component):
     """
     Looks for objects with factions different from its own, moves towards them,
-    and when in range, punches them.
+    and when in range, punches them with whatever is in his right hand.
     
     Assumes that the owner has SpawnerComponent and WalkerComponent
     """
@@ -411,6 +411,8 @@ class MeleeControllerComponent(Component):
                     dist = sqrt(dx**2 + dy**2)
                     if (not min_dist or min_dist > dist) and dist < self.perception_distance:
                         current_closest = enemy
+                if not current_closest:
+                    return
                 # Probably easier to recalculate for the selected enemy rather
                 # than bother caching, creating the dict and all that
                 target = current_closest
@@ -418,15 +420,7 @@ class MeleeControllerComponent(Component):
                 dy = self.owner.position.y - enemy.position.y
                 dist = sqrt(dx**2 + dy**2)
                 if abs(dx) <= 20 and abs(dy) <= 10:
-                    # Someone is in range, try a punch
-                    if self.owner.position.direction == 'r':
-                        self.owner.spawner.spawn('punch', (13, 4),
-                                                 direction='r',
-                                                 speed=(50, 0))
-                    else:
-                        self.owner.spawner.spawn('punch', (-1, 4),
-                                                 direction='l',
-                                                 speed=(-50, 0))
+                    self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
                 else:
                     i = randint(0, abs(dx) + abs(dy))

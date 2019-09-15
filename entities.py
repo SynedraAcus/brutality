@@ -196,6 +196,38 @@ class MapObjectFactory:
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
+        weapon = self._create_nunchaku('nunchaku1', owning_entity=nunchaku)
+        self.dispatcher.add_event(BearEvent('ecs_create', weapon))
+        # Creating hand entities
+        f_l = self._create_nunchaku_punk_hand_forward(f'{entity_id}_hand_fl',
+                                            direction='l')
+        f_r = self._create_nunchaku_punk_hand_forward(f'{entity_id}_hand_fr',
+                                            direction='r')
+        b_l = self._create_nunchaku_punk_hand_back(f'{entity_id}_hand_bl',
+                                         direction='l')
+        b_r = self._create_nunchaku_punk_hand_back(f'{entity_id}_hand_br',
+                                         direction='r')
+        self.dispatcher.add_event(BearEvent('ecs_create', f_l))
+        self.dispatcher.add_event(BearEvent('ecs_create', f_r))
+        self.dispatcher.add_event(BearEvent('ecs_create', b_l))
+        self.dispatcher.add_event(BearEvent('ecs_create', b_r))
+        nunchaku.add_component(HandInterfaceComponent(self.dispatcher,
+                                                        hand_entities={
+                                                            'forward_l': f_l.id,
+                                                            'forward_r': f_r.id,
+                                                            'back_l': b_l.id,
+                                                            'back_r': b_r.id},
+                                                        hands_offsets={
+                                                            'forward_l': (-1, 5),
+                                                            'forward_r': (0, 4),
+                                                            'back_l': (-1, 5),
+                                                            'back_r': (0, 4)},
+                                                        item_offsets={
+                                                            'forward_l': (0, 0),
+                                                            'forward_r': (8, 0),
+                                                            'back_l': (0, -2),
+                                                            'back_r': (4, 0)},
+                                                        right_item=weapon.id))
         return nunchaku
     
     def _create_invis(self, entity_id, size=(0, 0)):
@@ -325,6 +357,45 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
+    def _create_punk_hand_back(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'punk_hand_back_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
+    def _create_nunchaku_punk_hand_forward(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_forward_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
+    def _create_nunchaku_punk_hand_back(self, entity_id, direction='r'):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_back_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
     def _create_pistol(self, entity_id, owning_entity=None):
         entity = Entity(entity_id)
         widget = SwitchingWidget(images_dict={'l': self.atlas.get_element('pistol_l'),
@@ -348,7 +419,6 @@ class MapObjectFactory:
 
     def _create_fist(self, entity_id, owning_entity=None):
         entity = Entity(entity_id)
-        print(self.atlas.get_element('fist_l'))
         widget = SwitchingWidget(
             images_dict={'l': self.atlas.get_element('fist_l'),
                          'r': self.atlas.get_element('fist_r')},
@@ -360,6 +430,29 @@ class MapObjectFactory:
                                                             spawned_item='punch',
                                                             relative_pos={
                                                                 'r': (0, -2),
+                                                                'l': (-1, -2)}))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return entity
+
+    def _create_nunchaku(self, entity_id, owning_entity=None):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(
+            images_dict={'l': self.atlas.get_element('nunchaku_l'),
+                         'r': self.atlas.get_element('nunchaku_r')},
+            initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                   widget))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_item='punch',
+                                                            relative_pos={
+                                                                'r': (8, -1),
                                                                 'l': (-1, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',

@@ -133,6 +133,62 @@
     "ysize": 17
   },
   {
+    "name": "punk_hand_back_r",
+    "x": 48,
+    "y": 19,
+    "xsize": 4,
+    "ysize": 2
+  },
+  {
+    "name": "punk_hand_back_l",
+    "x": 48,
+    "y": 19,
+    "xsize": 4,
+    "ysize": 2
+  },
+  {
+    "name": "nunchaku_punk_hand_forward_r",
+    "x": 48,
+    "y": 22,
+    "xsize": 8,
+    "ysize": 5
+  },
+  {
+    "name": "nunchaku_punk_hand_forward_l",
+    "x": 47,
+    "y": 28,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
+    "name": "nunchaku_punk_hand_back_r",
+    "x": 58,
+    "y": 22,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
+    "name": "nunchaku_punk_hand_back_l",
+    "x": 58,
+    "y": 28,
+    "xsize": 9,
+    "ysize": 4
+  },
+  {
+    "name": "nunchaku_r",
+    "x": 48,
+    "y": 33,
+    "xsize": 8,
+    "ysize": 4
+  },
+  {
+    "name": "nunchaku_l",
+    "x": 57,
+    "y": 33,
+    "xsize": 8,
+    "ysize": 4
+  },
+  {
     "name": "bottle_punk_l_1",
     "x": 34,
     "y": 54,
