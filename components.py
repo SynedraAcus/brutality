@@ -362,16 +362,6 @@ class InputComponent(Component):
             elif event.event_value == 'TK_E':
                 # Right-handed attack
                 self.owner.hands.use_right_hand()
-                # if self.owner.position.direction == 'r':
-                #     self.owner.spawner.spawn('punch', (3, 3),
-                #                              direction='r',
-                #                              speed=(50, 0))
-                # else:
-                #     self.owner.spawner.spawn('punch', (-3, 3),
-                #                              direction='l',
-                #                              speed=(-50, 0))
-                #     # self.owner.spawner.spawn('cop_fist_back', (-3, 4),
-                #     #                          direction='l')
             elif event.event_value == 'TK_SPACE':
                 # Mostly debug. Eventually will be the rush or jump command
                 pass
@@ -404,8 +394,8 @@ class InputComponent(Component):
                                    event_value=(0, 0)))
             if moved:
                 self.owner.position.walk(self.last_move)
-                # r.append(BearEvent(event_type='play_sound',
-                #                    event_value='step'))
+                r.append(BearEvent(event_type='play_sound',
+                                   event_value='step'))
         return r
 
 
@@ -702,8 +692,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
 
     def use_item(self):
         direction = self.owning_entity.position.direction
-        # TODO: store and pass spawn speed properly
-        x_speed = direction == 'r' and 10 or -10
+        # This component just passes the direction and expects projectile
+        # creation code in entity factory to take care of speeds
         self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
-                                 speed=(x_speed, -40),
                                  direction=direction)

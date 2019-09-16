@@ -309,26 +309,29 @@ class MapObjectFactory:
         bg_entity.add_component(PassingComponent(self.dispatcher))
         return bg_entity
 
-    def _create_bullet(self, entity_id, speed=(0, 0), direction='r'):
+    def _create_bullet(self, entity_id, direction='r'):
         """
         Create a simple projectile
         :param speed:
         :return:
         """
+        if direction == 'r':
+            vx = 50
+        else:
+            vx = -50
         bullet_entity = Entity(id=entity_id)
         bullet_entity.add_component(WidgetComponent(self.dispatcher,
             SimpleAnimationWidget(Animation((self.atlas.get_element(f'bullet_{direction}_1'),
                                              self.atlas.get_element(f'bullet_{direction}_2'),
                                              self.atlas.get_element(f'bullet_{direction}_3'),
                                              ), 10))))
-        bullet_entity.add_component(PositionComponent(self.dispatcher,
-                                                      vx=speed[0], vy=speed[1]))
+        bullet_entity.add_component(PositionComponent(self.dispatcher, vx=vx))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher,
                                                                  damage=1))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
     
-    def _create_punch(self, entity_id, speed=(0, 0), direction='r'):
+    def _create_punch(self, entity_id, direction='r'):
         """
         Send a punch
         :param entity_id:
@@ -340,8 +343,11 @@ class MapObjectFactory:
         punch.add_component(WidgetComponent(self.dispatcher,
                                 Widget(*self.atlas.get_element(
                                     f'punch_{direction}'))))
-        punch.add_component(PositionComponent(self.dispatcher,
-                                              vx=speed[0], vy=speed[1]))
+        if direction == 'r':
+            vx = 50
+        else:
+            vx = -50
+        punch.add_component(PositionComponent(self.dispatcher, vx = vx))
         punch.add_component(ProjectileCollisionComponent(self.dispatcher,
                                                          damage=3))
         punch.add_component(DestructorComponent(self.dispatcher))
@@ -350,7 +356,7 @@ class MapObjectFactory:
                                            lifetime=0.2))
         return punch
 
-    def _create_bottle(self, entity_id, speed=(0, 0), direction='r'):
+    def _create_bottle(self, entity_id, direction='r'):
         """
         A rotating flying bottle
         :param entity_id:
@@ -364,6 +370,7 @@ class MapObjectFactory:
                                                       self.atlas.get_element('bottle_nw')),
                                                       8),
                                            emit_ecs=True)
+            vx = 30
         else:
             widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_nw'),
                                                       self.atlas.get_element('bottle_sw'),
@@ -371,10 +378,10 @@ class MapObjectFactory:
                                                       self.atlas.get_element('bottle_ne')),
                                                       8),
                                            emit_ecs=True)
+            vx = -30
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
-                                               acceleration=30,
-                                               vx=speed[0], vy=speed[1]))
+                                               acceleration=40, vx=20, vy=-35))
         entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
@@ -548,7 +555,7 @@ class MapObjectFactory:
                                                             owning_entity=owning_entity,
                                                             spawned_item='punch',
                                                             relative_pos={
-                                                                'r': (0, -2),
+                                                                'r': (1, -2),
                                                                 'l': (-1, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
