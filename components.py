@@ -5,7 +5,7 @@ from random import randint
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
-    WidgetComponent
+    WidgetComponent, Entity
 from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
 
@@ -649,6 +649,10 @@ class HandInterfaceComponent(Component):
                                                                    item_y)
             self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
 
+    def __repr__(self):
+        d = loads(repr(super()))
+        # To be implemented
+
 
 class ItemBehaviourComponent(Component):
     """
@@ -659,6 +663,12 @@ class ItemBehaviourComponent(Component):
         super().__init__(*args, name='item_behaviour', **kwargs)
         # Actual entity (ie character) who uses the item. Not to be mistaken
         # for self.owner, which is item
+        if isinstance(owning_entity, Entity):
+            self.owning_entity = owning_entity
+        elif isinstance(owning_entity, str):
+            self.owning_entity = EntityTracker().entities[owning_entity]
+        else:
+            raise BearECSException(f'A {type(owning_entity)} used as an owning_entity for item')
         self.owning_entity = owning_entity
         self.dispatcher.register_listener(self, 'brut_use_item')
 
@@ -669,7 +679,10 @@ class ItemBehaviourComponent(Component):
         if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:
             self.use_item()
 
-    # TODO: ItemBehaviourComponent repr
+    def __repr__(self):
+        d = loads(repr(super()))
+        d['owning_entity'] = self.owning_entity.id
+        return dumps(d)
 
 
 class SpawningItemBehaviourComponent(ItemBehaviourComponent):
@@ -696,3 +709,9 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
         # creation code in entity factory to take care of speeds
         self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
                                  direction=direction)
+
+    def __repr__(self):
+        d = loads(repr(super()))
+        d['spawned_item'] = self.spawned_item
+        d['relative_pos'] = self.relative_pos
+        return dumps(d)
