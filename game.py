@@ -90,11 +90,11 @@ else:
     # Created before the loop starts, will be added on the first tick
     factory.create_entity('wall', (0, 0), size=(150, 30))
     factory.create_entity('floor', (0, 30), size=(150, 30))
-    factory.create_entity('cop', (10, 30))
+    # factory.create_entity('cop', (10, 30))
     # factory.create_entity('nunchaku_punk', (60, 30))
     factory.create_entity('barrel', (75, 25))
     factory.create_entity('barrel', (61, 50))
-    # factory.create_entity('bottle_punk', (60, 30))
+    factory.create_entity('bottle_punk', (60, 30))
     # factory.create_entity('target', (65, 30))
     factory.create_entity('flame', (30, 40))
     # TODO: check if I still need these

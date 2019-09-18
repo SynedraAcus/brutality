@@ -201,6 +201,34 @@ class HazardCollisionComponent(CollisionComponent):
         d['on_cooldown'] = self.on_cooldown
 
 
+class GrenadeComponent(Component):
+    """
+    The grenade behaviour.
+
+    When entity with this component reaches a certain y, it self-destructs and
+    creates a predetermined entity with its Spawner. This is supposed to be used
+    with things like grenades and Molotov cocktails that fly in the arc and
+    explode upon hitting the ground.
+    """
+
+    def __init__(self, *args, spawned_item='flame', target_y=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.spawned_item = spawned_item
+        self.target_y = target_y
+        self.dispatcher.register_listener(self, 'ecs_move')
+
+    def on_event(self, event):
+        if event.event_type == 'ecs_move' and event.event_value[0] == self.owner.id:
+            print(self.owner.position.y, self.target_y)
+            if not self.target_y:
+                self.target_y = self.owner.position.y + 7
+            if self.owner.position.y >= self.target_y:
+                self.owner.spawner.spawn(self.spawned_item,
+                                         (round(self.owner.widget.width/2),
+                                          round(self.owner.widget.height/2)))
+                self.owner.destructor.destroy()
+
+
 class PassingComponent(Component):
     """
     A component responsible for knowing whether items can or cannot be walked

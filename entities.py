@@ -11,7 +11,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
-    GravityPositionComponent, HazardCollisionComponent
+    GravityPositionComponent, HazardCollisionComponent, GrenadeComponent
 from widgets import PatternGenerator
 
 
@@ -384,6 +384,9 @@ class MapObjectFactory:
                                                acceleration=40, vx=vx, vy=-35))
         entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(GrenadeComponent(self.dispatcher,
+                                              spawned_item='flame'))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
     def _create_flame(self, entity_id):
