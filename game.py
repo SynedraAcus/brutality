@@ -96,6 +96,7 @@ else:
     factory.create_entity('barrel', (61, 50))
     # factory.create_entity('bottle_punk', (60, 30))
     # factory.create_entity('target', (65, 30))
+    factory.create_entity('flame', (30, 40))
     # TODO: check if I still need these
     factory.create_entity('invis', (0, 0), size=(150, 15))
     factory.create_entity('invis', (0, 15), size=(2, 45))

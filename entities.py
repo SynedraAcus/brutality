@@ -11,7 +11,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
-    GravityPositionComponent
+    GravityPositionComponent, HazardCollisionComponent
 from widgets import PatternGenerator
 
 
@@ -384,6 +384,26 @@ class MapObjectFactory:
                                                acceleration=40, vx=vx, vy=-35))
         entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
+
+    def _create_flame(self, entity_id):
+        """
+        A flame on the ground
+        :param entity_id:
+        :return:
+        """
+        entity = Entity(id=entity_id)
+        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('flame_1'),
+                                                  self.atlas.get_element('flame_2')),
+                                                 3),
+                                       emit_ecs=True)
+        entity.add_component(WidgetComponent(self.dispatcher, widget))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=5.0))
+        entity.add_component(HazardCollisionComponent(self.dispatcher))
         return entity
 
     def _create_target(self, entity_id):

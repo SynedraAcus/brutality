@@ -357,6 +357,20 @@
     "ysize": 5
   },
   {
+    "name": "flame_1",
+    "x": 6,
+    "y": 14,
+    "xsize": 6,
+    "ysize": 3
+  },
+  {
+    "name": "flame_2",
+    "x": 6,
+    "y": 18,
+    "xsize": 6,
+    "ysize": 3
+  },
+  {
     "name": "target_intact",
     "x": 15,
     "y": 38,

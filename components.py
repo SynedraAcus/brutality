@@ -156,6 +156,51 @@ class ProjectileCollisionComponent(CollisionComponent):
         return dumps(d)
 
 
+class HazardCollisionComponent(CollisionComponent):
+    """
+    A collision component that damages whoever collides into it.
+
+    Intended for use with flames, traps and such.
+    """
+    def __init__(self, *args, damage=1, damage_cooldown=0.3,
+                 on_cooldown=False, have_waited=0, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.damage = damage
+        self.damage_cooldown = damage_cooldown
+        self.on_cooldown = on_cooldown
+        self.have_waited = have_waited
+        self.dispatcher.register_listener(self, 'tick')
+
+    def collided_by(self, entity):
+        # TODO: do damage to entities who stand in fire and don't move
+        if not self.on_cooldown:
+            other = EntityTracker().entities[entity]
+            if hasattr(other, 'passability'):
+                if rectangles_collide((self.owner.position.x, self.owner.position.y),
+                                      self.owner.widget.size,
+                                      (other.position.x + other.passability.shadow_pos[0],
+                                       other.position.y + other.passability.shadow_pos[1]),
+                                      other.passability.shadow_size):
+                    self.dispatcher.add_event(BearEvent(event_type='brut_damage',
+                                                        event_value=(entity, self.damage)))
+            self.on_cooldown = True
+
+    def on_event(self, event):
+        if event.event_type == 'tick' and self.on_cooldown:
+            self.have_waited += event.event_value
+            if self.have_waited >= self.damage_cooldown:
+                self.on_cooldown = False
+                self.have_waited = 0
+        return super().on_event(event)
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['damage'] = self.damage
+        d['damage_cooldown'] = self.damage_cooldown
+        d['have_waited'] = self.have_waited
+        d['on_cooldown'] = self.on_cooldown
+
+
 class PassingComponent(Component):
     """
     A component responsible for knowing whether items can or cannot be walked
@@ -220,6 +265,7 @@ class HealthComponent(Component):
         if not isinstance(value, int):
             raise BearECSException(f'Attempting to set hitpoints of {self.owner.id} to non-integer {value}')
         self._hitpoints = value
+        print(self._hitpoints)
         if self._hitpoints < 0:
             self._hitpoints = 0
         self.process_hitpoint_update()
