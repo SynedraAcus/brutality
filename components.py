@@ -563,8 +563,9 @@ class HandInterfaceComponent(Component):
     """
     A Component that allows human characters to use hands.
 
-    Shows the correct hand and calls the corresponding item when buttons are
-    pressed. When created, requires two dicts:
+    This entity keeps track of all hand entities assigned to this character. It
+    shows the correct hand at the correct position and expects the hand itself
+    to call the corresponding item. When created, requires two dicts:
 
     `hands_dict` should be a dict with the following
     keys: 'forward_l', 'forward_r', 'back_l', and 'back_r', which should have
@@ -580,7 +581,6 @@ class HandInterfaceComponent(Component):
     Expects owner to have a PositionComponent.
 
     """
-    #TODO: HandInterfaceComponent repr
     def __init__(self, *args, hand_entities, hands_offsets, item_offsets,
                  left_item=None,
                  right_item=None,
@@ -588,7 +588,7 @@ class HandInterfaceComponent(Component):
         super().__init__(*args, name='hands', **kwargs)
         self.hand_entities = hand_entities
         # Offsets of hands relative to the character
-        self.hand_offsets = hands_offsets
+        self.hands_offsets = hands_offsets
         # Offsets of items relative to the hand, ie the position of the
         # outer tip of the hand. For left-facing items, *right edge* of the item
         # should be at this position
@@ -605,8 +605,8 @@ class HandInterfaceComponent(Component):
         # Have to call the HidingComponent directly because show/hide logic does
         # not use the event for communication
         EntityTracker().entities[self.hand_entities[hand]].hiding.show()
-        hand_x = self.owner.position.x + self.hand_offsets[hand][0]
-        hand_y = self.owner.position.y + self.hand_offsets[hand][1]
+        hand_x = self.owner.position.x + self.hands_offsets[hand][0]
+        hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
                                             event_value=(self.hand_entities[hand],
                                                          hand_x, hand_y)))
@@ -631,8 +631,8 @@ class HandInterfaceComponent(Component):
         else:
             hand = 'back_l'
         EntityTracker().entities[self.hand_entities[hand]].hiding.show()
-        hand_x = self.owner.position.x + self.hand_offsets[hand][0]
-        hand_y = self.owner.position.y + self.hand_offsets[hand][1]
+        hand_x = self.owner.position.x + self.hands_offsets[hand][0]
+        hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
                                             event_value=(
                                                 self.hand_entities[hand],
@@ -650,8 +650,13 @@ class HandInterfaceComponent(Component):
             self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
 
     def __repr__(self):
-        d = loads(repr(super()))
-        # To be implemented
+        d = loads(super().__repr__())
+        d['hand_entities'] = self.hand_entities
+        d['hands_offsets'] = self.hands_offsets
+        d['item_offsets'] = self.item_offsets
+        d['left_item'] = self.left_item
+        d['right_item'] = self.right_item
+        return dumps(d)
 
 
 class ItemBehaviourComponent(Component):
@@ -666,7 +671,18 @@ class ItemBehaviourComponent(Component):
         if isinstance(owning_entity, Entity):
             self.owning_entity = owning_entity
         elif isinstance(owning_entity, str):
-            self.owning_entity = EntityTracker().entities[owning_entity]
+            # The item entity can be created (eg during deserialization) before
+            # its owning entity has been announced via 'ecs_create'. If so,
+            # remember owning entity ID and attempt to find the actual entity
+            # when the item is first used. An attempt to use an item without a
+            # correct owning_entity will cause AttributeError (via attempting
+            # to adress 'str.position', 'str.spawner' or something) and will be
+            # caught by self.on_event. If the entity is still not created by
+            # then, no attempt to catch the resulting KeyError is made.
+            try:
+                self.owning_entity = EntityTracker().entities[owning_entity]
+            except KeyError:
+                self._future_owner = owning_entity
         else:
             raise BearECSException(f'A {type(owning_entity)} used as an owning_entity for item')
         self.owning_entity = owning_entity
@@ -677,11 +693,18 @@ class ItemBehaviourComponent(Component):
 
     def on_event(self, event):
         if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:
-            self.use_item()
+            try:
+                self.use_item()
+            except AttributeError:
+                self.owning_entity = EntityTracker().entities[self._future_owner]
+                self.use_item()
 
     def __repr__(self):
-        d = loads(repr(super()))
-        d['owning_entity'] = self.owning_entity.id
+        d = loads(super().__repr__())
+        try:
+            d['owning_entity'] = self.owning_entity.id
+        except AttributeError:
+            d['owning_entity'] = self._future_owner
         return dumps(d)
 
 
@@ -711,7 +734,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
                                  direction=direction)
 
     def __repr__(self):
-        d = loads(repr(super()))
+        d = loads(super().__repr__())
         d['spawned_item'] = self.spawned_item
         d['relative_pos'] = self.relative_pos
         return dumps(d)

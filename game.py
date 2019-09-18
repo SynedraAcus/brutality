@@ -38,11 +38,13 @@ dispatcher.register_listener(layout, 'all')
 factory = MapObjectFactory(atlas, dispatcher, layout)
 
 # Game-specific event types
+# Expected values shown for each type
 dispatcher.register_event_type('brut_damage') # value (int)
 dispatcher.register_event_type('brut_heal') # value (int)
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus') # Entity ID
 dispatcher.register_event_type('brut_use_item') # Entity ID of used item
+dispatcher.register_event_type('brut_use_hand') #hand entity ID
 
 
 ################################################################################
@@ -88,13 +90,14 @@ else:
     # Created before the loop starts, will be added on the first tick
     factory.create_entity('wall', (0, 0), size=(150, 30))
     factory.create_entity('floor', (0, 30), size=(150, 30))
-    # factory.create_entity('cop', (10, 30))
+    factory.create_entity('cop', (10, 30))
     # factory.create_entity('nunchaku_punk', (60, 30))
     factory.create_entity('barrel', (75, 25))
     factory.create_entity('barrel', (61, 50))
-    factory.create_entity('bottle_punk', (60, 30))
+    # factory.create_entity('bottle_punk', (60, 30))
     # factory.create_entity('target', (65, 30))
-    # factory.create_entity('invis', (0, 0), size=(150, 15))
+    # TODO: check if I still need these
+    factory.create_entity('invis', (0, 0), size=(150, 15))
     factory.create_entity('invis', (0, 15), size=(2, 45))
     factory.create_entity('invis', (148, 15), size=(2, 45))
     factory.create_entity('invis', (0, 58), size=(100, 2))

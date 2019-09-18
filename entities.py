@@ -54,7 +54,7 @@ class MapObjectFactory:
         # simple event emitter
         if hasattr(entity, 'spawner'):
             entity.spawner.factory = self
-        if emit_show:
+        if emit_show and not hasattr(entity, 'hiding'):
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id,
                                                             entity.position.x,
                                                             entity.position.y)))
@@ -370,7 +370,7 @@ class MapObjectFactory:
                                                       self.atlas.get_element('bottle_nw')),
                                                       8),
                                            emit_ecs=True)
-            vx = 30
+            vx = 20
         else:
             widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_nw'),
                                                       self.atlas.get_element('bottle_sw'),
@@ -378,10 +378,10 @@ class MapObjectFactory:
                                                       self.atlas.get_element('bottle_ne')),
                                                       8),
                                            emit_ecs=True)
-            vx = -30
+            vx = -20
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
-                                               acceleration=40, vx=20, vy=-35))
+                                               acceleration=40, vx=vx, vy=-35))
         entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
