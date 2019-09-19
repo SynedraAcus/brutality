@@ -219,9 +219,8 @@ class GrenadeComponent(Component):
 
     def on_event(self, event):
         if event.event_type == 'ecs_move' and event.event_value[0] == self.owner.id:
-            print(self.owner.position.y, self.target_y)
             if not self.target_y:
-                self.target_y = self.owner.position.y + 7
+                self.target_y = self.owner.position.y + randint(2, 12)
             if self.owner.position.y >= self.target_y:
                 self.owner.spawner.spawn(self.spawned_item,
                                          (round(self.owner.widget.width/2),
@@ -480,13 +479,14 @@ class MeleeControllerComponent(Component):
     
     Assumes that the owner has SpawnerComponent and WalkerComponent
     """
-    def __init__(self, *args, action_delay=0.5, perception_distance=150, **kwargs):
+    def __init__(self, *args, action_delay=0.5, perception_distance=150,
+                 action_cooldown=0, **kwargs):
         #TODO: separate cooldowns for move and attack(s)
         # Maybe this will not be necessary until I make attack class or smth
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, 'tick')
         self.action_delay = action_delay
-        self.action_cooldown = 0
+        self.action_cooldown = action_cooldown
         self.perception_distance = perception_distance
         
     def on_event(self, event):
@@ -512,8 +512,10 @@ class MeleeControllerComponent(Component):
                 target = current_closest
                 dx = self.owner.position.x - enemy.position.x
                 dy = self.owner.position.y - enemy.position.y
-                dist = sqrt(dx**2 + dy**2)
-                if abs(dx) <= 20 and abs(dy) <= 10:
+                # TODO: let controllers change direction
+                if sqrt(dx**2 + dy**2) > self.perception_distance:
+                    self.action_cooldown = self.action_delay
+                elif abs(dx) <= 20 and abs(dy) <= 10:
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
                 else:
@@ -527,17 +529,76 @@ class MeleeControllerComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'action_delay': self.action_delay,
+                      'action_cooldown': self.action_cooldown,
                       'perception_distance': self.perception_distance})
                 
 
-class RangedControlComponent(Component):
+class BottleControllerComponent(Component):
     """
-    Looks for objects with factions different from its own, tries to establish
-    a clear line of sight and shoots when it can. Does not move towards target
-    along x; when dx is too small, tries to run away
+    A controller for the bottle-throwing punk.
+
+    Looks for entities with a faction different from its own and closes in until
+    dy < 5 and 30 < dx < 50. When this condition is reached, uses an item in
+    right hand (which is expected to be a bottle). If, at any moment, an enemy
+    is closer than that, runs away instead
     """
-    # TODO: make a bottle punk controller
-    pass
+
+    def __init__(self, *args, action_delay=0.5, perception_distance=150,
+                 action_cooldown=0, **kwargs):
+        super().__init__(*args, name='controller', **kwargs)
+        self.dispatcher.register_listener(self, 'tick')
+        self.action_delay = action_delay
+        self.action_cooldown = action_cooldown
+        self.perception_distance = perception_distance
+
+    def on_event(self, event):
+        if event.event_type == 'tick':
+            if self.action_cooldown > 0:
+                self.action_cooldown -= event.event_value
+            if self.action_cooldown <= 0:
+                enemies = list(EntityTracker().filter_entities(
+                    lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
+                current_closest = None
+                min_dist = None
+                for enemy in enemies:
+                    dx = self.owner.position.x - enemy.position.x
+                    dy = self.owner.position.y - enemy.position.y
+                    dist = sqrt(dx**2 + dy**2)
+                    if (not min_dist or min_dist > dist) and dist < self.perception_distance:
+                        current_closest = enemy
+                if not current_closest:
+                    return
+                # Probably easier to recalculate for the selected enemy rather
+                # than bother caching, creating the dict and all that
+                target = current_closest
+                dx = self.owner.position.x - enemy.position.x
+                dy = self.owner.position.y - enemy.position.y
+                if sqrt(dx**2 + dy**2) > self.perception_distance:
+                    self.action_cooldown = self.action_delay
+                elif 30 < abs(dx) < 50 and abs(dy) <= 5:
+                    self.owner.hands.use_right_hand()
+                    self.action_cooldown = self.action_delay
+                elif abs(dx) < 5 and abs(dy) < 5:
+                    # Try melee if caught in close quarters
+                    self.owner.hands.use_left_hand()
+                    self.action_cooldown = self.action_delay
+                elif abs(dx) < 30:
+                    # Run away if 5 < dx < 30, whatever dy
+                    self.owner.position.walk((dx < 0 and -1 or 1, 0))
+                    self.action_cooldown = self.action_delay
+                else:
+                    i = randint(0, abs(dx) + abs(dy))
+                    if i <= abs(dx):
+                        self.owner.position.walk((dx < 0 and 1 or -1, 0))
+                    else:
+                        self.owner.position.walk((0, dy < 0 and 1 or -1))
+                    self.action_cooldown = self.action_delay
+
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'action_delay': self.action_delay,
+                      'action_cooldown': self.action_cooldown,
+                      'perception_distance': self.perception_distance})
 
 
 class DecayComponent(Component):

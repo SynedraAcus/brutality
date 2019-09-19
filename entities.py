@@ -1,3 +1,5 @@
+from random import randint
+
 from bear_hug.bear_utilities import copy_shape, BearECSException
 from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
     DestructorComponent, deserialize_entity
@@ -11,7 +13,8 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     ProjectileCollisionComponent, InputComponent, PassingComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
-    GravityPositionComponent, HazardCollisionComponent, GrenadeComponent
+    GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
+    BottleControllerComponent
 from widgets import PatternGenerator
 
 
@@ -249,7 +252,7 @@ class MapObjectFactory:
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(DestructorHealthComponent(self.dispatcher,
                                                          hitpoints=5))
-        punk.add_component(InputComponent(self.dispatcher))
+        punk.add_component(BottleControllerComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
         # Sttart from here
