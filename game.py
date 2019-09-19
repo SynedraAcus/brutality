@@ -103,3 +103,10 @@ else:
     factory.create_entity('invis', (148, 15), size=(2, 45))
     factory.create_entity('invis', (0, 58), size=(100, 2))
 loop.run()
+
+# TODO: Items that can be picked up
+# TODO: HUD: HP display
+# TODO: HUD: item display
+# TODO: README.md
+# TODO: corpses of enemies
+# TODO: MessageEntity
