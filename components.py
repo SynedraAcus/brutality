@@ -42,6 +42,17 @@ class WalkerComponent(PositionComponent):
         else:
             self.phase = '1'
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
+
+    def turn(self, direction):
+        """
+        Set direction and set correct widget
+        :param direction:
+        :return:
+        """
+        if direction not in ('l', 'r'):
+            raise ValueError('WalkerComponent can only turn l or r')
+        self.owner.position.direction = direction
+        self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):
         if event.event_type == 'tick':
@@ -479,13 +490,15 @@ class MeleeControllerComponent(Component):
     
     Assumes that the owner has SpawnerComponent and WalkerComponent
     """
-    def __init__(self, *args, action_delay=0.5, perception_distance=150,
+    def __init__(self, *args,
+                 action_delay=0.5,
+                 walk_delay=0.2,
+                 perception_distance=150,
                  action_cooldown=0, **kwargs):
-        #TODO: separate cooldowns for move and attack(s)
-        # Maybe this will not be necessary until I make attack class or smth
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, 'tick')
         self.action_delay = action_delay
+        self.walk_delay = walk_delay
         self.action_cooldown = action_cooldown
         self.perception_distance = perception_distance
         
@@ -509,13 +522,16 @@ class MeleeControllerComponent(Component):
                     return
                 # Probably easier to recalculate for the selected enemy rather
                 # than bother caching, creating the dict and all that
-                target = current_closest
-                dx = self.owner.position.x - enemy.position.x
-                dy = self.owner.position.y - enemy.position.y
-                # TODO: let controllers change direction
-                if sqrt(dx**2 + dy**2) > self.perception_distance:
-                    self.action_cooldown = self.action_delay
-                elif abs(dx) <= 20 and abs(dy) <= 10:
+                dx = self.owner.position.x - current_closest.position.x
+                dy = self.owner.position.y - current_closest.position.y
+                if sqrt(dx ** 2 + dy ** 2) > self.perception_distance:
+                    self.action_cooldown = self.walk_delay
+                else:
+                    # Change direction
+                    self.owner.position.turn(dx < 0 and 'r' or 'l')
+                if abs(dx) <= 20 and abs(dy) <= 10:
+                    # TODO: decrease punch flight distance
+                    # and change behaviours accordingly
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
                 else:
@@ -524,11 +540,12 @@ class MeleeControllerComponent(Component):
                         self.owner.position.walk((dx < 0 and 1 or -1, 0))
                     else:
                         self.owner.position.walk((0, dy < 0 and 1 or -1))
-                    self.action_cooldown = self.action_delay
+                    self.action_cooldown = self.walk_delay
                     
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'action_delay': self.action_delay,
+                      'walk_delay': self.walk_delay,
                       'action_cooldown': self.action_cooldown,
                       'perception_distance': self.perception_distance})
                 
@@ -543,11 +560,13 @@ class BottleControllerComponent(Component):
     is closer than that, runs away instead
     """
 
-    def __init__(self, *args, action_delay=0.5, perception_distance=150,
+    def __init__(self, *args, action_delay=1.5, walk_delay=0.2,
+                 perception_distance=150,
                  action_cooldown=0, **kwargs):
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, 'tick')
         self.action_delay = action_delay
+        self.walk_delay = walk_delay
         self.action_cooldown = action_cooldown
         self.perception_distance = perception_distance
 
@@ -568,35 +587,36 @@ class BottleControllerComponent(Component):
                         current_closest = enemy
                 if not current_closest:
                     return
-                # Probably easier to recalculate for the selected enemy rather
-                # than bother caching, creating the dict and all that
-                target = current_closest
-                dx = self.owner.position.x - enemy.position.x
-                dy = self.owner.position.y - enemy.position.y
+                dx = self.owner.position.x - current_closest.position.x
+                dy = self.owner.position.y - current_closest.position.y
                 if sqrt(dx**2 + dy**2) > self.perception_distance:
-                    self.action_cooldown = self.action_delay
-                elif 30 < abs(dx) < 50 and abs(dy) <= 5:
+                    self.action_cooldown = self.walk_delay
+                else:
+                    # Change direction
+                    self.owner.position.turn(dx < 0 and 'r' or 'l')
+                if 30 <= abs(dx) <= 45 and abs(dy) <= 5:
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
-                elif abs(dx) < 5 and abs(dy) < 5:
+                elif abs(dx) < 8 and abs(dy) < 5:
                     # Try melee if caught in close quarters
                     self.owner.hands.use_left_hand()
                     self.action_cooldown = self.action_delay
                 elif abs(dx) < 30:
                     # Run away if 5 < dx < 30, whatever dy
                     self.owner.position.walk((dx < 0 and -1 or 1, 0))
-                    self.action_cooldown = self.action_delay
+                    self.action_cooldown = self.walk_delay
                 else:
                     i = randint(0, abs(dx) + abs(dy))
                     if i <= abs(dx):
                         self.owner.position.walk((dx < 0 and 1 or -1, 0))
                     else:
                         self.owner.position.walk((0, dy < 0 and 1 or -1))
-                    self.action_cooldown = self.action_delay
+                    self.action_cooldown = self.walk_delay
 
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'action_delay': self.action_delay,
+                      'walk_delay': self.walk_delay,
                       'action_cooldown': self.action_cooldown,
                       'perception_distance': self.perception_distance})
 
