@@ -529,8 +529,7 @@ class MeleeControllerComponent(Component):
                 else:
                     # Change direction
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
-                if abs(dx) <= 20 and abs(dy) <= 10:
-                    # TODO: decrease punch flight distance
+                if abs(dx) <= 15 and abs(dy) <= 10:
                     # and change behaviours accordingly
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay

@@ -59,7 +59,7 @@ dispatcher.register_listener(ScrollListener(layout=layout),
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['ecs_collision', 'brut_damage', 'ecs_destroy'])
+dispatcher.register_listener(logger, ['brut_damage'])
 # Save test
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
