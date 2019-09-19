@@ -382,7 +382,6 @@ class MapObjectFactory:
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
                                                acceleration=40, vx=vx, vy=-35))
-        entity.add_component(ProjectileCollisionComponent(self.dispatcher, damage=1))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(GrenadeComponent(self.dispatcher,
                                               spawned_item='flame'))
@@ -625,7 +624,7 @@ class MapObjectFactory:
                                                             spawned_item='bottle',
                                                             relative_pos={
                                                                 'r': (2, -2),
-                                                                'l': (-3, -2)}))
+                                                                'l': (-4, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
