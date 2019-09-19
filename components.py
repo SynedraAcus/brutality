@@ -185,7 +185,11 @@ class HazardCollisionComponent(CollisionComponent):
     def collided_by(self, entity):
         # TODO: do damage to entities who stand in fire and don't move
         if not self.on_cooldown:
-            other = EntityTracker().entities[entity]
+            try:
+                # Covers some weird bug with destroyed bottles colliding into a fire
+                other = EntityTracker().entities[entity]
+            except KeyError:
+                return
             if hasattr(other, 'passability'):
                 if rectangles_collide((self.owner.position.x, self.owner.position.y),
                                       self.owner.widget.size,
