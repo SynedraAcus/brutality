@@ -253,9 +253,9 @@ class MapObjectFactory:
         punk.add_component(DestructorHealthComponent(self.dispatcher,
                                                          hitpoints=5))
         punk.add_component(BottleControllerComponent(self.dispatcher))
+        # punk.add_component(InputComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
-        # Sttart from here
         f_l = self._create_bottle_punk_hand_forward(f'{entity_id}_hand_fl',
                                                       direction='l')
         f_r = self._create_bottle_punk_hand_forward(f'{entity_id}_hand_fr',

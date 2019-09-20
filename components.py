@@ -84,8 +84,9 @@ class GravityPositionComponent(PositionComponent):
         if event.event_type == 'tick':
             self.have_waited += event.event_value
         if self.have_waited >= self.update_freq:
-            self.vy += 1
+            self.vy += round(self.have_waited/self.update_freq)
             self.have_waited = 0
+            print(self.acceleration, self.vy)
         return super().on_event(event)
 
     def __repr__(self):
