@@ -8,7 +8,7 @@ from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, XpLoader
-from bear_hug.widgets import ClosingListener, LoggingListener
+from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 from listeners import ScrollListener, EntityTracker, SavingListener
@@ -23,7 +23,7 @@ args = parser.parse_args()
 ################################################################################
 
 #Bear_hug boilerplate
-t = BearTerminal(font_path='cp437_12x12.png', size='85x60',
+t = BearTerminal(font_path='cp437_12x12.png', size='85x72',
                  title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
@@ -77,6 +77,9 @@ if not args.disable_sound:
 
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
+# TODO: redraw hud for width 80
+t.add_widget(Widget(*atlas.get_element('hud_bg')),
+             (0, 61), layer=1)
 
 ################################################################################
 # Creating initial entities
@@ -90,8 +93,8 @@ else:
     # Created before the loop starts, will be added on the first tick
     factory.create_entity('wall', (0, 0), size=(150, 30))
     factory.create_entity('floor', (0, 30), size=(150, 30))
-    # factory.create_entity('cop', (10, 30))
-    # factory.create_entity('nunchaku_punk', (40, 30))
+    factory.create_entity('cop', (10, 30))
+    factory.create_entity('nunchaku_punk', (40, 30))
     factory.create_entity('barrel', (75, 25))
     factory.create_entity('barrel', (61, 50))
     factory.create_entity('bottle_punk', (70, 30))
