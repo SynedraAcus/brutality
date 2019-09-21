@@ -12,6 +12,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 from listeners import ScrollListener, EntityTracker, SavingListener
+from widgets import HitpointBar
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
@@ -79,6 +80,9 @@ t.start()
 t.add_widget(layout, (0, 0), layer=1)
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
              (0, 61), layer=1)
+hp_bar = HitpointBar(target_entity='cop_1')
+dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
+t.add_widget(hp_bar, (19, 65), layer=2)
 
 ################################################################################
 # Creating initial entities

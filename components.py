@@ -86,7 +86,6 @@ class GravityPositionComponent(PositionComponent):
         if self.have_waited >= self.update_freq:
             self.vy += round(self.have_waited/self.update_freq)
             self.have_waited = 0
-            print(self.acceleration, self.vy)
         return super().on_event(event)
 
     def __repr__(self):
@@ -308,7 +307,6 @@ class HealthComponent(Component):
         if not isinstance(value, int):
             raise BearECSException(f'Attempting to set hitpoints of {self.owner.id} to non-integer {value}')
         self._hitpoints = value
-        print(self._hitpoints)
         if self._hitpoints < 0:
             self._hitpoints = 0
         self.process_hitpoint_update()

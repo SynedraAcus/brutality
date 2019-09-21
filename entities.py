@@ -14,7 +14,7 @@ from components import WalkerComponent, WalkerCollisionComponent, \
     DecayComponent, MeleeControllerComponent, HidingComponent,\
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
-    BottleControllerComponent
+    BottleControllerComponent, HealthComponent
 from widgets import PatternGenerator
 
 
@@ -86,6 +86,7 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
+        return entity.id
 
     def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
@@ -137,6 +138,8 @@ class MapObjectFactory:
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
                                                   faction='police'))
+        cop_entity.add_component(DestructorHealthComponent(self.dispatcher, hitpoints=10))
+        cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
         f_l = self._create_cop_hand_forward(f'{entity_id}_hand_fl',
                                             direction='l')
