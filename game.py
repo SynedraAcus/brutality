@@ -23,7 +23,7 @@ args = parser.parse_args()
 ################################################################################
 
 #Bear_hug boilerplate
-t = BearTerminal(font_path='cp437_12x12.png', size='85x72',
+t = BearTerminal(font_path='cp437_12x12.png', size='81x72',
                  title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
@@ -33,7 +33,7 @@ atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 # Init game screen
 chars = [[' ' for _ in range(150)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
-layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(85, 60))
+layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 60))
 dispatcher.register_listener(layout, 'all')
 factory = MapObjectFactory(atlas, dispatcher, layout)
 
@@ -77,7 +77,6 @@ if not args.disable_sound:
 
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
-# TODO: redraw hud for width 80
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
              (0, 61), layer=1)
 
