@@ -3,6 +3,7 @@ import random
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException
 from bear_hug.widgets import Widget, Label, Layout
 
+
 class PatternGenerator:
     def __init__(self, atlas):
         self.atlas = atlas
@@ -132,7 +133,6 @@ class HitpointBar(Layout):
                       width=self.width, height=1, just='center')
         self.add_child(label, (0, 1))
         self._rebuild_self()
-
 
     def on_event(self, event):
         if event.event_type == 'brut_damage' and event.event_value[0] == self.target_entity:

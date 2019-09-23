@@ -5,11 +5,9 @@ from random import randint
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
-    WidgetComponent, Entity
+    WidgetComponent, Entity, EntityTracker, CollisionComponent
 from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
-
-from listeners import EntityTracker
 
 
 class WalkerComponent(PositionComponent):
@@ -93,55 +91,6 @@ class GravityPositionComponent(PositionComponent):
         {}.update({'acceleration': self.acceleration,
                    'have_waited': self.have_waited})
         return dumps(d)
-
-
-class CollisionComponent(Component):
-    """
-    A component responsible for processing collisions of this object
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, name='collision', **kwargs)
-        self.dispatcher.register_listener(self, 'ecs_collision')
-
-    def on_event(self, event):
-        if event.event_type == 'ecs_collision':
-            if event.event_value[0] == self.owner.id:
-                self.collided_into(event.event_value[1])
-            elif event.event_value[1] == self.owner.id:
-                self.collided_by(event.event_value[0])
-
-    def collided_into(self, entity):
-        pass
-    
-    def collided_by(self, entity):
-        pass
-
-
-class WalkerCollisionComponent(CollisionComponent):
-    """
-    A collision component that, upon colliding into something impassable,
-    moves the entity to where it came from. Expects both entities involved to
-    have a PassabilityComponent
-    """
-
-    def collided_into(self, entity):
-        if entity is not None:
-            other = EntityTracker().entities[entity]
-            if 'passability' in self.owner.__dict__ and 'passability' in other.__dict__:
-                if rectangles_collide((self.owner.position.x + self.owner.passability.shadow_pos[0],
-                                       self.owner.position.y + self.owner.passability.shadow_pos[1]),
-                                      self.owner.passability.shadow_size,
-                                      (other.position.x + other.passability.shadow_pos[0],
-                                       other.position.y + other.passability.shadow_pos[1]),
-                                      other.passability.shadow_size):
-                    self.owner.position.relative_move(self.owner.position.last_move[0] * -1,
-                                                      self.owner.position.last_move[1] * -1)
-        else:
-            # Processing collisions with screen edges without involving passability
-            self.owner.position.relative_move(
-                self.owner.position.last_move[0] * -1,
-                self.owner.position.last_move[1] * -1)
 
 
 class ProjectileCollisionComponent(CollisionComponent):
@@ -242,46 +191,6 @@ class GrenadeComponent(Component):
                                           round(self.owner.widget.height/2)))
                 self.owner.destructor.destroy()
 
-
-class PassingComponent(Component):
-    """
-    A component responsible for knowing whether items can or cannot be walked
-    through.
-    
-    Unlike collisions of eg projectiles, walkers can easily collide with screen
-    items and each other provided they are "behind" or "ahead" of each other. To
-    check for that, PassingComponent stores a sort of hitbox (basically the
-    projection on the surface, something like lowest three rows for a
-    human-sized object). Then, WalkerCollisionComponent uses those to define
-    if walk attempt was unsuccessful.
-    
-    All entities that do not have this component are assumed to be passable.
-    """
-    def __init__(self, *args, shadow_pos=(0, 0), shadow_size=None, **kwargs):
-        super().__init__(*args, name='passability', **kwargs)
-        self.shadow_pos = shadow_pos
-        self._shadow_size = shadow_size
-            
-    @property
-    def shadow_size(self):
-        #TODO: remove the ugly shadow size hack
-        # The idea is that shadow size can be set to owner's widget size by
-        # default. The only issue is that owner may not be set, or may not have
-        # a widget yet, when this component is created. Thus, this hack.
-        # Hopefully no one will try and walk into the object before it is shown
-        # on screen. Alas, it requires calling a method for a frequently used
-        # property and is generally pretty ugly. Remove this if I ever get to
-        # optimizing and manage to think of something better.
-        if self._shadow_size is None:
-            self._shadow_size = self.owner.widget.size
-        return self._shadow_size
-    
-    def __repr__(self):
-        d = {'class': self.__class__.__name__,
-             'shadow_size': self._shadow_size,
-             'shadow_pos': self.shadow_pos}
-        return dumps(d)
-    
     
 class HealthComponent(Component):
     """
@@ -621,42 +530,6 @@ class BottleControllerComponent(Component):
                       'walk_delay': self.walk_delay,
                       'action_cooldown': self.action_cooldown,
                       'perception_distance': self.perception_distance})
-
-
-class DecayComponent(Component):
-    """
-    Attaches to an entity and destroys it when conditions are met.
-    
-    Currently supported destroy conditions are 'keypress' and 'timeout'. If the
-    latter is set, you can supply the lifetime (defaults to 1.0 sec)
-    """
-    
-    def __init__(self, *args, destroy_condition='keypress', lifetime=1.0, age=0,
-                 **kwargs):
-        super().__init__(*args, name='decay', **kwargs)
-        if destroy_condition == 'keypress':
-            self.dispatcher.register_listener(self, 'key_down')
-        elif destroy_condition == 'timeout':
-            self.dispatcher.register_listener(self, 'tick')
-            self.lifetime = lifetime
-            self.age = age
-        else:
-            raise ValueError(f'destroy_condition should be either keypress or timeout')
-        self.destroy_condition = destroy_condition
-
-    def on_event(self, event):
-        if self.destroy_condition == 'keypress' and event.event_type == 'key_down':
-            self.owner.destructor.destroy()
-        elif self.destroy_condition == 'timeout' and event.event_type == 'tick':
-            self.age += event.event_value
-            if self.age >= self.lifetime:
-                self.owner.destructor.destroy()
-
-    def __repr__(self):
-        return dumps({'class': self.__class__.__name__,
-                      'destroy_condition': self.destroy_condition,
-                      'lifetime': self.lifetime,
-                      'age': self.age})
 
 
 class HidingComponent(Component):

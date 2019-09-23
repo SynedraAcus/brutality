@@ -5,13 +5,14 @@ import sys
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
+from bear_hug.ecs import EntityTracker
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, XpLoader
 from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
-from listeners import ScrollListener, EntityTracker, SavingListener
+from listeners import ScrollListener, SavingListener
 from widgets import HitpointBar
 
 parser = ArgumentParser('A game about beating people')

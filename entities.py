@@ -2,16 +2,16 @@ from random import randint
 
 from bear_hug.bear_utilities import copy_shape, BearECSException
 from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
-    DestructorComponent, deserialize_entity
+    DestructorComponent, deserialize_entity, CollisionComponent,\
+    WalkerCollisionComponent, PassingComponent, DecayComponent
 from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget
 
-from components import WalkerComponent, WalkerCollisionComponent, \
-    SwitchWidgetComponent, SpawnerComponent, VisualDamageHealthComponent, \
-    DestructorHealthComponent, FactionComponent, CollisionComponent, \
-    ProjectileCollisionComponent, InputComponent, PassingComponent, \
-    DecayComponent, MeleeControllerComponent, HidingComponent,\
+from components import  SwitchWidgetComponent, SpawnerComponent,\
+    VisualDamageHealthComponent, DestructorHealthComponent, FactionComponent,\
+    ProjectileCollisionComponent, InputComponent, MeleeControllerComponent,\
+    HidingComponent, WalkerComponent, \
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
     BottleControllerComponent, HealthComponent
