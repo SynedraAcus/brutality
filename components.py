@@ -5,7 +5,7 @@ from random import randint
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
-    WidgetComponent, Entity, EntityTracker, CollisionComponent
+    SwitchWidgetComponent, Entity, EntityTracker, CollisionComponent
 from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
 
@@ -269,27 +269,6 @@ class VisualDamageHealthComponent(HealthComponent):
         d = loads(super().__repr__())
         d['widgets_dict'] = self.widgets_dict
         return dumps(d)
-    
-    
-class SwitchWidgetComponent(WidgetComponent):
-    """
-    A widget component that supports SwitchingWidget
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not isinstance(self.widget, SwitchingWidget):
-            raise BearECSException('SwitchWidgetComponent can only be used with SwitchingWidget')
-        
-    def switch_to_image(self, image_id):
-        self.widget.switch_to_image(image_id)
-        
-    def validate_image(self, image_id):
-        """
-        Return True if image_id is a valid ID for its widget
-        :param image_id:
-        :return:
-        """
-        return image_id in self.widget.images
 
 
 class SpawnerComponent(Component):
