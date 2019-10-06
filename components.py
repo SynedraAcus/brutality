@@ -18,7 +18,6 @@ class WalkerComponent(PositionComponent):
     def __init__(self, *args, direction='r', initial_phase='1', **kwargs):
         super().__init__(*args, **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
-        self.last_move = None
         self.direction = direction
         self.phase = initial_phase
         self.moved_this_tick = False
@@ -27,7 +26,6 @@ class WalkerComponent(PositionComponent):
         if self.moved_this_tick:
             return
         self.relative_move(*move)
-        self.last_move = move
         self.moved_this_tick = True
         if move[0] > 0:
             self.direction = 'r'
@@ -204,7 +202,7 @@ class HealthComponent(Component):
     def on_event(self, event):
         if event.event_type == 'brut_damage' and event.event_value[0] == self.owner.id:
             self.hitpoints -= event.event_value[1]
-        elif event.event_type == 'brut_damage' and event.event_value[0] == self.owner.id:
+        elif event.event_type == 'brut_heal' and event.event_value[0] == self.owner.id:
             self.hitpoints += event.event_value[1]
 
     @property
@@ -341,16 +339,16 @@ class InputComponent(Component):
                 # Mostly debug. Eventually will be the rush or jump command
                 pass
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
-                self.last_move = (2, 0)
+                last_move = (2, 0)
                 moved = True
             elif event.event_value in ('TK_A', 'TK_LEFT'):
-                self.last_move = (-2, 0)
+                last_move = (-2, 0)
                 moved = True
             elif event.event_value in ('TK_S', 'TK_DOWN'):
-                self.last_move = (0, 2)
+                last_move = (0, 2)
                 moved = True
             elif event.event_value in ('TK_W', 'TK_UP'):
-                self.last_move = (0, -2)
+                last_move = (0, -2)
                 moved = True
             elif event.event_value == 'TK_KP_6':
                 r.append(BearEvent(event_type='ecs_scroll_by',
@@ -368,7 +366,7 @@ class InputComponent(Component):
                 r.append(BearEvent(event_type='ecs_scroll_to',
                                    event_value=(0, 0)))
             if moved:
-                self.owner.position.walk(self.last_move)
+                self.owner.position.walk(last_move)
                 r.append(BearEvent(event_type='play_sound',
                                    event_value='step'))
         return r
