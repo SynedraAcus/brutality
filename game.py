@@ -106,5 +106,5 @@ loop.run()
 
 # TODO: Items that can be picked up
 # TODO: HUD: item display
-# TODO: corpses of enemies
+# TODO: directions for corpses
 # TODO: MessageEntity

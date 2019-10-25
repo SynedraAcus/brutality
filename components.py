@@ -238,6 +238,23 @@ class DestructorHealthComponent(HealthComponent):
             self.owner.destructor.destroy()
 
 
+class SpawnerHealthComponent(HealthComponent):
+    """
+    Destroys entity and creates a corpse upon reaching zero HP
+
+    Expects owner to have SpawnerComponent and DestructorComponent
+    """
+    def __init__(self, *args, corpse_type=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.corpse_type = corpse_type
+
+    def process_hitpoint_update(self):
+        if self.hitpoints == 0:
+            self.owner.spawner.spawn(self.corpse_type,
+                                     relative_pos=(0, self.owner.widget.height - 5))
+            self.owner.destructor.destroy()
+
+
 class VisualDamageHealthComponent(HealthComponent):
     """
     A health component for non-active objects.

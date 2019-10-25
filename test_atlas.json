@@ -42,18 +42,11 @@
     "ysize": 17
   },
   {
-    "name": "cop_shooting_r",
-    "x": 64,
-    "y": 1,
-    "xsize": 9,
-    "ysize": 2
-  },
-  {
-    "name": "cop_shooting_l",
-    "x": 64,
-    "y": 4,
-    "xsize": 9,
-    "ysize": 2
+    "name": "cop_corpse",
+    "x": 12,
+    "y": 2,
+    "xsize": 18,
+    "ysize": 8
   },
   {
     "name": "cop_hand_back_r",
@@ -140,6 +133,13 @@
     "ysize": 17
   },
   {
+    "name": "nunchaku_punk_corpse",
+    "x": 13,
+    "y": 11,
+    "xsize": 20,
+    "ysize": 7
+  },
+  {
     "name": "punk_hand_back_r",
     "x": 48,
     "y": 19,
@@ -222,6 +222,13 @@
     "y": 54,
     "xsize": 7,
     "ysize": 17
+  },
+  {
+    "name": "bottle_punk_corpse",
+    "x": 57,
+    "y": 54,
+    "xsize": 20,
+    "ysize": 7
   },
   {
     "name": "bottle_punk_hand_forward_r",
