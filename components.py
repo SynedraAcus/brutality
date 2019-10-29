@@ -354,7 +354,7 @@ class InputComponent(Component):
                 self.owner.hands.use_right_hand()
             elif event.event_value == 'TK_SPACE':
                 # Mostly debug. Eventually will be the rush or jump command
-                pass
+                self.owner.hands.pick_up(hand='left')
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 last_move = (2, 0)
                 moved = True
@@ -673,6 +673,36 @@ class HandInterfaceComponent(Component):
                                                                    item_y)
             self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
 
+    def pick_up(self, hand='right'):
+        """
+        Pick up whatever item is on the ground under owner
+
+        :param hand: Either 'left' or 'right'. Pick up in that hand.
+        :return:
+        """
+        # Drop current item in that hand, if any.
+        item_id = hand == 'right' and self.right_item or self.left_item
+        item = EntityTracker().entities[item_id]
+        item.hiding.show()
+        item.item_behaviour.owning_entity = None
+        # Find a new entity
+        # TODO: more elegant search for items to pick up
+        other_item = None
+        for entity in EntityTracker().filter_entities(lambda x: hasattr(x, 'collectable')):
+            if rectangles_collide((entity.position.x, entity.position.y),
+                                   entity.widget.size,
+                                  (self.owner.position.x, self.owner.position.y),
+                                   self.owner.widget.size):
+                other_item = entity
+                break
+        if other_item:
+            other_item.item_behaviour.owning_entity = self.owner
+            other_item.hiding.hide()
+            if hand == 'right':
+                self.right_item = other_item.id
+            elif hand == 'left':
+                self.left_item = other_item.id
+
     def __repr__(self):
         d = loads(super().__repr__())
         d['hand_entities'] = self.hand_entities
@@ -681,6 +711,16 @@ class HandInterfaceComponent(Component):
         d['left_item'] = self.left_item
         d['right_item'] = self.right_item
         return dumps(d)
+
+
+class CollectableBehaviourComponent(Component):
+    """
+    A behaviour component for the item that can be picked up
+
+    This is actually empty and marks entity as pick up-able.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, name='collectable', **kwargs)
 
 
 class ItemBehaviourComponent(Component):
@@ -692,6 +732,8 @@ class ItemBehaviourComponent(Component):
         super().__init__(*args, name='item_behaviour', **kwargs)
         # Actual entity (ie character) who uses the item. Not to be mistaken
         # for self.owner, which is item
+        # TODO: wrap owning_entity in @property
+        # Otherwise its validity is only checked on creation
         if isinstance(owning_entity, Entity):
             self.owning_entity = owning_entity
         elif isinstance(owning_entity, str):
@@ -707,7 +749,8 @@ class ItemBehaviourComponent(Component):
                 self.owning_entity = EntityTracker().entities[owning_entity]
             except KeyError:
                 self._future_owner = owning_entity
-        else:
+        elif owning_entity is not None:
+            # owning_entity can be empty, but not some incorrect type
             raise BearECSException(f'A {type(owning_entity)} used as an owning_entity for item')
         self.owning_entity = owning_entity
         self.dispatcher.register_listener(self, 'brut_use_item')

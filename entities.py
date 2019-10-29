@@ -14,7 +14,7 @@ from components import  SwitchWidgetComponent, SpawnerComponent,\
     HidingComponent, WalkerComponent, SpawnerHealthComponent, \
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
-    BottleControllerComponent, HealthComponent
+    BottleControllerComponent, HealthComponent, CollectableBehaviourComponent
 from widgets import PatternGenerator
 
 
@@ -480,6 +480,7 @@ class MapObjectFactory:
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.
+    # TODO: ditto for corpses
     def _create_muzzle_flash(self, entity_id, direction='r'):
         entity = Entity(entity_id)
         if direction == 'r':
@@ -605,6 +606,7 @@ class MapObjectFactory:
                                              hide_condition='timeout',
                                              lifetime=0.25,
                                              is_working=False))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
@@ -651,6 +653,7 @@ class MapObjectFactory:
                                              hide_condition='timeout',
                                              lifetime=0.25,
                                              is_working=False))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
@@ -664,6 +667,7 @@ class MapObjectFactory:
             initial_image='r')
         entity.add_component(SwitchWidgetComponent(self.dispatcher,
                                                    widget))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                                             owning_entity=owning_entity,
                                                             spawned_item='bottle',
