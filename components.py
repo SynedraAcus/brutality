@@ -729,9 +729,17 @@ class HandInterfaceComponent(Component):
         if other_item is None:
             # If there is no item, drop whatever there was and reactivate fist
             if hand == 'right':
-                self.right_item = f'{self.owner.id}_right_fist'
+                self.right_item = f'fist_{self.owner.id}_right'
+                self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                    (self.owner.id,
+                                                     'right',
+                                                     self.right_item)))
             else:
-                self.left_item = f'{self.owner.id}_right_fist'
+                self.left_item = f'fist_{self.owner.id}_right'
+                self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                    (self.owner.id,
+                                                     'left',
+                                                     self.left_item)))
         else:
             # Pick up that item
             other_item.item_behaviour.owning_entity = self.owner
@@ -740,6 +748,10 @@ class HandInterfaceComponent(Component):
                 self.right_item = other_item.id
             elif hand == 'left':
                 self.left_item = other_item.id
+            self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                (self.owner.id,
+                                                 hand,
+                                                 other_item.id)))
 
     def __repr__(self):
         d = loads(super().__repr__())

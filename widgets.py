@@ -149,3 +149,24 @@ class HitpointBar(Layout):
             self.children[1].text = f'{self.current_hp}/{self.max_hp}'
             self._rebuild_self()
             self.terminal.update_widget(self)
+
+
+class ItemWindow(Widget):
+    """
+    A window that displays an item icon within HUD
+    """
+    def __init__(self, target_entity, target_hand,
+                 atlas):
+        chars = [[' ' for x in range(14)] for y in range(9)]
+        colors = copy_shape(chars, '000')
+        super().__init__(chars, colors)
+        self.target_entity = target_entity
+        self.target_hand = target_hand
+        self.atlas = atlas
+
+    def on_event(self, event):
+        if event.event_type == 'brut_pick_up':
+            if event.event_value[0] == self.target_entity and event.event_value[1] == self.target_hand:
+                icon_id = f"{event.event_value[2].split('_')[0]}_icon"
+                self.chars, self.colors = self.atlas.get_element(icon_id)
+                self.terminal.update_widget(self)

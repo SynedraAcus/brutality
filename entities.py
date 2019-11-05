@@ -157,10 +157,10 @@ class MapObjectFactory:
         # pistol = self._create_pistol(f'{entity_id}_left_pistol',
         #                              owning_entity=cop_entity)
         # self.dispatcher.add_event(BearEvent('ecs_create', pistol))
-        left_fist = self._create_fist(f'{entity_id}_left_fist',
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
                                  owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
-        right_fist = self._create_fist(f'{entity_id}_right_fist',
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
                                        owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         cop_entity.add_component(HandInterfaceComponent(self.dispatcher,

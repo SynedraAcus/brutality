@@ -13,7 +13,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
 from listeners import ScrollListener, SavingListener
-from widgets import HitpointBar
+from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
@@ -47,6 +47,7 @@ dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus') # Entity ID
 dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 dispatcher.register_event_type('brut_use_hand') #hand entity ID
+dispatcher.register_event_type('brut_pick_up') # owner entity ID, which hand (left or right), picked up entity ID
 
 
 ################################################################################
@@ -61,7 +62,7 @@ dispatcher.register_listener(ScrollListener(layout=layout),
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['brut_damage'])
+dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
 # Save test
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
@@ -74,15 +75,25 @@ if not args.disable_sound:
 
 
 ################################################################################
-# Starting the game terminal and adding main ECSLayout
+# Starting the game terminal and adding main widgets
 ################################################################################
 
 t.start()
 t.add_widget(layout, (0, 0), layer=1)
+# HUD elements
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
              (0, 51), layer=1)
 hp_bar = HitpointBar(target_entity='cop_1')
 dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
+left_item_window = ItemWindow('cop_1', 'left', atlas)
+dispatcher.register_listener(left_item_window, 'brut_pick_up')
+t.add_widget(left_item_window, (1, 52), layer=2)
+right_item_window = ItemWindow('cop_1', 'right', atlas)
+dispatcher.register_listener(right_item_window, 'brut_pick_up')
+t.add_widget(right_item_window, (66, 52), layer=2)
+# Pseudo-events to let HUD know about the default fists
+dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'left', 'fist_pseudo')))
+dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'right', 'fist_pseudo')))
 t.add_widget(hp_bar, (19, 55), layer=2)
 
 ################################################################################
@@ -106,7 +117,5 @@ else:
     # factory.create_entity('bottle_punk', (70, 20))
 loop.run()
 
-# TODO: Items that can be picked up
-# TODO: HUD: item display
 # TODO: directions for corpses
 # TODO: MessageEntity

@@ -14,6 +14,27 @@
     "ysize": 11
   },
   {
+    "name": "nunchaku_icon",
+    "x": 36,
+    "y": 84,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
+    "name": "fist_icon",
+    "x": 51,
+    "y": 84,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
+    "name": "pistol_icon",
+    "x": 66,
+    "y": 84,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
     "name": "cop_r_1",
     "x": 40,
     "y": 1,
