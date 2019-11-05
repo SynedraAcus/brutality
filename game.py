@@ -114,6 +114,10 @@ else:
     # factory.create_entity('nunchaku_punk', (40, 20))
     factory.create_entity('barrel', (75, 15))
     factory.create_entity('barrel', (61, 41))
+    # Messages and stuff
+    factory.create_entity('message', (20, 20),
+                          text='This is a sample message.\nPress any key to hide it.',
+                          vx=0, vy=-2, lifetime=10)
     # factory.create_entity('bottle_punk', (70, 20))
 loop.run()
 

@@ -6,7 +6,7 @@ from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
     WalkerCollisionComponent, PassingComponent, DecayComponent
 from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
-    SwitchingWidget
+    SwitchingWidget, Label
 
 from components import  SwitchWidgetComponent, SpawnerComponent,\
     VisualDamageHealthComponent, DestructorHealthComponent, FactionComponent,\
@@ -87,6 +87,17 @@ class MapObjectFactory:
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
         return entity.id
+
+    def _create_message(self, entity_id, text = 'Sample text\nsample text',
+                        vx=0, vy=0, destroy_condition='keypress', lifetime=2.0):
+        message = Entity(id=entity_id)
+        widget = Label(text)
+        message.add_component(WidgetComponent(self.dispatcher, widget))
+        message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy))
+        message.add_component(DestructorComponent(self.dispatcher))
+        message.add_component(DecayComponent(self.dispatcher, destroy_condition=destroy_condition,
+                                             lifetime=lifetime))
+        return message
 
     def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
