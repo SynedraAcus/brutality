@@ -14,7 +14,9 @@ from components import  SwitchWidgetComponent, SpawnerComponent,\
     HidingComponent, WalkerComponent, SpawnerHealthComponent, \
     HandInterfaceComponent, SpawningItemBehaviourComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
-    BottleControllerComponent, HealthComponent, CollectableBehaviourComponent
+    BottleControllerComponent, HealthComponent, CollectableBehaviourComponent, \
+    SpawnerCollisionComponent
+
 from widgets import PatternGenerator
 
 
@@ -98,6 +100,22 @@ class MapObjectFactory:
         message.add_component(DecayComponent(self.dispatcher, destroy_condition=destroy_condition,
                                              lifetime=lifetime))
         return message
+
+    def _create_message_spawner(self, entity_id, xsize=10, ysize=10,
+                                entity_filter = lambda x: True, **kwargs):
+        spawner = Entity(id = entity_id)
+        chars = [[' ' for x in range(xsize)] for y in range(ysize)]
+        colors = copy_shape(chars, '000')
+        widget = Widget(chars, colors)
+        spawner.add_component(WidgetComponent(self.dispatcher, widget))
+        spawner.add_component(PositionComponent(self.dispatcher))
+        spawner.add_component(DestructorComponent(self.dispatcher))
+        spawner.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        spawner.add_component(SpawnerCollisionComponent(self.dispatcher,
+                                                        entity_filter=entity_filter,
+                                                        spawned_item='message',
+                                                        spawn_kwargs=kwargs))
+        return spawner
 
     def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)

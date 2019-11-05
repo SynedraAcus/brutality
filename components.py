@@ -163,6 +163,33 @@ class HazardCollisionComponent(CollisionComponent):
         d['on_cooldown'] = self.on_cooldown
 
 
+class SpawnerCollisionComponent(CollisionComponent):
+    """
+    Spawns something when a correct entity collides into it
+
+    Expects the owner to have SpawnComponent, PositionComponent and WidgetComponent
+    """
+    def __init__(self, *args, entity_filter=lambda x: True,
+                 spawned_item='message', spawn_kwargs={'text': 'Spawned text'},
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        if not hasattr(entity_filter, '__call__'):
+            raise BearECSException('entity_filter should be callable')
+        self.entity_filter = entity_filter
+        self.spawned_item = spawned_item
+        self.spawn_kwargs = spawn_kwargs
+
+    def collided_by(self, entity):
+        if self.entity_filter(entity):
+            print(entity)
+            # If collided into by a correct entity
+            self.owner.spawner.spawn(self.spawned_item,
+                                     (round(self.owner.widget.width/2),
+                                      round(self.owner.widget.height/2)),
+                                     **self.spawn_kwargs)
+            self.owner.destructor.destroy()
+
+
 class GrenadeComponent(Component):
     """
     The grenade behaviour.

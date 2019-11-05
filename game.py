@@ -108,16 +108,23 @@ else:
     # Created before the loop starts, will be added on the first tick
     factory.create_entity('wall', (0, 0), size=(150, 20))
     factory.create_entity('floor', (0, 20), size=(150, 30))
-    factory.create_entity('cop', (10, 25))
-    factory.create_entity('pistol', (40, 30))
-    factory.create_entity('nunchaku', (40, 40))
-    # factory.create_entity('nunchaku_punk', (40, 20))
-    factory.create_entity('barrel', (75, 15))
-    factory.create_entity('barrel', (61, 41))
+    factory.create_entity('cop', (5, 25))
+    # factory.create_entity('pistol', (40, 30))
+    # factory.create_entity('nunchaku', (40, 40))
+    # # factory.create_entity('nunchaku_punk', (40, 20))
+    # factory.create_entity('barrel', (75, 15))
+    # factory.create_entity('barrel', (61, 41))
     # Messages and stuff
     factory.create_entity('message', (20, 20),
-                          text='This is a sample message.\nPress any key to hide it.',
-                          vx=0, vy=-2, lifetime=10)
+                          text='Walk with WASD or arrow keys.',
+                          destroy_condition='timeout',
+                          vy=-2, lifetime=5)
+    factory.create_entity('message_spawner', (30, 20),
+                          xsize=8, ysize=30,
+                          entity_filter=lambda x: x == 'cop_1',
+                          text='Use your hands with Q and E\nCurrently, you can only punch with your fists,\nso beat the shit out of this target',
+                          destroy_condition='timeout', lifetime=5,
+                          vy=-2)
     # factory.create_entity('bottle_punk', (70, 20))
 loop.run()
 
