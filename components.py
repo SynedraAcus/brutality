@@ -708,13 +708,13 @@ class HandInterfaceComponent(Component):
 
         # See if there is an item on the ground
         # TODO: more elegant search for items to pick up
-        # TODO: pick up only from the lowest few chars, under feet
         other_item = None
         for entity in EntityTracker().filter_entities(lambda x: hasattr(x, 'collectable')):
             if rectangles_collide((entity.position.x, entity.position.y),
                                   entity.widget.size,
-                                  (self.owner.position.x, self.owner.position.y),
-                                  self.owner.widget.size):
+                                  (self.owner.position.x,
+                                   self.owner.position.y + self.owner.widget.height - 5),
+                                  (self.owner.widget.width, 5)):
                 other_item = entity
                 break
         # Drop any non-fist item in hand
