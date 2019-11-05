@@ -535,6 +535,7 @@ class HidingComponent(Component):
     """
     def __init__(self, *args, hide_condition='keypress',
                  lifetime=1.0, age=0, is_working=True,
+                 should_hide=True,
                  **kwargs):
         super().__init__(*args, name='hiding', **kwargs)
         if hide_condition == 'keypress':
@@ -548,14 +549,29 @@ class HidingComponent(Component):
         # This is set to True whenever the owner's widget is actually shown, to
         # avoid triggering when the Entity is already hidden
         self.is_working = is_working
+        # This is set to False when item should not be hidden
+        self.should_hide = should_hide
         self.hide_condition = hide_condition
 
     def hide(self):
+        self.should_hide = True
         self.is_working = False
         self.dispatcher.add_event(BearEvent(event_type='ecs_remove',
                                             event_value=self.owner.id))
 
+    def unhide(self):
+        """
+        Stop hiding the entity forever
+        :return:
+        """
+        self.should_hide = False
+        self.show()
+
     def show(self):
+        """
+        Show temporarily, until self.hide_condition becomes true
+        :return:
+        """
         if not self.is_working:
             self.is_working = True
             self.dispatcher.add_event(BearEvent(event_type='ecs_add',
@@ -566,7 +582,7 @@ class HidingComponent(Component):
                 self.age = 0
 
     def on_event(self, event):
-        if not self.is_working:
+        if not self.should_hide or not self.is_working:
             return
         if self.hide_condition == 'keypress' and event.event_type == 'key_down':
             self.hide()
@@ -680,11 +696,7 @@ class HandInterfaceComponent(Component):
         :param hand: Either 'left' or 'right'. Pick up in that hand.
         :return:
         """
-        # Drop current item in that hand, if any.
-        item_id = hand == 'right' and self.right_item or self.left_item
-        item = EntityTracker().entities[item_id]
-        item.hiding.show()
-        item.item_behaviour.owning_entity = None
+
         # Find a new entity
         # TODO: more elegant search for items to pick up
         other_item = None
@@ -696,6 +708,13 @@ class HandInterfaceComponent(Component):
                 other_item = entity
                 break
         if other_item:
+            # Drop current item in that hand, if any.
+            item_id = hand == 'right' and self.right_item or self.left_item
+            item = EntityTracker().entities[item_id]
+            item.hiding.unhide()
+            item.item_behaviour.owning_entity = None
+            item.position.move(self.owner.position.x,
+                               self.owner.position.y + self.owner.widget.height - item.widget.height)
             other_item.item_behaviour.owning_entity = self.owner
             other_item.hiding.hide()
             if hand == 'right':
@@ -763,6 +782,7 @@ class ItemBehaviourComponent(Component):
             try:
                 self.use_item()
             except AttributeError:
+                print(self.owner.id)
                 self.owning_entity = EntityTracker().entities[self._future_owner]
                 self.use_item()
 

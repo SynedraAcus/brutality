@@ -99,6 +99,7 @@ else:
     factory.create_entity('floor', (0, 20), size=(150, 30))
     factory.create_entity('cop', (10, 25))
     factory.create_entity('pistol', (40, 30))
+    factory.create_entity('nunchaku', (40, 40))
     # factory.create_entity('nunchaku_punk', (40, 20))
     factory.create_entity('barrel', (75, 15))
     factory.create_entity('barrel', (61, 40))
