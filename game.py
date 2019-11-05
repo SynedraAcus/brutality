@@ -114,8 +114,9 @@ else:
     factory.create_entity('target', (90, 20))
     factory.create_entity('pistol', (65, 30))
     # factory.create_entity('nunchaku', (40, 40))
-    factory.create_entity('nunchaku_punk', (210, 20))
+    factory.create_entity('nunchaku_punk', (210, 8))
     factory.create_entity('bottle_punk', (230, 20))
+    factory.create_entity('bottle_punk', (220, 32))
     # factory.create_entity('barrel', (75, 15))
     # factory.create_entity('barrel', (61, 41))
     # Messages and stuff
@@ -135,7 +136,7 @@ else:
                           text='Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
                           destroy_condition='timeout', lifetime=5,
                           vy=-2)
-    factory.create_entity('message_spawner', (70, 20),
+    factory.create_entity('message_spawner', (95, 20),
                           xsize=8, ysize=30,
                           entity_filter=lambda x: x == 'cop_1',
                           text='Now go along and finish these punks!',
