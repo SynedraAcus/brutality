@@ -154,15 +154,15 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
-        pistol = self._create_pistol(f'{entity_id}_left_pistol',
-                                     owning_entity=cop_entity)
-        self.dispatcher.add_event(BearEvent('ecs_create', pistol))
-        # fist = self._create_fist(f'{entity_id}_fist',
-        #                          owning_entity=cop_entity)
-        # self.dispatcher.add_event(BearEvent('ecs_create', fist))
-        nunchaku = self._create_nunchaku(f'{entity_id}_nunchaku',
-                                         owning_entity=cop_entity)
-        self.dispatcher.add_event(BearEvent('ecs_create', nunchaku))
+        # pistol = self._create_pistol(f'{entity_id}_left_pistol',
+        #                              owning_entity=cop_entity)
+        # self.dispatcher.add_event(BearEvent('ecs_create', pistol))
+        left_fist = self._create_fist(f'{entity_id}_left_fist',
+                                 owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'{entity_id}_right_fist',
+                                       owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
                                                         hand_entities={
                                                             'forward_l': f_l.id,
@@ -179,8 +179,8 @@ class MapObjectFactory:
                                                             'forward_r': (7, 0),
                                                             'back_l': (0, 0),
                                                             'back_r': (4, 0)},
-                                                        left_item=nunchaku.id,
-                                                        right_item=pistol.id))
+                                                        left_item=left_fist.id,
+                                                        right_item=right_fist.id))
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity

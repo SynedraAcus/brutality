@@ -334,7 +334,7 @@ class InputComponent(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, 'key_down')
-        
+
     def on_event(self, event):
         #TODO: Support non-hardcoded actions and keys
         x = super().on_event(event)
@@ -347,14 +347,18 @@ class InputComponent(Component):
         if event.event_type == 'key_down':
             moved = False
             if event.event_value == 'TK_Q':
-                # left-handed punch
+                # left-handed attack
                 self.owner.hands.use_left_hand()
             elif event.event_value == 'TK_E':
                 # Right-handed attack
                 self.owner.hands.use_right_hand()
+            elif event.event_value == 'TK_Z':
+                self.owner.hands.pick_up(hand='left')
+            elif event.event_value == 'TK_C':
+                self.owner.hands.pick_up(hand='right')
             elif event.event_value == 'TK_SPACE':
                 # Mostly debug. Eventually will be the rush or jump command
-                self.owner.hands.pick_up(hand='left')
+                pass
             elif event.event_value in ('TK_D', 'TK_RIGHT'):
                 last_move = (2, 0)
                 moved = True
@@ -594,6 +598,7 @@ class HidingComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'hide_condition': self.hide_condition,
+                      'should_hide': self.should_hide,
                       'lifetime': self.lifetime,
                       'age': self.age,
                       'is_working': self.is_working})
@@ -691,30 +696,44 @@ class HandInterfaceComponent(Component):
 
     def pick_up(self, hand='right'):
         """
-        Pick up whatever item is on the ground under owner
+        Pick up whatever item is on the ground under owner.
+
+        If owner has any non-fist item in that hand, drop it.
+        Then, if there is an item available, pick it up; otherwise, set fist
+        as an active item.
 
         :param hand: Either 'left' or 'right'. Pick up in that hand.
         :return:
         """
 
-        # Find a new entity
+        # See if there is an item on the ground
         # TODO: more elegant search for items to pick up
+        # TODO: pick up only from the lowest few chars, under feet
         other_item = None
         for entity in EntityTracker().filter_entities(lambda x: hasattr(x, 'collectable')):
             if rectangles_collide((entity.position.x, entity.position.y),
-                                   entity.widget.size,
+                                  entity.widget.size,
                                   (self.owner.position.x, self.owner.position.y),
-                                   self.owner.widget.size):
+                                  self.owner.widget.size):
                 other_item = entity
                 break
-        if other_item:
-            # Drop current item in that hand, if any.
-            item_id = hand == 'right' and self.right_item or self.left_item
+        # Drop any non-fist item in hand
+        # Drops after checking to avoid endless drop-and-pick-up cycle
+        item_id = hand == 'right' and self.right_item or self.left_item
+        if 'fist' not in item_id:
             item = EntityTracker().entities[item_id]
             item.hiding.unhide()
             item.item_behaviour.owning_entity = None
             item.position.move(self.owner.position.x,
                                self.owner.position.y + self.owner.widget.height - item.widget.height)
+        if other_item is None:
+            # If there is no item, drop whatever there was and reactivate fist
+            if hand == 'right':
+                self.right_item = f'{self.owner.id}_right_fist'
+            else:
+                self.left_item = f'{self.owner.id}_right_fist'
+        else:
+            # Pick up that item
             other_item.item_behaviour.owning_entity = self.owner
             other_item.hiding.hide()
             if hand == 'right':
