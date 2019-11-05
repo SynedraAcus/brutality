@@ -782,11 +782,19 @@ class ItemBehaviourComponent(Component):
         super().__init__(*args, name='item_behaviour', **kwargs)
         # Actual entity (ie character) who uses the item. Not to be mistaken
         # for self.owner, which is item
-        # TODO: wrap owning_entity in @property
-        # Otherwise its validity is only checked on creation
-        if isinstance(owning_entity, Entity):
-            self.owning_entity = owning_entity
-        elif isinstance(owning_entity, str):
+        self._owning_entity = None
+        self.owning_entity = owning_entity
+        self.dispatcher.register_listener(self, 'brut_use_item')
+
+    @property
+    def owning_entity(self):
+        return self._owning_entity
+
+    @owning_entity.setter
+    def owning_entity(self, value):
+        if isinstance(value, Entity):
+            self._owning_entity = value
+        elif isinstance(value, str):
             # The item entity can be created (eg during deserialization) before
             # its owning entity has been announced via 'ecs_create'. If so,
             # remember owning entity ID and attempt to find the actual entity
@@ -796,14 +804,12 @@ class ItemBehaviourComponent(Component):
             # caught by self.on_event. If the entity is still not created by
             # then, no attempt to catch the resulting KeyError is made.
             try:
-                self.owning_entity = EntityTracker().entities[owning_entity]
+                self._owning_entity = EntityTracker().entities[value]
             except KeyError:
-                self._future_owner = owning_entity
-        elif owning_entity is not None:
+                self._future_owner = value
+        elif value is not None:
             # owning_entity can be empty, but not some incorrect type
-            raise BearECSException(f'A {type(owning_entity)} used as an owning_entity for item')
-        self.owning_entity = owning_entity
-        self.dispatcher.register_listener(self, 'brut_use_item')
+            raise BearECSException(f'A {type(value)} used as an owning_entity for item')
 
     def use_item(self):
         raise NotImplementedError('ItemBehaviourComponent.use_item should be overridden')
