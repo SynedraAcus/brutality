@@ -25,7 +25,7 @@ args = parser.parse_args()
 ################################################################################
 
 #Bear_hug boilerplate
-t = BearTerminal(font_path='cp437_12x12.png', size='81x72',
+t = BearTerminal(font_path='cp437_12x12.png', size='81x61',
                  title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
@@ -82,19 +82,19 @@ t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # HUD elements
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
-             (0, 51), layer=1)
+             (0, 50), layer=1)
 hp_bar = HitpointBar(target_entity='cop_1')
 dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
 left_item_window = ItemWindow('cop_1', 'left', atlas)
 dispatcher.register_listener(left_item_window, 'brut_pick_up')
-t.add_widget(left_item_window, (1, 52), layer=2)
+t.add_widget(left_item_window, (1, 51), layer=2)
 right_item_window = ItemWindow('cop_1', 'right', atlas)
 dispatcher.register_listener(right_item_window, 'brut_pick_up')
-t.add_widget(right_item_window, (66, 52), layer=2)
+t.add_widget(right_item_window, (66, 51), layer=2)
 # Pseudo-events to let HUD know about the default fists
 dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'left', 'fist_pseudo')))
 dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'right', 'fist_pseudo')))
-t.add_widget(hp_bar, (19, 55), layer=2)
+t.add_widget(hp_bar, (19, 54), layer=2)
 
 ################################################################################
 # Creating initial entities
@@ -113,7 +113,7 @@ else:
     factory.create_entity('nunchaku', (40, 40))
     # factory.create_entity('nunchaku_punk', (40, 20))
     factory.create_entity('barrel', (75, 15))
-    factory.create_entity('barrel', (61, 40))
+    factory.create_entity('barrel', (61, 41))
     # factory.create_entity('bottle_punk', (70, 20))
 loop.run()
 
