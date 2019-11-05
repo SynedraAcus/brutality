@@ -7,6 +7,7 @@ from bear_hug.bear_utilities import BearLayoutException
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
 from bear_hug.widgets import Listener
+from bear_hug.ecs import EntityTracker
 
 
 class ScrollListener(Listener):

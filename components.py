@@ -707,7 +707,6 @@ class HandInterfaceComponent(Component):
         """
 
         # See if there is an item on the ground
-        # TODO: more elegant search for items to pick up
         other_item = None
         for entity in EntityTracker().filter_entities(lambda x: hasattr(x, 'collectable')):
             if rectangles_collide((entity.position.x, entity.position.y),
