@@ -181,7 +181,6 @@ class SpawnerCollisionComponent(CollisionComponent):
 
     def collided_by(self, entity):
         if self.entity_filter(entity):
-            print(entity)
             # If collided into by a correct entity
             self.owner.spawner.spawn(self.spawned_item,
                                      (round(self.owner.widget.width/2),

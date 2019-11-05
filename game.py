@@ -33,7 +33,7 @@ dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
 atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 
 # Init game screen
-chars = [[' ' for _ in range(150)] for y in range(50)]
+chars = [[' ' for _ in range(250)] for y in range(50)]
 colors = copy_shape(chars, 'gray')
 layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 50))
 dispatcher.register_listener(layout, 'all')
@@ -54,7 +54,8 @@ dispatcher.register_event_type('brut_pick_up') # owner entity ID, which hand (le
 # Starting various listeners
 ################################################################################
 
-dispatcher.register_listener(ScrollListener(layout=layout),
+dispatcher.register_listener(ScrollListener(layout=layout,
+                                            distance=30),
                              ['brut_focus',
                               'brut_temporary_focus',
                              'ecs_move',
@@ -106,12 +107,15 @@ if args.s:
 
 else:
     # Created before the loop starts, will be added on the first tick
-    factory.create_entity('wall', (0, 0), size=(150, 20))
-    factory.create_entity('floor', (0, 20), size=(150, 30))
+    factory.create_entity('wall', (0, 0), size=(250, 20))
+    factory.create_entity('floor', (0, 20), size=(250, 30))
     factory.create_entity('cop', (5, 25))
-    # factory.create_entity('pistol', (40, 30))
+    factory.create_entity('target', (50, 20))
+    factory.create_entity('target', (90, 20))
+    factory.create_entity('pistol', (65, 30))
     # factory.create_entity('nunchaku', (40, 40))
-    # # factory.create_entity('nunchaku_punk', (40, 20))
+    factory.create_entity('nunchaku_punk', (210, 20))
+    factory.create_entity('bottle_punk', (230, 20))
     # factory.create_entity('barrel', (75, 15))
     # factory.create_entity('barrel', (61, 41))
     # Messages and stuff
@@ -119,10 +123,22 @@ else:
                           text='Walk with WASD or arrow keys.',
                           destroy_condition='timeout',
                           vy=-2, lifetime=5)
-    factory.create_entity('message_spawner', (30, 20),
+    factory.create_entity('message_spawner', (20, 20),
                           xsize=8, ysize=30,
                           entity_filter=lambda x: x == 'cop_1',
                           text='Use your hands with Q and E\nCurrently, you can only punch with your fists,\nso beat the shit out of this target',
+                          destroy_condition='timeout', lifetime=5,
+                          vy=-2)
+    factory.create_entity('message_spawner', (55, 20),
+                          xsize=8, ysize=30,
+                          entity_filter=lambda x: x == 'cop_1',
+                          text='Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
+                          destroy_condition='timeout', lifetime=5,
+                          vy=-2)
+    factory.create_entity('message_spawner', (70, 20),
+                          xsize=8, ysize=30,
+                          entity_filter=lambda x: x == 'cop_1',
+                          text='Now go along and finish these punks!',
                           destroy_condition='timeout', lifetime=5,
                           vy=-2)
     # factory.create_entity('bottle_punk', (70, 20))
