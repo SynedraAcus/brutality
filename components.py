@@ -12,12 +12,12 @@ from bear_hug.widgets import SwitchingWidget
 
 class WalkerComponent(PositionComponent):
     """
-    A simple PositionComponent that can change x;y on keypress
+    A simple PositionComponent that switches widgets appropriately
     """
     
     def __init__(self, *args, direction='r', initial_phase='1', **kwargs):
         super().__init__(*args, **kwargs)
-        self.dispatcher.register_listener(self, ['key_down', 'tick'])
+        self.dispatcher.register_listener(self, ['tick'])
         self.direction = direction
         self.phase = initial_phase
         self.moved_this_tick = False
