@@ -403,9 +403,14 @@ class InputComponent(Component):
                 self.owner.hands.pick_up(hand='left')
             elif event.event_value == 'TK_C':
                 self.owner.hands.pick_up(hand='right')
-            elif event.event_value == 'TK_SPACE':
+            elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
                 # Mostly debug. Eventually will be the rush or jump command
-                pass
+                # TODO: jump that makes sense
+                if self.owner.position.direction == 'r':
+                    self.next_move[0] += 15
+                else:
+                    self.next_move[0] -= 15
+                self.current_action_delay = self.action_delay
             elif event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
                 self.next_move[0] += 2
             elif event.event_value in ('TK_A', 'TK_LEFT') and self.current_walk_delay <= 0:
