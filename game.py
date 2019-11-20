@@ -146,4 +146,3 @@ else:
 loop.run()
 
 # TODO: directions for corpses
-# TODO: MessageEntity

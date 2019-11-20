@@ -360,10 +360,11 @@ class InputComponent(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
-        self.walk_delay = 0.1
+        self.walk_delay = 0.12
         self.current_walk_delay = 0
         self.action_delay = 0.4
         self.current_action_delay = 0
+        self.next_move = [0, 0]
 
     def on_event(self, event):
         #TODO: Support non-hardcoded actions and keys
@@ -377,10 +378,19 @@ class InputComponent(Component):
         if event.event_type == 'tick':
             if self.current_walk_delay > 0:
                 self.current_walk_delay -= event.event_value
+            else:
+                # Movement is processed from the commands collected during
+                # the previous tick. Of course, the input is ignored while
+                # entity is on the cooldown
+                if self.next_move[0] != 0 or self.next_move[1] != 0:
+                    self.owner.position.walk(self.next_move)
+                    self.next_move = [0, 0]
+                    self.current_walk_delay = self.walk_delay
+                    r.append(BearEvent(event_type='play_sound',
+                                       event_value='step'))
             if self.current_action_delay > 0:
                 self.current_action_delay -= event.event_value
         if event.event_type == 'key_down':
-            moved = False
             if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
                 # left-handed attack
                 self.current_action_delay = self.action_delay
@@ -397,21 +407,13 @@ class InputComponent(Component):
                 # Mostly debug. Eventually will be the rush or jump command
                 pass
             elif event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
-                last_move = (2, 0)
-                moved = True
-                self.current_walk_delay = self.walk_delay
+                self.next_move[0] += 2
             elif event.event_value in ('TK_A', 'TK_LEFT') and self.current_walk_delay <= 0:
-                last_move = (-2, 0)
-                moved = True
-                self.current_walk_delay = self.walk_delay
+                self.next_move[0] -= 2
             elif event.event_value in ('TK_S', 'TK_DOWN') and self.current_walk_delay <= 0:
-                last_move = (0, 2)
-                moved = True
-                self.current_walk_delay = self.walk_delay
+                self.next_move[1] += 2
             elif event.event_value in ('TK_W', 'TK_UP') and self.current_walk_delay <= 0:
-                last_move = (0, -2)
-                moved = True
-                self.current_walk_delay = self.walk_delay
+                self.next_move[1] -= 2
             elif event.event_value == 'TK_KP_6':
                 r.append(BearEvent(event_type='ecs_scroll_by',
                                    event_value=(1, 0)))
@@ -427,10 +429,6 @@ class InputComponent(Component):
             elif event.event_value == 'TK_KP_5':
                 r.append(BearEvent(event_type='ecs_scroll_to',
                                    event_value=(0, 0)))
-            if moved:
-                self.owner.position.walk(last_move)
-                r.append(BearEvent(event_type='play_sound',
-                                   event_value='step'))
         return r
 
 
