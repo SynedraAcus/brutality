@@ -17,8 +17,7 @@ from components import  SwitchWidgetComponent, SpawnerComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
     BottleControllerComponent, HealthComponent, CollectableBehaviourComponent, \
     SpawnerCollisionComponent
-from background import generate_tiled, tile_randomly, generate_bg
-from widgets import PatternGenerator
+from background import generate_tiled, tile_randomly, generate_bg, ghetto_transition
 
 
 class MapObjectFactory:
@@ -38,7 +37,6 @@ class MapObjectFactory:
         self.dispatcher = dispatcher
         self.atlas = atlas
         self.layout = layout
-        self.patterns = PatternGenerator(self.atlas)
         self.counts = {}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
@@ -122,7 +120,7 @@ class MapObjectFactory:
         wall = Entity(id=entity_id)
         # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
-                              None, size[0])
+                              ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))

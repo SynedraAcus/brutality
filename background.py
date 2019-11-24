@@ -4,7 +4,21 @@ A PatternGenerator for backrounds
 
 from bear_hug.bear_utilities import BearException, shapes_equal, copy_shape
 
+from math import isclose
 import random
+
+################################################################################
+# Transition dicts for backgrounds
+################################################################################
+
+ghetto_transition = {'wall_1': {'wall_end': 0.5,
+                                'wall_1': 0.25,
+                                'wall_2': 0.25},
+                     'wall_2': {'wall_end': 0.5,
+                                'wall_1': 0.25,
+                                'wall_2': 0.25},
+                     'wall_end': {'wall_1': 0.5,
+                                  'wall_2': 0.5}}
 
 
 def generate_tiled(atlas, pattern, size):
@@ -118,22 +132,60 @@ def stack_boxes(*boxes, order='vertical'):
     return chars, colors
 
 
+def choose_next(transitions):
+    """
+    Select the next element from probability dict.
+
+    The dict should have the form of ``{element: probability}``, ie
+    ``{'e1': 0.5, 'e2': 0.1, ...}``. Assumes that probabilities sum to unity.
+    :param transitions: Probability dict
+    :return:
+    """
+    roll = random.random()
+    total = 0
+    for element in transitions:
+        total += transitions[element]
+        if total >= roll:
+            return element
+
+
 def generate_bg(atlas, transition_dict, width, height=20):
     """
     Randomly assemble the background.
 
     Takes an atlas and a transition dict. Uses the Markov Chain defined by the
-    dict to order elements together.
+    dict to order elements together. This dict should be the nested dict, with
+    a subdict for each element. Subdicts should include all possible
+    transitions, being element-to-probability mappings. For example, for two
+    elements with all probabilities at 0.5 it should look like this:
+
+    ``{'e1': {'e1': 0.5, 'e2': 0.5}, 'e2': {'e1': 0.5, 'e2': 0.5'}}``
+
+    If, for any element, transition probabilities do not sum to unity, a
+    ValueError is raised.
+
+    Of course, if any element mentioned in the dict is absent from the atlas,
+    attempting to use it will cause an exception. If, on the other hand, the
+    element is present in the atlas (but not dict), it just won't be used.
     :param atlas:
     :param transition_dict:
     :param width:
     :return:
     """
+    for d in transition_dict:
+        if not isclose(sum(transition_dict[d].values()), 1.0):
+            raise ValueError(f'Transition_dict for {d} does not sum to unity')
     running_x = 0
-    elements = tuple(atlas.elements.keys())
+    current_element = None
+    elements = tuple(transition_dict.keys())
     boxes = []
     while running_x < width:
-        element_id = random.choice(elements)
+        if not current_element:
+            # Start from each element with equal probability
+            element_id = random.choice(elements)
+        else:
+            element_id = choose_next(transition_dict[current_element])
+        current_element = element_id
         element = atlas.get_element(element_id)
         if len(element[0][0]) < width - running_x:
             # The element will fit as a whole
