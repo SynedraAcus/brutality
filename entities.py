@@ -7,6 +7,7 @@ from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
 from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
+from bear_hug.resources import Atlas, XpLoader
 
 from components import  SwitchWidgetComponent, SpawnerComponent,\
     VisualDamageHealthComponent, DestructorHealthComponent, FactionComponent,\
@@ -16,7 +17,7 @@ from components import  SwitchWidgetComponent, SpawnerComponent,\
     GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
     BottleControllerComponent, HealthComponent, CollectableBehaviourComponent, \
     SpawnerCollisionComponent
-
+from background import generate_tiled, tile_randomly, generate_bg
 from widgets import PatternGenerator
 
 
@@ -119,7 +120,10 @@ class MapObjectFactory:
 
     def _create_wall(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
-        widget = Widget(*self.patterns.generate_tiled('brick_tile', size))
+        # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
+        w = generate_bg(Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
+                              None, size[0])
+        widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))
         wall.add_component(PassingComponent(self.dispatcher))
@@ -127,10 +131,10 @@ class MapObjectFactory:
 
     def _create_floor(self, entity_id, size=(150, 30)):
         floor = Entity(id=entity_id)
-        widget = Widget(*self.patterns.tile_randomly('floor_tile_1',
-                                                     'floor_tile_2',
-                                                     'floor_tile_3',
-                                                      size=size))
+        widget = Widget(*tile_randomly(self.atlas, 'floor_tile_1',
+                                                  'floor_tile_2',
+                                                  'floor_tile_3',
+                                                  size=size))
         floor.add_component(PositionComponent(self.dispatcher))
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         return floor
