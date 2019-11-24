@@ -91,28 +91,27 @@ def stack_boxes(*boxes, order='vertical'):
     :param order: str. Either 'vertical' or 'horizontal'
     :return:
     """
-    # TODO: Fix this check
-    # for item in boxes[1:]:
-    #     if not shapes_equal(item, boxes[0]):
-    #         raise BearException('Incorrectly shaped item in stack_boxes')
     if order == 'vertical':
-        width = len(boxes[0][0])
+        width = len(boxes[0][0][0])
         chars = []
         colors = []
         for item in boxes:
-            if len(item[0])
+            if len(item[0][0]) != width:
+                raise BearException('Incorrect item width in stacking')
             chars.extend(item[0])
             colors.extend(item[1])
     elif order == 'horizontal':
+        height = len(boxes[0][0])
         chars = []
         colors = []
         for y in range(len(boxes[0][1])):
             chars.append([])
             colors.append([])
             for item in boxes:
+                if len(item[0]) != height:
+                    raise BearException('Incorrect item height in stacking')
                 chars[y] += item[0][y]
                 colors[y] += item[1][y]
-                print(chars)
     else:
         raise BearException(
             'Stacking order should be either vertical or horizontal')
