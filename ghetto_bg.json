@@ -1,0 +1,72 @@
+[
+  {
+    "name": "wall_1",
+    "x": 0,
+    "y": 0,
+    "xsize": 16,
+    "ysize": 20
+  },
+  {
+    "name": "wall_2",
+    "x": 17,
+    "y": 0,
+    "xsize": 16,
+    "ysize": 20
+  },
+  {
+    "name": "wall_3",
+    "x": 34,
+    "y": 0,
+    "xsize": 16,
+    "ysize": 20
+  },
+  {
+    "name": "wall_3",
+    "x": 51,
+    "y": 0,
+    "xsize": 16,
+    "ysize": 20
+  },
+  {
+    "name": "wall_end",
+    "x": 68,
+    "y": 0,
+    "xsize": 20,
+    "ysize": 20
+  },
+  {
+    "name": "house_win",
+    "x": 0,
+    "y": 22,
+    "xsize": 32,
+    "ysize": 20
+  },
+  {
+    "name": "house_door",
+    "x": 33,
+    "y": 22,
+    "xsize": 20,
+    "ysize": 20
+  },
+  {
+    "name": "house_end_1",
+    "x": 54,
+    "y": 22,
+    "xsize": 22,
+    "ysize": 20
+  },
+  {
+    "name": "house_end_2",
+    "x": 78,
+    "y": 22,
+    "xsize": 20,
+    "ysize": 20
+  },
+  {
+    "name": "gym",
+    "x": 0,
+    "y": 44,
+    "xsize": 81,
+    "ysize": 20
+  }
+]
