@@ -360,7 +360,7 @@ class InputComponent(Component):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, name='controller', **kwargs)
         self.dispatcher.register_listener(self, ['key_down', 'tick'])
-        self.walk_delay = 0.12
+        self.walk_delay = 0.1
         self.current_walk_delay = 0
         self.action_delay = 0.4
         self.current_action_delay = 0
@@ -399,10 +399,14 @@ class InputComponent(Component):
                 # Right-handed attack
                 self.current_action_delay = self.action_delay
                 self.owner.hands.use_right_hand()
-            elif event.event_value == 'TK_Z':
+            elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
+                # Left-handed pickup
                 self.owner.hands.pick_up(hand='left')
-            elif event.event_value == 'TK_C':
+                self.current_action_delay = self.action_delay
+            elif event.event_value == 'TK_C' and self.current_action_delay <= 0:
+                # Right-handed pickup
                 self.owner.hands.pick_up(hand='right')
+                self.current_action_delay = self.action_delay
             elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
                 # Mostly debug. Eventually will be the rush or jump command
                 # TODO: jump that makes sense
@@ -765,10 +769,11 @@ class HandInterfaceComponent(Component):
         item_id = hand == 'right' and self.right_item or self.left_item
         if 'fist' not in item_id:
             item = EntityTracker().entities[item_id]
-            item.hiding.unhide()
             item.item_behaviour.owning_entity = None
+            item.hiding.show()
             item.position.move(self.owner.position.x,
                                self.owner.position.y + self.owner.widget.height - item.widget.height)
+            item.hiding.unhide()
         if other_item is None:
             # If there is no item, drop whatever there was and reactivate fist
             if hand == 'right':
