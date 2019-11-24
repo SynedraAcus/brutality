@@ -38,6 +38,8 @@ class MapObjectFactory:
         self.atlas = atlas
         self.layout = layout
         self.counts = {}
+        self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
+                            'bucket', 'pizza_box'}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -66,7 +68,18 @@ class MapObjectFactory:
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
         Create entity and emit the corresponding events.
-        Kwargs, if any, are passed to the creating function.
+
+        If entity is in ``self.decorations``, calls
+        ``self.generate_inactive_decoration`` with the correct ID and type. In
+        this case, kwargs are ignored, since this kind of entity is not supposed
+        to have anything except widget and position.
+
+        Otherwise calls ``self._create_{entity_type}`` and passes all kwargs to
+        this method.
+
+        In either case, this method takes care of providing correct entity ID
+        and emitting ``ecs_create`` and, if requested, ``ecs_add``.
+
         :param entity_type: str. Entity type code
         :param pos: Two-int position tuple
         :param emit_show: bool. If True, emits ecs_add event
@@ -77,9 +90,13 @@ class MapObjectFactory:
                 self.counts[entity_type] += 1
             else:
                 self.counts[entity_type] = 1
-            entity = getattr(self, f'_create_{entity_type}')(
-                entity_id=f'{entity_type}_{self.counts[entity_type]}',
-                **kwargs)
+            if entity_type in self.decorations:
+                entity = self.generate_inactive_decoration(f'{entity_type}_{self.counts[entity_type]}',
+                                                           entity_type)
+            else:
+                entity = getattr(self, f'_create_{entity_type}')(
+                    entity_id=f'{entity_type}_{self.counts[entity_type]}',
+                    **kwargs)
         except AttributeError:
             raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
@@ -116,7 +133,7 @@ class MapObjectFactory:
                                                         spawn_kwargs=kwargs))
         return spawner
 
-    def _create_wall(self, entity_id, size=(50, 30)):
+    def _create_ghetto_bg(self, entity_id, size=(50, 30)):
         wall = Entity(id=entity_id)
         # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
@@ -136,6 +153,29 @@ class MapObjectFactory:
         floor.add_component(PositionComponent(self.dispatcher))
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         return floor
+
+    # def _create_can(self, entity_id):
+    #     return self.generate_inactive_decoration(entity_id, 'can')
+    #
+    # def _create_cigarettes(self, entity_id):
+    #     return self.generate_inactive_decoration(entity_id, 'cigarettes')
+
+    def generate_inactive_decoration(self, entity_id, type):
+        """
+        Generate a simple Entity with Widget and Position, but nothing else.
+
+        This method is meant for decorative elements (ie some garbage on the
+        floor). All _create_{garbage_type_item} methods will redirect here to
+        avoid writing tons of boilerplate methods.
+        :param entity_id: Entity ID
+        :param type: a type of object.
+        :return:
+        """
+        e = Entity(id=entity_id)
+        widget = Widget(*self.atlas.get_element(type))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component((PositionComponent(self.dispatcher)))
+        return e
 
     def _create_barrel(self, entity_id):
         barrel_entity = Entity(id=entity_id)

@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 import sys
+import random
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
@@ -107,18 +108,35 @@ if args.s:
 
 else:
     # Created before the loop starts, will be added on the first tick
-    factory.create_entity('wall', (0, 0), size=(250, 20))
+    factory.create_entity('ghetto_bg', (0, 0), size=(250, 20))
     factory.create_entity('floor', (0, 20), size=(250, 30))
+    # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
+    # other items (possibly incuding more bags)
+    garbage_pos = []
+    for _ in range(3):
+        # Make sure garbage heaps are properly spaced
+        while True:
+            x = random.randint(0, 240)
+            max_dist = len(garbage_pos) > 0\
+                       and max((abs(x-i) for i in garbage_pos))\
+                       or 1000
+            if max_dist > 50:
+                garbage_pos.append(x)
+                break
+        factory.create_entity('garbage_bag', (x, 18))
+        for i in range(random.randint(3, 6)):
+            t = random.choice(('can', 'can2', 'cigarettes', 'garbage_bag',
+                               'bucket', 'pizza_box'))
+            factory.create_entity(t, (x + random.randint(-5, 5),
+                                      22 + random.randint(-2, 2)))
     factory.create_entity('cop', (5, 25))
     factory.create_entity('target', (50, 20))
     factory.create_entity('target', (90, 20))
     factory.create_entity('pistol', (65, 30))
-    # factory.create_entity('nunchaku', (40, 40))
     factory.create_entity('nunchaku_punk', (210, 8))
     factory.create_entity('bottle_punk', (230, 20))
     factory.create_entity('bottle_punk', (220, 32))
-    # factory.create_entity('barrel', (75, 15))
-    # factory.create_entity('barrel', (61, 41))
+
     # Messages and stuff
     factory.create_entity('message', (20, 20),
                           text='Walk with WASD or arrow keys.',
@@ -142,7 +160,6 @@ else:
                           text='Now go along and finish these punks!',
                           destroy_condition='timeout', lifetime=5,
                           vy=-2)
-    # factory.create_entity('bottle_punk', (70, 20))
 loop.run()
 
 # TODO: directions for corpses
