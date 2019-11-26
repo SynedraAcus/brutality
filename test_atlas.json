@@ -70,6 +70,20 @@
     "ysize": 8
   },
   {
+    "name": "cop_jump_r",
+    "x": 0,
+    "y": 115,
+    "xsize": 10,
+    "ysize": 18
+  },
+  {
+    "name": "cop_jump_l",
+    "x": 11,
+    "y": 115,
+    "xsize": 10,
+    "ysize": 18
+  },
+  {
     "name": "cop_hand_back_r",
     "x": 64,
     "y": 1,
