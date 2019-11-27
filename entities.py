@@ -564,6 +564,9 @@ class MapObjectFactory:
         target_entity.add_component(PositionComponent(self.dispatcher))
         target_entity.add_component(DestructorComponent(self.dispatcher))
         target_entity.add_component(CollisionComponent(self.dispatcher))
+        target_entity.add_component(PassingComponent(self.dispatcher,
+                                                     shadow_pos=(0, 10),
+                                                     shadow_size=(7, 5)))
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.
