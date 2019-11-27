@@ -409,10 +409,16 @@ class InputComponent(Component):
                 self.current_action_delay = self.action_delay
             elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
                 # TODO: jump that makes sense
+                # Current placeholder solution just teleports the cop
+                # immediately and spawns a separate jumping animation entity
                 if self.owner.position.direction == 'r':
-                    self.next_move[0] += 15
+                    self.owner.spawner.spawn('cop_jump', (2, -8),
+                                             direction='r')
+                    self.next_move[0] += 20
                 else:
-                    self.next_move[0] -= 15
+                    self.next_move[0] -= 20
+                    self.owner.spawner.spawn('cop_jump', (-8, -8),
+                                             direction='l')
                 self.current_action_delay = self.action_delay
             elif event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
                 self.next_move[0] += 2

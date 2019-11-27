@@ -386,6 +386,19 @@ class MapObjectFactory:
         corpse.add_component(PositionComponent(self.dispatcher))
         return corpse
 
+    def _create_cop_jump(self, entity_id, direction='r'):
+        e = Entity(id=entity_id)
+        widget=Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        vx = 60 if direction == 'r' else -60
+        e.add_component(PositionComponent(self.dispatcher,
+                                          vx=vx))
+        e.add_component(DecayComponent(self.dispatcher,
+                                       destroy_condition='timeout',
+                                       lifetime=0.1))
+        e.add_component(DestructorComponent(self.dispatcher))
+        return e
+
     def _create_nunchaku_punk_corpse(self, entity_id):
         """
         Cop corpse: inactive, just lays there
