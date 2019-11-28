@@ -133,7 +133,7 @@ class HazardCollisionComponent(CollisionComponent):
         # TODO: do damage to entities who stand in fire and don't move
         if not self.on_cooldown:
             try:
-                # Covers some weird bug with destroyed bottles colliding into a fire
+                # Covers collisions from nonexistent entities
                 other = EntityTracker().entities[entity]
             except KeyError:
                 return
@@ -391,36 +391,39 @@ class InputComponent(Component):
             if self.current_action_delay > 0:
                 self.current_action_delay -= event.event_value
         if event.event_type == 'key_down':
-            if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
-                # left-handed attack
-                self.current_action_delay = self.action_delay
-                self.owner.hands.use_left_hand()
-            elif event.event_value == 'TK_E' and self.current_action_delay <= 0:
-                # Right-handed attack
-                self.current_action_delay = self.action_delay
-                self.owner.hands.use_right_hand()
-            elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
-                # Left-handed pickup
-                self.owner.hands.pick_up(hand='left')
-                self.current_action_delay = self.action_delay
-            elif event.event_value == 'TK_C' and self.current_action_delay <= 0:
-                # Right-handed pickup
-                self.owner.hands.pick_up(hand='right')
-                self.current_action_delay = self.action_delay
-            elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
-                # TODO: jump that makes sense
-                # Current placeholder solution just teleports the cop
-                # immediately and spawns a separate jumping animation entity
-                if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('cop_jump', (2, -5),
-                                             direction='r')
-                    self.next_move[0] += 30
-                else:
-                    self.next_move[0] -= 30
-                    self.owner.spawner.spawn('cop_jump', (-8, -5),
-                                             direction='l')
-                self.current_action_delay = self.action_delay
-            elif event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
+            if self.owner.health.hitpoints > 0:
+                # These actions are only available to a non-dead player char
+                if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
+                    # left-handed attack
+                    self.current_action_delay = self.action_delay
+                    self.owner.hands.use_left_hand()
+                elif event.event_value == 'TK_E' and self.current_action_delay <= 0:
+                    # Right-handed attack
+                    self.current_action_delay = self.action_delay
+                    self.owner.hands.use_right_hand()
+                elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
+                    # Left-handed pickup
+                    self.owner.hands.pick_up(hand='left')
+                    self.current_action_delay = self.action_delay
+                elif event.event_value == 'TK_C' and self.current_action_delay <= 0:
+                    # Right-handed pickup
+                    self.owner.hands.pick_up(hand='right')
+                    self.current_action_delay = self.action_delay
+                elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
+                    # TODO: jump that makes sense
+                    # Current placeholder solution just teleports the cop
+                    # immediately and spawns a separate jumping animation entity
+                    if self.owner.position.direction == 'r':
+                        self.owner.spawner.spawn('cop_jump', (2, -5),
+                                                 direction='r')
+                        self.next_move[0] += 30
+                    else:
+                        self.next_move[0] -= 30
+                        self.owner.spawner.spawn('cop_jump', (-8, -5),
+                                                 direction='l')
+                    self.current_action_delay = self.action_delay
+            # These actions are available whether or not the player is dead
+            if event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
                 self.next_move[0] += 2
             elif event.event_value in ('TK_A', 'TK_LEFT') and self.current_walk_delay <= 0:
                 self.next_move[0] -= 2
@@ -470,7 +473,7 @@ class MeleeControllerComponent(Component):
             # If on cooldown, be cooling down. Else, try and act
             if self.action_cooldown > 0:
                 self.action_cooldown -= event.event_value
-            if self.action_cooldown <= 0:
+            if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
                 enemies = list(EntityTracker().filter_entities(
                     lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
                 current_closest = None
@@ -536,7 +539,7 @@ class BottleControllerComponent(Component):
         if event.event_type == 'tick':
             if self.action_cooldown > 0:
                 self.action_cooldown -= event.event_value
-            if self.action_cooldown <= 0:
+            if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
                 enemies = list(EntityTracker().filter_entities(
                     lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
                 current_closest = None

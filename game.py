@@ -134,7 +134,7 @@ else:
         t = random.choice(('nunchaku_punk', 'bottle_punk'))
         x = random.randint(60, 240)
         y = random.randint(20, 30)
-        factory.create_entity(t, (x,y))
+        factory.create_entity(t, (x, y))
     factory.create_entity('cop', (5, 25))
     factory.create_entity('target', (50, 20))
     factory.create_entity('target', (90, 20))

@@ -278,7 +278,7 @@ class MapObjectFactory:
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
-        weapon = self._create_nunchaku('nunchaku1', owning_entity=nunchaku)
+        weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
         # Creating hand entities
         f_l = self._create_nunchaku_punk_hand_forward(f'{entity_id}_hand_fl',
