@@ -274,7 +274,7 @@ class MapObjectFactory:
         nunchaku.add_component(DestructorComponent(self.dispatcher))
         nunchaku.add_component(SpawnerHealthComponent(self.dispatcher,
                                                       corpse_type='nunchaku_punk_corpse',
-                                                         hitpoints=3))
+                                                      hitpoints=5))
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
@@ -331,7 +331,7 @@ class MapObjectFactory:
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(SpawnerHealthComponent(self.dispatcher,
                                                   corpse_type='bottle_punk_corpse',
-                                                  hitpoints=3))
+                                                  hitpoints=5))
         punk.add_component(BottleControllerComponent(self.dispatcher))
         # punk.add_component(InputComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,

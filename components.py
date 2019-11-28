@@ -412,12 +412,12 @@ class InputComponent(Component):
                 # Current placeholder solution just teleports the cop
                 # immediately and spawns a separate jumping animation entity
                 if self.owner.position.direction == 'r':
-                    self.owner.spawner.spawn('cop_jump', (2, -8),
+                    self.owner.spawner.spawn('cop_jump', (2, -5),
                                              direction='r')
-                    self.next_move[0] += 20
+                    self.next_move[0] += 30
                 else:
-                    self.next_move[0] -= 20
-                    self.owner.spawner.spawn('cop_jump', (-8, -8),
+                    self.next_move[0] -= 30
+                    self.owner.spawner.spawn('cop_jump', (-8, -5),
                                              direction='l')
                 self.current_action_delay = self.action_delay
             elif event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:
@@ -837,6 +837,7 @@ class ItemBehaviourComponent(Component):
         # for self.owner, which is item
         self._owning_entity = None
         self.owning_entity = owning_entity
+        self._future_owner = None
         self.dispatcher.register_listener(self, 'brut_use_item')
 
     @property
@@ -872,7 +873,6 @@ class ItemBehaviourComponent(Component):
             try:
                 self.use_item()
             except AttributeError:
-                print(self.owner.id)
                 self.owning_entity = EntityTracker().entities[self._future_owner]
                 self.use_item()
 

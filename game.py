@@ -129,13 +129,20 @@ else:
                                'bucket', 'pizza_box'))
             factory.create_entity(t, (x + random.randint(-5, 5),
                                       22 + random.randint(-2, 2)))
+    # Spawning 5 punks at random pos
+    for _ in range(5):
+        t = random.choice(('nunchaku_punk', 'bottle_punk'))
+        x = random.randint(60, 240)
+        y = random.randint(20, 30)
+        factory.create_entity(t, (x,y))
     factory.create_entity('cop', (5, 25))
     factory.create_entity('target', (50, 20))
     factory.create_entity('target', (90, 20))
     factory.create_entity('pistol', (65, 30))
-    factory.create_entity('nunchaku_punk', (210, 8))
-    factory.create_entity('bottle_punk', (230, 20))
-    factory.create_entity('bottle_punk', (220, 32))
+    factory.create_entity('nunchaku', (45, 40))
+    # factory.create_entity('nunchaku_punk', (210, 8))
+    # factory.create_entity('bottle_punk', (230, 20))
+    # factory.create_entity('bottle_punk', (220, 32))
 
     # Messages and stuff
     factory.create_entity('message', (20, 20),
