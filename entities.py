@@ -9,14 +9,7 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
-from components import  SwitchWidgetComponent, SpawnerComponent,\
-    VisualDamageHealthComponent, DestructorHealthComponent, FactionComponent,\
-    ProjectileCollisionComponent, InputComponent, MeleeControllerComponent,\
-    HidingComponent, WalkerComponent, SpawnerHealthComponent, \
-    HandInterfaceComponent, SpawningItemBehaviourComponent,\
-    GravityPositionComponent, HazardCollisionComponent, GrenadeComponent, \
-    BottleControllerComponent, HealthComponent, CollectableBehaviourComponent, \
-    SpawnerCollisionComponent
+from components import *
 from background import generate_tiled, tile_randomly, generate_bg, ghetto_transition
 
 
@@ -517,6 +510,7 @@ class MapObjectFactory:
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(GrenadeComponent(self.dispatcher,
                                               spawned_item='flame'))
+        entity.add_component(ScreenEdgeCollisionComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 

@@ -189,6 +189,20 @@ class SpawnerCollisionComponent(CollisionComponent):
             self.owner.destructor.destroy()
 
 
+class ScreenEdgeCollisionComponent(CollisionComponent):
+    """
+    Destroys the entity if collided into None (ie screen edge)
+
+    Meant for the grenades and such, which cause crashes by attempting to fly
+    beyond screen edges.
+
+    Expects owner to have DestructorComponent
+    """
+    def collided_into(self, entity):
+        if entity is None:
+            self.owner.destructor.destroy
+
+
 class GrenadeComponent(Component):
     """
     The grenade behaviour.
@@ -706,14 +720,12 @@ class HandInterfaceComponent(Component):
         # Have to call the HidingComponent directly because show/hide logic does
         # not use the event for communication
         EntityTracker().entities[self.hand_entities[hand]].hiding.show()
+        # TODO: make hand_offsets dependent on the item's size
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
                                             event_value=(self.hand_entities[hand],
                                                          hand_x, hand_y)))
-        # TODO: communicate hands with items via events
-        # Currently there are several ways in which HandInterfaceComponent
-        # calls the methods of items directly. It may cause bugs later
         if self.left_item:
             item = EntityTracker().entities[self.left_item]
             item.widget.switch_to_image(self.owner.position.direction)
