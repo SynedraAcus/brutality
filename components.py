@@ -534,7 +534,7 @@ class BottleControllerComponent(Component):
     A controller for the bottle-throwing punk.
 
     Looks for entities with a faction different from its own and closes in until
-    dy < 5 and 30 < dx < 50. When this condition is reached, uses an item in
+    dy < 5 and 35 < dx < 40. When this condition is reached, uses an item in
     right hand (which is expected to be a bottle). If, at any moment, an enemy
     is closer than that, runs away instead
     """
@@ -573,7 +573,7 @@ class BottleControllerComponent(Component):
                 else:
                     # Change direction
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
-                if 30 <= abs(dx) <= 45 and abs(dy) <= 5:
+                if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
                 elif abs(dx) < 8 and abs(dy) < 5:
