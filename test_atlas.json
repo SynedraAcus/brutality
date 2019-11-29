@@ -421,28 +421,28 @@
   },
   {
     "name": "target_intact",
-    "x": 15,
+    "x": 12,
     "y": 38,
     "xsize": 7,
     "ysize": 15
   },
   {
     "name": "target_1",
-    "x": 23,
+    "x": 20,
     "y": 38,
     "xsize": 7,
     "ysize": 15
   },
   {
     "name": "target_2",
-    "x": 31,
+    "x": 28,
     "y": 38,
     "xsize": 7,
     "ysize": 15
   },
   {
     "name": "target_destroyed",
-    "x": 38,
+    "x": 35,
     "y": 38,
     "xsize": 7,
     "ysize": 15
@@ -516,5 +516,12 @@
     "y": 12,
     "xsize": 4,
     "ysize": 3
+  },
+  {
+    "name": "broken_car",
+    "x": 44,
+    "y": 38,
+    "xsize": 38,
+    "ysize": 15
   }
 ]

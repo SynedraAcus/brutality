@@ -33,6 +33,9 @@ class MapObjectFactory:
         self.counts = {}
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box'}
+        self.barriers = {'broken_car'}
+        self.shadow_positions = {'broken_car': (0, 7)}
+        self.shadow_sizes = {'broken_car': (38, 7)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -86,6 +89,9 @@ class MapObjectFactory:
             if entity_type in self.decorations:
                 entity = self.generate_inactive_decoration(f'{entity_type}_{self.counts[entity_type]}',
                                                            entity_type)
+            elif entity_type in self.barriers:
+                entity = self.generate_barrier(f'{entity_type}_{self.counts[entity_type]}',
+                                               entity_type)
             else:
                 entity = getattr(self, f'_create_{entity_type}')(
                     entity_id=f'{entity_type}_{self.counts[entity_type]}',
@@ -153,7 +159,7 @@ class MapObjectFactory:
     # def _create_cigarettes(self, entity_id):
     #     return self.generate_inactive_decoration(entity_id, 'cigarettes')
 
-    def generate_inactive_decoration(self, entity_id, type):
+    def generate_inactive_decoration(self, entity_id, entity_type):
         """
         Generate a simple Entity with Widget and Position, but nothing else.
 
@@ -165,9 +171,34 @@ class MapObjectFactory:
         :return:
         """
         e = Entity(id=entity_id)
-        widget = Widget(*self.atlas.get_element(type))
+        widget = Widget(*self.atlas.get_element(entity_type))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component((PositionComponent(self.dispatcher)))
+        return e
+
+    def generate_barrier(self, entity_id, entity_type):
+        """
+        Generate a simple Entity with Widget, Position, CollisionComponent
+        and PassingComponent.
+
+        This method is used for various un-passable entities without complex
+        logic or animations, like walls, fences, barriers, trees and whatnot.
+        All _create_{barrier_type_item} methods will redirect here to avoid
+        writing tons of boilerplate methods. It relies on the factory class
+        having self.shadow_positions and self.shadow_sizes dictionaries for the
+        PassingComponents.
+        :param entity_id:
+        :param type:
+        :return:
+        """
+        e = Entity(id=entity_id)
+        widget = Widget(*self.atlas.get_element(entity_type))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher))
+        e.add_component(PassingComponent(self.dispatcher,
+                                 shadow_size=self.shadow_sizes[entity_type],
+                                 shadow_pos=self.shadow_positions[entity_type]))
         return e
 
     def _create_barrel(self, entity_id):
