@@ -523,5 +523,26 @@
     "y": 38,
     "xsize": 38,
     "ysize": 15
+  },
+  {
+    "name": "barricade_1",
+    "x": 23,
+    "y": 104,
+    "xsize": 12,
+    "ysize": 16
+  },
+  {
+    "name": "barricade_2",
+    "x": 36,
+    "y": 104,
+    "xsize": 14,
+    "ysize": 14
+  },
+  {
+    "name": "barricade_3",
+    "x": 51,
+    "y": 104,
+    "xsize": 13,
+    "ysize": 14
   }
 ]

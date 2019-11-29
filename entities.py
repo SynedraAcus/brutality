@@ -33,9 +33,16 @@ class MapObjectFactory:
         self.counts = {}
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box'}
-        self.barriers = {'broken_car'}
-        self.shadow_positions = {'broken_car': (0, 7)}
-        self.shadow_sizes = {'broken_car': (38, 7)}
+        self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
+                         'barricade_3'}
+        self.shadow_positions = {'broken_car': (0, 7),
+                                 'barricade_1': (1, 9),
+                                 'barricade_2': (0, 6),
+                                 'barricade_3': (0, 6)}
+        self.shadow_sizes = {'broken_car': (38, 7),
+                             'barricade_1': (11, 7),
+                             'barricade_2': (14, 8),
+                             'barricade_3': (13, 8)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
