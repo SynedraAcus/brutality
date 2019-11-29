@@ -153,12 +153,6 @@ class MapObjectFactory:
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         return floor
 
-    # def _create_can(self, entity_id):
-    #     return self.generate_inactive_decoration(entity_id, 'can')
-    #
-    # def _create_cigarettes(self, entity_id):
-    #     return self.generate_inactive_decoration(entity_id, 'cigarettes')
-
     def generate_inactive_decoration(self, entity_id, entity_type):
         """
         Generate a simple Entity with Widget and Position, but nothing else.
@@ -249,9 +243,6 @@ class MapObjectFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
-        # pistol = self._create_pistol(f'{entity_id}_left_pistol',
-        #                              owning_entity=cop_entity)
-        # self.dispatcher.add_event(BearEvent('ecs_create', pistol))
         left_fist = self._create_fist(f'fist_{entity_id}_left',
                                  owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
