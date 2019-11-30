@@ -34,7 +34,7 @@ dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
 atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
 
 # Init game screen
-chars = [[' ' for _ in range(250)] for y in range(50)]
+chars = [[' ' for _ in range(500)] for y in range(50)]
 colors = copy_shape(chars, 'gray')
 layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 50))
 dispatcher.register_listener(layout, 'all')
@@ -108,12 +108,12 @@ if args.s:
 
 else:
     # Created before the loop starts, will be added on the first tick
-    factory.create_entity('ghetto_bg', (0, 0), size=(250, 20))
-    factory.create_entity('floor', (0, 20), size=(250, 30))
+    factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+    factory.create_entity('floor', (0, 20), size=(500, 30))
     # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
     # other items (possibly incuding more bags)
     garbage_pos = []
-    for _ in range(3):
+    for _ in range(6):
         # Make sure garbage heaps are properly spaced
         while True:
             x = random.randint(0, 240)
@@ -129,23 +129,28 @@ else:
                                'bucket', 'pizza_box'))
             factory.create_entity(t, (x + random.randint(-5, 5),
                                       22 + random.randint(-2, 2)))
-    # Spawning 5 punks at random pos
-    # for _ in range(5):
-    #     t = random.choice(('nunchaku_punk', 'bottle_punk'))
-    #     x = random.randint(60, 240)
-    #     y = random.randint(20, 30)
-    #     factory.create_entity(t, (x, y))
-    factory.create_entity('cop', (5, 25))
-    # factory.create_entity('broken_car', (50, 20))
-    factory.create_entity('barricade_3', (50, 20))
-    # factory.create_entity('target', (50, 20))
-    # factory.create_entity('target', (90, 20))
-    # factory.create_entity('pistol', (65, 30))
-    # factory.create_entity('nunchaku', (45, 40))
-    factory.create_entity('nunchaku_punk', (210, 8))
-    factory.create_entity('bottle_punk', (230, 20))
-    factory.create_entity('bottle_punk', (220, 32))
 
+    # Tutorial area entities
+    factory.create_entity('cop', (5, 25))
+    factory.create_entity('target', (50, 20))
+    factory.create_entity('target', (90, 20))
+    factory.create_entity('pistol', (65, 30))
+    # Central area
+    factory.create_entity('broken_car', (150, 12))
+    factory.create_entity('barricade_3', (250, 35))
+    factory.create_entity('bottle_punk', (270, 30))
+    factory.create_entity('nunchaku_punk', (300, 20))
+    # Main enemy fortification
+    factory.create_entity('barricade_2', (320, 15))
+    factory.create_entity('barricade_1', (319, 23))
+    factory.create_entity('barricade_2', (340, 36))
+    factory.create_entity('barricade_3', (346, 25))
+    factory.create_entity('bottle_punk', (380, 32))
+    factory.create_entity('bottle_punk', (380, 25))
+    factory.create_entity('nunchaku_punk', (330, 15))
+    factory.create_entity('nunchaku_punk', (330, 25))
+    factory.create_entity('nunchaku_punk', (380, 15))
+    # factory.create_entity('nunchaku', (45, 40))
     # Messages and stuff
     factory.create_entity('message', (20, 20),
                           text='Walk with WASD or arrow keys.',
@@ -166,7 +171,7 @@ else:
     factory.create_entity('message_spawner', (95, 20),
                           xsize=8, ysize=30,
                           entity_filter=lambda x: x == 'cop_1',
-                          text='Now go along and finish these punks!',
+                          text='Now go along and finish those punks!',
                           destroy_condition='timeout', lifetime=5,
                           vy=-2)
 loop.run()
