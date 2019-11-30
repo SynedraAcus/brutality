@@ -454,7 +454,7 @@ class MapObjectFactory:
         :return:
         """
         bg_entity = Entity(id=entity_id)
-        chars = [[' ' for _ in range(size[0])] for _ in range(size[1])]
+        chars = [[' ' for x in range(size[0])] for y in range(size[1])]
         colors = copy_shape(chars, 'gray')
         widget = Widget(chars, colors)
         bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
