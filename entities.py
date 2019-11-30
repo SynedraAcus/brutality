@@ -507,7 +507,7 @@ class MapObjectFactory:
         punch.add_component(DestructorComponent(self.dispatcher))
         punch.add_component(DecayComponent(self.dispatcher,
                                            destroy_condition='timeout',
-                                           lifetime=0.05))
+                                           lifetime=0.1))
         return punch
 
     def _create_bottle(self, entity_id, direction='r'):
