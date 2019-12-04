@@ -40,7 +40,7 @@ class ScrollListener(Listener):
     
     `BearEvent(event_type='ecs_destroy')` and `BearEvent(event_type='ecs_move')`
      are necessary for this Listener to work, but should not be used to interact
-     with it.
+     with it directly.
     """
     def __init__(self, *args, layout=None, distance=10, **kwargs):
         super().__init__(*args, **kwargs)
@@ -82,12 +82,35 @@ class ScrollListener(Listener):
             self.old_target = None
             return BearEvent(event_type='ecs_scroll_to',
                              event_value=(self.old_pos))
+        elif event.event_type == 'tick':
+            # Each tick, check that the tracked entity does not happen to be
+            # outside the screen. This can happen, for example, after loading
+            # the game from save, where view is set to the default position of 0
+            # regardless of where it has been before. Or after processing some
+            # 'ecs_scroll*' events coming from outside this class.
+            x = EntityTracker().entities[self.target_entity].position.x
+            if x <= self.layout.view_pos[0]:
+                return BearEvent(event_type='ecs_scroll_by',
+                                 event_value=(x - self.distance - self.layout.view_pos[0], 0))
+            elif x >= self.layout.view_pos[0] + self.layout.view_size[0] \
+                       - self.layout.entities[self.target_entity].widget.size[0]:
+                return BearEvent(event_type='ecs_scroll_by',
+                                 event_value=(x + self.layout.entities[self.target_entity].widget.size[0] \
+                                              - self.layout.view_pos[0] + self.distance \
+                                                - self.layout.view_size[0],
+                                              0))
         elif event.event_type == 'ecs_move' and event.event_value[0] == self.target_entity:
-            # There is no support for y-scrolling because this is a
-            # side-scrolling (sic) beat'em'up. If this piece of code makes idt to
-            # bear_hug or other project, it would be trivial to add by replacing
-            # some [0]s with [1]s and x's with y's
+            # Routine scrolling is done here and not in tick, because otherwise
+            # it causes following bug: character is moved 2 chars to the right
+            # by step, the game moves him 2 chars relative to the monitor, then
+            # on the next tick this class notices the need to scroll and moves
+            # view 2 chars right, thus needing to move character to the left
+            # relative to the monitor. Thus ugly stuttering. This does not
+            # happen when this class gets its 'tick' event before the ECSLayout,
+            # but I can't have something dependent on the order in which things
+            # process the same event.
             x = event.event_value[1]
+            # There is no support for y-scrolling because this is a sidescroller
             if x <= self.layout.view_pos[0] + self.distance:
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x - self.distance - self.layout.view_pos[0], 0))
@@ -99,6 +122,8 @@ class ScrollListener(Listener):
                                               - self.layout.view_pos[0] + self.distance \
                                                 - self.layout.view_size[0],
                                               0))
+
+
 
 
 # This data class contains all information about what should be spawned and when

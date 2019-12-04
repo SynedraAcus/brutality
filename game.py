@@ -59,7 +59,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
                                             distance=30),
                              ['brut_focus',
                               'brut_temporary_focus',
-                             'ecs_move',
+                             'tick', 'ecs_move',
                              'ecs_destroy'])
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
@@ -110,6 +110,8 @@ t.add_widget(hp_bar, (19, 54), layer=2)
 if args.s:
     for line in open(args.s):
         factory.load_entity_from_JSON(line.rstrip())
+    # ScrollListener is initialized anew, so the scroll position is not kept
+    dispatcher.add_event(BearEvent('brut_focus', 'cop_1'))
 
 else:
     # Created before the loop starts, will be added on the first tick
