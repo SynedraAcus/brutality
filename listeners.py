@@ -184,7 +184,6 @@ class SpawningListener(Listener):
                     self.spawns.remove(spawn)
 
 
-
 class SavingListener(Listener):
     """
     A Listener class that waits for a signal (currently keypress 'TK_F5') and,

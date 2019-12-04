@@ -720,7 +720,6 @@ class HandInterfaceComponent(Component):
         # Have to call the HidingComponent directly because show/hide logic does
         # not use the event for communication
         EntityTracker().entities[self.hand_entities[hand]].hiding.show()
-        # TODO: make hand_offsets dependent on the item's size
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
