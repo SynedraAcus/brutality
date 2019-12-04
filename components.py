@@ -850,8 +850,8 @@ class ItemBehaviourComponent(Component):
         # Actual entity (ie character) who uses the item. Not to be mistaken
         # for self.owner, which is item
         self._owning_entity = None
-        self.owning_entity = owning_entity
         self._future_owner = None
+        self.owning_entity = owning_entity
         self.dispatcher.register_listener(self, 'brut_use_item')
 
     @property
@@ -887,6 +887,7 @@ class ItemBehaviourComponent(Component):
             try:
                 self.use_item()
             except AttributeError:
+                print(self.owner)
                 self.owning_entity = EntityTracker().entities[self._future_owner]
                 self.use_item()
 
