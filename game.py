@@ -13,7 +13,7 @@ from bear_hug.resources import Atlas, XpLoader
 from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import MapObjectFactory
-from listeners import ScrollListener, SavingListener
+from listeners import ScrollListener, SavingListener, SpawnItem, SpawningListener
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -75,6 +75,11 @@ if not args.disable_sound:
                                     'shot': 'sounds/dsshotgn.wav'})
     dispatcher.register_listener(jukebox, 'play_sound')
 
+# Message spawner for tutorial messages
+# TODO: un-hardcode player ID in tutorial SpawnerListener
+spawner = SpawningListener('cop_1', factory=factory)
+dispatcher.register_listener(spawner, 'ecs_move')
+
 
 ################################################################################
 # Starting the game terminal and adding main widgets
@@ -110,7 +115,7 @@ else:
     # Created before the loop starts, will be added on the first tick
     factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
     factory.create_entity('floor', (0, 20), size=(500, 30))
-    # The purpose of this invisible collider is to have some space below thes
+    # The purpose of this invisible collider is to have some space below the
     # screen in case eg corpses are spawned at the very bottom
     factory.create_entity('invis', (0, 51), size=(500, 9))
     # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
@@ -142,24 +147,28 @@ else:
                           text='Walk with WASD or arrow keys.',
                           destroy_condition='timeout',
                           vy=-2, lifetime=5)
-    factory.create_entity('message_spawner', (20, 20),
-                          xsize=8, ysize=30,
-                          entity_filter=lambda x: x == 'cop_1',
-                          text='Use your hands with Q and E\nCurrently, you can only punch with your fists,\nso beat the shit out of this target',
-                          destroy_condition='timeout', lifetime=5,
-                          vy=-2)
-    factory.create_entity('message_spawner', (55, 20),
-                          xsize=8, ysize=30,
-                          entity_filter=lambda x: x == 'cop_1',
-                          text='Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
-                          destroy_condition='timeout', lifetime=5,
-                          vy=-2)
-    factory.create_entity('message_spawner', (95, 20),
-                          xsize=8, ysize=30,
-                          entity_filter=lambda x: x == 'cop_1',
-                          text='Now go along and finish those punks!',
-                          destroy_condition='timeout', lifetime=5,
-                          vy=-2)
+    spawns = (SpawnItem(item='message',
+                        pos=(20, 20),
+                        size=(10, 20),
+                        kwargs={'text': 'Use your hands with Q and E\nCurrently, you can only punch with your fists,\nso beat the shit out of this target',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+              SpawnItem(item='message',
+                        pos=(55, 20),
+                        size=(10, 20),
+                        kwargs={'text': 'Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+              SpawnItem(item='message',
+                        pos=(95, 20),
+                        size=(10, 20),
+                        kwargs={'text': 'Now go along and finish those punks!',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}))
+    spawner.add_spawns_iterable(spawns)
     # Central area
     factory.create_entity('broken_car', (150, 12))
     factory.create_entity('barricade_3', (250, 35))

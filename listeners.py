@@ -1,13 +1,16 @@
 """
 Things that should somehow interact with the events, but are too simple to
-merit a complete entity
+merit a complete entity, or to complicated to be limited to one.
 """
 
-from bear_hug.bear_utilities import BearLayoutException
+from collections import namedtuple
+
+from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
+    BearECSException
+from bear_hug.ecs import EntityTracker
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
 from bear_hug.widgets import Listener
-from bear_hug.ecs import EntityTracker
 
 
 class ScrollListener(Listener):
@@ -96,6 +99,90 @@ class ScrollListener(Listener):
                                               - self.layout.view_pos[0] + self.distance \
                                                 - self.layout.view_size[0],
                                               0))
+
+
+# This data class contains all information about what should be spawned and when
+# Attributes are: `item` (str) for item type, `pos` (tuple of ints) for upper
+# left corner of region where a player must walk to trigger this item, `size`
+# (tuple of ints) for the size of this region, and `kwargs` (dict) for any
+# kwargs that should be passed to factory during item creation
+SpawnItem = namedtuple('SpawnItem', ('item', 'pos', 'size', 'kwargs'))
+
+
+class SpawningListener(Listener):
+    """
+    Spawns items when player walks into a predefined area.
+
+    :param player_entity: Str. Player entity ID; this Listener will create
+    entities when this entity walks into predefined areas
+
+    :param factory: MapObjectFactory instance
+
+    :param spawns: an iterable of SpawnItem instances
+    """
+    def __init__(self, player_entity_id,
+                 factory=None, spawns=None, **kwargs):
+        super().__init__(**kwargs)
+        self.spawns = []
+        if spawns:
+            for item in self.spawns:
+                if not isinstance(item, SpawnItem):
+                    raise TypeError(f'{type(item)} supplied to SpawningListener instead of SpawnItem')
+                self.spawns.append(item)
+        self.factory = factory
+        self.player_id = player_entity_id
+        # To be set during the first event
+        self.player_entity = None
+
+    def set_player(self, value):
+        """
+        Set tracked entity ID to `value`.
+
+        This method assumes that entity already exists and is known to
+        EntityTracker when it is called.
+        :param value:
+        :return:
+        """
+        entity = EntityTracker().entities[value]
+        self.player_id = entity
+        self.player_entity = entity
+
+    def add_spawn(self, item):
+        """
+        Add a single SpawnItem to this Listener
+
+        :param item: SpawnItem
+        :return:
+        """
+        if not isinstance(item, SpawnItem):
+            raise TypeError(f'{type(item)} supplied to SpawningListener instead of SpawnItem')
+        self.spawns.append(item)
+
+    def add_spawns_iterable(self, spawns):
+        """
+        Add a group of SpawnItems to this listener
+        :param spawns: an iterable of SpawnItem
+        :return:
+        """
+        for item in spawns:
+            self.add_spawn(item)
+
+    def on_event(self, event):
+        if event.event_type == 'ecs_move' and \
+                    event.event_value[0] == self.player_id:
+            if not self.player_entity:
+                self.player_entity = EntityTracker().entities[self.player_id]
+            for spawn in self.spawns:
+                if rectangles_collide(spawn.pos, spawn.size,
+                                      self.player_entity.position.pos,
+                                      self.player_entity.widget.size):
+                    self.factory.create_entity(spawn.item,
+                                               # Spawn in the middle
+                                               (int(spawn.pos[0]+spawn.size[0]/2),
+                                                int(spawn.pos[1]+spawn.size[1]/2)),
+                                               **spawn.kwargs)
+                    self.spawns.remove(spawn)
+
 
 
 class SavingListener(Listener):
