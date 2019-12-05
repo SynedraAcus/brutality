@@ -93,7 +93,7 @@ class ScrollListener(Listener):
             except KeyError:
                 # Do nothing if entity no longer exists (possible when PC is
                 # destroyed and leaves a corpse)
-                pass
+                return
             if x <= self.layout.view_pos[0]:
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x - self.distance - self.layout.view_pos[0], 0))

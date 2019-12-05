@@ -917,22 +917,23 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     this class expects it to have PositionComponent.
 
     Expects owner to have PositionComponent and SpawnerComponent. Expects
-    owner's widget to be SwitchWidgetComponent
+    owner's widget to be SwitchWidgetComponent. Expects the method responsible
+    for the creation of spawned object to accept ``direction`` kwarg
     """
-    def __init__(self, *args, spawned_item='bullet',
-                 relative_pos={'r': (0, 0),
-                               'l': (0, 0)},
+    def __init__(self, *args, spawned_items={'bullet':{'r': (0, 0),
+                                                       'l': (0, 0)}},
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.spawned_item = spawned_item
-        self.relative_pos = relative_pos
+        self.spawned_items = spawned_items
 
     def use_item(self):
         direction = self.owning_entity.position.direction
         # This component just passes the direction and expects projectile
         # creation code in entity factory to take care of speeds
-        self.owner.spawner.spawn(self.spawned_item, self.relative_pos[direction],
-                                 direction=direction)
+        for item in self.spawned_items:
+            self.owner.spawner.spawn(item,
+                                     self.spawned_items[item][direction],
+                                     direction=direction)
 
     def __repr__(self):
         d = loads(super().__repr__())

@@ -710,10 +710,11 @@ class MapObjectFactory:
         entity.add_component(SwitchWidgetComponent(self.dispatcher,
                                                    widget))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
-                                                            owning_entity=owning_entity,
-                                                            spawned_item='bullet',
-                                                            relative_pos={'r': (0, 0),
-                                                                          'l': (-2, 0)}))
+                                owning_entity=owning_entity,
+                                spawned_items={'bullet': {'r': (0, 0),
+                                                         'l': (-2, 0)},
+                                               'muzzle_flash': {'r': (4, -1),
+                                                               'l': (-2, -1)}}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -733,11 +734,9 @@ class MapObjectFactory:
         entity.add_component(SwitchWidgetComponent(self.dispatcher,
                                                    widget))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
-                                                            owning_entity=owning_entity,
-                                                            spawned_item='punch',
-                                                            relative_pos={
-                                                                'r': (-3, -2),
-                                                                'l': (2, -2)}))
+                                    owning_entity=owning_entity,
+                                    spawned_items={'punch': {'r': (-3, -2),
+                                                             'l': (2, -2)}}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -756,11 +755,9 @@ class MapObjectFactory:
         entity.add_component(SwitchWidgetComponent(self.dispatcher,
                                                    widget))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
-                                                            owning_entity=owning_entity,
-                                                            spawned_item='punch',
-                                                            relative_pos={
-                                                                'r': (8, -1),
-                                                                'l': (-1, -2)}))
+                                    owning_entity=owning_entity,
+                                    spawned_items={'punch': {'r': (8, -1),
+                                                             'l': (-1, -2)}}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -781,11 +778,9 @@ class MapObjectFactory:
                                                    widget))
         entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
-                                                            owning_entity=owning_entity,
-                                                            spawned_item='bottle',
-                                                            relative_pos={
-                                                                'r': (2, -2),
-                                                                'l': (-4, -2)}))
+                                    owning_entity=owning_entity,
+                                    spawned_items={'bottle': {'r': (2, -2),
+                                                              'l': (-4, -2)}}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
