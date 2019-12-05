@@ -409,8 +409,6 @@ class InputComponent(Component):
                     self.owner.position.walk(self.next_move)
                     self.next_move = [0, 0]
                     self.current_walk_delay = self.walk_delay
-                    r.append(BearEvent(event_type='play_sound',
-                                       event_value='step'))
             if self.current_action_delay > 0:
                 self.current_action_delay -= event.event_value
         if event.event_type == 'key_down':

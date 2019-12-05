@@ -69,10 +69,12 @@ dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
 # TODO: find some free sounds that actually fit the game
+# TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
-    jukebox = SoundListener(sounds={'step': 'sounds/dshoof.wav',
-                                    'shot': 'sounds/dsshotgn.wav'})
+    jukebox = SoundListener(sounds={'step': 'sounds/step.wav',
+                                    'shot': 'sounds/shot.wav',
+                                    'punch': 'sounds/punch.wav'})
     dispatcher.register_listener(jukebox, 'play_sound')
 
 # Message spawner for tutorial messages
@@ -174,7 +176,7 @@ else:
     # Central area
     factory.create_entity('broken_car', (150, 12))
     factory.create_entity('barricade_3', (250, 35))
-    factory.create_entity('bottle_punk', (70, 30))
+    factory.create_entity('bottle_punk', (270, 30))
     # factory.create_entity('nunchaku_punk', (300, 20))
     # Main enemy fortification
     factory.create_entity('barricade_2', (320, 15))
