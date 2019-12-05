@@ -736,8 +736,8 @@ class MapObjectFactory:
                                                             owning_entity=owning_entity,
                                                             spawned_item='punch',
                                                             relative_pos={
-                                                                'r': (1, -2),
-                                                                'l': (-1, -2)}))
+                                                                'r': (-3, -2),
+                                                                'l': (2, -2)}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
