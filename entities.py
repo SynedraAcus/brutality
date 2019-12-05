@@ -112,7 +112,8 @@ class MapObjectFactory:
         return entity.id
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
-                        vx=0, vy=0, destroy_condition='keypress', lifetime=2.0):
+                        vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
+                        **kwargs):
         message = Entity(id=entity_id)
         widget = Label(text)
         message.add_component(WidgetComponent(self.dispatcher, widget))
@@ -138,7 +139,7 @@ class MapObjectFactory:
                                                         spawn_kwargs=kwargs))
         return spawner
 
-    def _create_ghetto_bg(self, entity_id, size=(50, 30)):
+    def _create_ghetto_bg(self, entity_id, size=(50, 30), **kwargs):
         wall = Entity(id=entity_id)
         # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
@@ -149,7 +150,7 @@ class MapObjectFactory:
         wall.add_component(PassingComponent(self.dispatcher))
         return wall
 
-    def _create_floor(self, entity_id, size=(150, 30)):
+    def _create_floor(self, entity_id, size=(150, 30), **kwargs):
         floor = Entity(id=entity_id)
         widget = Widget(*tile_randomly(self.atlas, 'floor_tile_1',
                                                   'floor_tile_2',
@@ -159,7 +160,7 @@ class MapObjectFactory:
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         return floor
 
-    def generate_inactive_decoration(self, entity_id, entity_type):
+    def generate_inactive_decoration(self, entity_id, entity_type, **kwargs):
         """
         Generate a simple Entity with Widget and Position, but nothing else.
 
@@ -176,7 +177,7 @@ class MapObjectFactory:
         e.add_component((PositionComponent(self.dispatcher)))
         return e
 
-    def generate_barrier(self, entity_id, entity_type):
+    def generate_barrier(self, entity_id, entity_type, **kwargs):
         """
         Generate a simple Entity with Widget, Position, CollisionComponent
         and PassingComponent.
@@ -201,7 +202,7 @@ class MapObjectFactory:
                                  shadow_pos=self.shadow_positions[entity_type]))
         return e
 
-    def _create_barrel(self, entity_id):
+    def _create_barrel(self, entity_id, **kwargs):
         barrel_entity = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element(
                                                       'barrel_1'),
@@ -217,7 +218,7 @@ class MapObjectFactory:
         barrel_entity.add_component(CollisionComponent(self.dispatcher))
         return barrel_entity
     
-    def _create_cop(self, entity_id):
+    def _create_cop(self, entity_id, **kwargs):
         cop_entity = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
                                               'r_2': self.atlas.get_element('cop_r_2'),
@@ -277,7 +278,7 @@ class MapObjectFactory:
                                             event_value=entity_id))
         return cop_entity
     
-    def _create_nunchaku_punk(self, entity_id):
+    def _create_nunchaku_punk(self, entity_id, **kwargs):
         nunchaku = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
                                               'r_2': self.atlas.get_element('nunchaku_punk_r_2'),
@@ -333,7 +334,7 @@ class MapObjectFactory:
                                                         right_item=weapon.id))
         return nunchaku
 
-    def _create_bottle_punk(self, entity_id):
+    def _create_bottle_punk(self, entity_id, **kwargs):
         punk = Entity(id=entity_id)
         widget = SwitchingWidget(
             images_dict={'r_1': self.atlas.get_element('bottle_punk_r_1'),
@@ -395,7 +396,7 @@ class MapObjectFactory:
                                                       right_item=launcher.id))
         return punk
 
-    def _create_cop_corpse(self, entity_id):
+    def _create_cop_corpse(self, entity_id, **kwargs):
         """
         Cop corpse: inactive, just lays there
         :return:
@@ -407,7 +408,7 @@ class MapObjectFactory:
         corpse.add_component(PositionComponent(self.dispatcher))
         return corpse
 
-    def _create_cop_jump(self, entity_id, direction='r'):
+    def _create_cop_jump(self, entity_id, direction='r', **kwargs):
         e = Entity(id=entity_id)
         widget=Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
         e.add_component(WidgetComponent(self.dispatcher, widget))
@@ -420,7 +421,7 @@ class MapObjectFactory:
         e.add_component(DestructorComponent(self.dispatcher))
         return e
 
-    def _create_nunchaku_punk_corpse(self, entity_id):
+    def _create_nunchaku_punk_corpse(self, entity_id, **kwargs):
         """
         Cop corpse: inactive, just lays there
         :return:
@@ -432,7 +433,7 @@ class MapObjectFactory:
         corpse.add_component(PositionComponent(self.dispatcher))
         return corpse
 
-    def _create_bottle_punk_corpse(self, entity_id):
+    def _create_bottle_punk_corpse(self, entity_id, **kwargs):
         """
         Cop corpse: inactive, just lays there
         :return:
@@ -444,7 +445,7 @@ class MapObjectFactory:
         corpse.add_component(PositionComponent(self.dispatcher))
         return corpse
 
-    def _create_invis(self, entity_id, size=(0, 0)):
+    def _create_invis(self, entity_id, size=(0, 0), **kwargs):
         """
         Create an impassable background object
         :param x: xpos
@@ -462,7 +463,7 @@ class MapObjectFactory:
         bg_entity.add_component(PassingComponent(self.dispatcher))
         return bg_entity
 
-    def _create_bullet(self, entity_id, direction='r'):
+    def _create_bullet(self, entity_id, direction='r', **kwargs):
         """
         Create a simple projectile
         :param speed:
@@ -484,7 +485,7 @@ class MapObjectFactory:
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
     
-    def _create_punch(self, entity_id, direction='r'):
+    def _create_punch(self, entity_id, direction='r', **kwargs):
         """
         Send a punch
         :param entity_id:
@@ -509,7 +510,7 @@ class MapObjectFactory:
                                            lifetime=0.1))
         return punch
 
-    def _create_bottle(self, entity_id, direction='r'):
+    def _create_bottle(self, entity_id, direction='r', **kwargs):
         """
         A rotating flying bottle
         :param entity_id:
@@ -542,7 +543,7 @@ class MapObjectFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
-    def _create_flame(self, entity_id):
+    def _create_flame(self, entity_id, **kwargs):
         """
         A flame on the ground
         :param entity_id:
@@ -562,7 +563,7 @@ class MapObjectFactory:
         entity.add_component(HazardCollisionComponent(self.dispatcher))
         return entity
 
-    def _create_target(self, entity_id):
+    def _create_target(self, entity_id, **kwargs):
         """
         A target
         :return:
@@ -593,7 +594,7 @@ class MapObjectFactory:
 
     # TODO: some common method for spawning single-use attack animations.
     # TODO: ditto for corpses
-    def _create_muzzle_flash(self, entity_id, direction='r'):
+    def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         if direction == 'r':
             chars, colors = self.atlas.get_element('shot_r')
@@ -609,7 +610,7 @@ class MapObjectFactory:
         return entity
 
     # TODO: merge boilerplate hand generators into a single `_create_hand(hand_type)`
-    def _create_cop_hand_back(self, entity_id, direction='r'):
+    def _create_cop_hand_back(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(f'cop_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
@@ -622,7 +623,7 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_cop_hand_forward(self, entity_id, direction='r'):
+    def _create_cop_hand_forward(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(f'cop_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
@@ -635,7 +636,7 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_punk_hand_back(self, entity_id, direction='r'):
+    def _create_punk_hand_back(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(f'punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
@@ -648,7 +649,8 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_nunchaku_punk_hand_forward(self, entity_id, direction='r'):
+    def _create_nunchaku_punk_hand_forward(self, entity_id, direction='r',
+                                           **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
@@ -661,7 +663,8 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_nunchaku_punk_hand_back(self, entity_id, direction='r'):
+    def _create_nunchaku_punk_hand_back(self, entity_id, direction='r',
+                                        **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
@@ -674,7 +677,8 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_bottle_punk_hand_forward(self, entity_id, direction='r'):
+    def _create_bottle_punk_hand_forward(self, entity_id, direction='r',
+                                         **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(
             f'bottle_punk_hand_forward_{direction}')
@@ -688,7 +692,7 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_bottle_punk_hand_back(self, entity_id, direction='r'):
+    def _create_bottle_punk_hand_back(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         chars, colors = self.atlas.get_element(
             f'bottle_punk_hand_back_{direction}')
@@ -702,7 +706,7 @@ class MapObjectFactory:
                                              is_working=False))
         return entity
 
-    def _create_pistol(self, entity_id, owning_entity=None):
+    def _create_pistol(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(images_dict={'l': self.atlas.get_element('pistol_l'),
                                               'r': self.atlas.get_element('pistol_r')},
@@ -725,7 +729,7 @@ class MapObjectFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
-    def _create_fist(self, entity_id, owning_entity=None):
+    def _create_fist(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(
             images_dict={'l': self.atlas.get_element('fist_l'),
@@ -746,7 +750,7 @@ class MapObjectFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
-    def _create_nunchaku(self, entity_id, owning_entity=None):
+    def _create_nunchaku(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(
             images_dict={'l': self.atlas.get_element('nunchaku_l'),
@@ -768,7 +772,7 @@ class MapObjectFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
-    def _create_bottle_launcher(self, entity_id, owning_entity=None):
+    def _create_bottle_launcher(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(
             images_dict={'l': self.atlas.get_element('fist_l'),
