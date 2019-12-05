@@ -88,7 +88,12 @@ class ScrollListener(Listener):
             # the game from save, where view is set to the default position of 0
             # regardless of where it has been before. Or after processing some
             # 'ecs_scroll*' events coming from outside this class.
-            x = EntityTracker().entities[self.target_entity].position.x
+            try:
+                x = EntityTracker().entities[self.target_entity].position.x
+            except KeyError:
+                # Do nothing if entity no longer exists (possible when PC is
+                # destroyed and leaves a corpse)
+                pass
             if x <= self.layout.view_pos[0]:
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x - self.distance - self.layout.view_pos[0], 0))

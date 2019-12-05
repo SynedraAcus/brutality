@@ -23,6 +23,15 @@ class WalkerComponent(PositionComponent):
         self.moved_this_tick = False
         
     def walk(self, move):
+        """
+        Move the owner, switching widgets for step animation and setting direction
+
+        If this is undesirable (ie character was pushed or something), use
+        regular ``position_component.move()``, which is not overridden.
+
+        :param move: tuple of ints - relative move
+        :return:
+        """
         if self.moved_this_tick:
             return
         self.relative_move(*move)
@@ -576,7 +585,7 @@ class BottleControllerComponent(Component):
                 if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
                     self.owner.hands.use_right_hand()
                     self.action_cooldown = self.action_delay
-                elif abs(dx) < 8 and abs(dy) < 5:
+                elif abs(dx) < 10 and abs(dy) < 5:
                     # Try melee if caught in close quarters
                     self.owner.hands.use_left_hand()
                     self.action_cooldown = self.action_delay

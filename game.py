@@ -174,8 +174,8 @@ else:
     # Central area
     factory.create_entity('broken_car', (150, 12))
     factory.create_entity('barricade_3', (250, 35))
-    factory.create_entity('bottle_punk', (270, 30))
-    factory.create_entity('nunchaku_punk', (300, 20))
+    factory.create_entity('bottle_punk', (70, 30))
+    # factory.create_entity('nunchaku_punk', (300, 20))
     # Main enemy fortification
     factory.create_entity('barricade_2', (320, 15))
     factory.create_entity('barricade_1', (319, 23))

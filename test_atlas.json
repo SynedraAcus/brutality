@@ -274,14 +274,14 @@
   },
   {
     "name": "bottle_punk_hand_forward_l",
-    "x": 44,
+    "x": 43,
     "y": 62,
-    "xsize": 5,
+    "xsize": 7,
     "ysize": 5
   },
   {
     "name": "bottle_punk_hand_back_r",
-    "x": 50,
+    "x": 51,
     "y": 61,
     "xsize": 6,
     "ysize": 5

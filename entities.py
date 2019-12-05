@@ -382,7 +382,7 @@ class MapObjectFactory:
                                                           'back_l': b_l.id,
                                                           'back_r': b_r.id},
                                                       hands_offsets={
-                                                          'forward_l': (1, 6),
+                                                          'forward_l': (-1, 6),
                                                           'forward_r': (2, 4),
                                                           'back_l': (1, 5),
                                                           'back_r': (2, 5)},
