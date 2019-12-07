@@ -124,7 +124,7 @@ else:
     # RUn a single tick so EntityTracker is aware of everything before level
     # is being generated
     loop._run_iteration(0)
-    levelgen.set_level('ghetto_tutorial')
+    levelgen.set_level('ghetto_test')
 
 
 # Actually starting

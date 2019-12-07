@@ -62,6 +62,7 @@ class LevelManager:
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
+        self.factory.create_entity('level_switch', (45, 25))
         self.factory.create_entity('barrel', (2, 17))
         self.factory.create_entity('barrel', (2, 35))
         self.factory.create_entity('barrel', (40, 17))

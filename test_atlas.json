@@ -544,5 +544,26 @@
     "y": 104,
     "xsize": 13,
     "ysize": 14
+  },
+  {
+    "name":  "level_switch_1",
+    "x": 65,
+    "y": 107,
+    "xsize": 15,
+    "ysize": 4
+  },
+  {
+    "name":  "level_switch_2",
+    "x": 65,
+    "y": 112,
+    "xsize": 15,
+    "ysize": 4
+  },
+  {
+    "name":  "level_switch_3",
+    "x": 65,
+    "y": 117,
+    "xsize": 15 ,
+    "ysize": 4
   }
 ]

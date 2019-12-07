@@ -222,6 +222,18 @@ class MapObjectFactory:
         barrel_entity.add_component(CollisionComponent(self.dispatcher))
         barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
+
+    def _create_level_switch(self, entity_id, **kwargs):
+        e = Entity(entity_id)
+        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
+                                                  self.atlas.get_element('level_switch_2'),
+                                                  self.atlas.get_element('level_switch_3')),
+                                                 2),
+                                       emit_ecs=True)
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher)),
+        e.add_component(DestructorComponent(self.dispatcher))
+        return e
     
     def _create_cop(self, entity_id, **kwargs):
         cop_entity = Entity(id=entity_id)
