@@ -197,6 +197,20 @@ class SpawningListener(Listener):
         for item in spawns:
             self.add_spawn(item)
 
+    def remove_spawns(self, filter=lambda x: True):
+        """
+        Remove all spawns for which filter returns True-ish value
+
+        :param filter: callable which accepts a single argument
+        :return:
+        """
+        # Copy list to avoid all weirdness caused by changing list while
+        # iterating over it
+        tmp_list = [x for x in self.spawns]
+        for spawn in tmp_list:
+            if filter(spawn):
+                self.spawns.remove(spawn)
+
     def on_event(self, event):
         if event.event_type == 'ecs_move' and \
                     event.event_value[0] == self.player_id:

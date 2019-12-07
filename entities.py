@@ -148,6 +148,7 @@ class MapObjectFactory:
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))
         wall.add_component(PassingComponent(self.dispatcher))
+        wall.add_component(DestructorComponent(self.dispatcher))
         return wall
 
     def _create_floor(self, entity_id, size=(150, 30), **kwargs):
@@ -158,6 +159,7 @@ class MapObjectFactory:
                                                   size=size))
         floor.add_component(PositionComponent(self.dispatcher))
         floor.add_component(WidgetComponent(self.dispatcher, widget))
+        floor.add_component(DestructorComponent(self.dispatcher))
         return floor
 
     def generate_inactive_decoration(self, entity_id, entity_type, **kwargs):
@@ -174,7 +176,8 @@ class MapObjectFactory:
         e = Entity(id=entity_id)
         widget = Widget(*self.atlas.get_element(entity_type))
         e.add_component(WidgetComponent(self.dispatcher, widget))
-        e.add_component((PositionComponent(self.dispatcher)))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(DestructorComponent(self.dispatcher))
         return e
 
     def generate_barrier(self, entity_id, entity_type, **kwargs):
@@ -200,6 +203,7 @@ class MapObjectFactory:
         e.add_component(PassingComponent(self.dispatcher,
                                  shadow_size=self.shadow_sizes[entity_type],
                                  shadow_pos=self.shadow_positions[entity_type]))
+        e.add_component(DestructorComponent(self.dispatcher))
         return e
 
     def _create_barrel(self, entity_id, **kwargs):
@@ -216,6 +220,7 @@ class MapObjectFactory:
                                                      shadow_pos=(0, 7),
                                                      shadow_size=(6, 2)))
         barrel_entity.add_component(CollisionComponent(self.dispatcher))
+        barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
     
     def _create_cop(self, entity_id, **kwargs):
@@ -423,7 +428,7 @@ class MapObjectFactory:
 
     def _create_nunchaku_punk_corpse(self, entity_id, **kwargs):
         """
-        Cop corpse: inactive, just lays there
+        Like cop corpse, except for the punk
         :return:
         """
         corpse = Entity(id=entity_id)
@@ -434,10 +439,6 @@ class MapObjectFactory:
         return corpse
 
     def _create_bottle_punk_corpse(self, entity_id, **kwargs):
-        """
-        Cop corpse: inactive, just lays there
-        :return:
-        """
         corpse = Entity(id=entity_id)
         corpse.add_component(WidgetComponent(self.dispatcher,
                                              Widget(*self.atlas.get_element('bottle_punk_corpse'))))
@@ -461,6 +462,7 @@ class MapObjectFactory:
                                                 owner=bg_entity))
         bg_entity.add_component(PositionComponent(self.dispatcher))
         bg_entity.add_component(PassingComponent(self.dispatcher))
+        bg_entity.add_component(DestructorComponent(self.dispatcher))
         return bg_entity
 
     def _create_bullet(self, entity_id, direction='r', **kwargs):
@@ -593,7 +595,7 @@ class MapObjectFactory:
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.
-    # TODO: ditto for corpses
+    # TODO: Move corpses to decorations or barriers
     def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
         if direction == 'r':
