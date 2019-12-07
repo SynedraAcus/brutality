@@ -863,7 +863,10 @@ class ItemBehaviourComponent(Component):
 
     @property
     def owning_entity(self):
-        return self._owning_entity
+        if self._owning_entity:
+            return self._owning_entity
+        else:
+            return self._future_owner
 
     @owning_entity.setter
     def owning_entity(self, value):

@@ -30,10 +30,36 @@ class LevelManager:
         self.starting_positions = {'ghetto_test': (30, 20),
                                    'ghetto_tutorial': (5, 25)}
 
+    def should_remove(self, entity):
+        """
+        Return True if this entity should be removed during level change
+
+        This function returns False for:
+        1. Player himself (self.player_entity)
+        2. Items in player's posession (those that have ItemBehaviourComponent
+        and its owning_entity is set to player's ID)
+        3. Hands whose name includes player name (strictly speaking, entities
+        where both `player_entity` and `hand` are parts of the id).
+        :return:
+        """
+        if entity.id == self.player_entity:
+            return False
+        if 'item_behaviour' in entity.components:
+            try:
+                if entity.item_behaviour.owning_entity.id == self.player_entity:
+                    return False
+            except AttributeError:
+                 if entity.item_behaviour._future_owner == self.player_entity:
+                     return False
+            return False
+        if f'{self.player_entity}_hand' in entity.id:
+            return False
+        return True
+
     def destroy_current_level(self):
         self.current_level = None
         # Remove every entity except self.player_entity
-        for entity in EntityTracker().filter_entities(lambda x: x.id != self.player_entity):
+        for entity in EntityTracker().filter_entities(self.should_remove):
             # TODO: Do not remove players hands and items
             entity.destructor.destroy()
         # Remove any un-triggered spawns
@@ -67,6 +93,7 @@ class LevelManager:
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (45, 25))
+        self.factory.create_entity('nunchaku', (10, 20))
         self.factory.create_entity('barrel', (2, 17))
         self.factory.create_entity('barrel', (2, 35))
         self.factory.create_entity('barrel', (40, 17))
