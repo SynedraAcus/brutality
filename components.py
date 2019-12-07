@@ -935,6 +935,5 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
 
     def __repr__(self):
         d = loads(super().__repr__())
-        d['spawned_item'] = self.spawned_item
-        d['relative_pos'] = self.relative_pos
+        d['spawned_items'] = self.spawned_items
         return dumps(d)

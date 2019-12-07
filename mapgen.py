@@ -8,6 +8,7 @@ from listeners import SpawnItem
 from bear_hug.ecs import EntityTracker
 from bear_hug.event import BearEvent
 
+
 class LevelManager:
     """
     A class responsible for creating levels.
@@ -15,11 +16,13 @@ class LevelManager:
     For each level, it calls all appropriate factory methods to create
     everything except player character
     """
-    def __init__(self, dispatcher, factory, spawner=None, player_entity=None):
+    def __init__(self, dispatcher, factory, spawner=None, level_switch=None,
+                 player_entity=None):
         # TODO: check types
         self.dispatcher = dispatcher
         self.factory = factory
         self.spawner = spawner
+        self.level_switch = level_switch
         self.player_entity = player_entity
         self.current_level = None
         self.methods = {'ghetto_test': '_ghetto_test',
@@ -31,10 +34,11 @@ class LevelManager:
         self.current_level = None
         # Remove every entity except self.player_entity
         for entity in EntityTracker().filter_entities(lambda x: x.id != self.player_entity):
+            # TODO: Do not remove players hands and items
             entity.destructor.destroy()
-            print(entity)
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
+        self.level_switch.disable()
 
     def set_level(self, level_id):
         """
@@ -67,6 +71,9 @@ class LevelManager:
         self.factory.create_entity('barrel', (2, 35))
         self.factory.create_entity('barrel', (40, 17))
         self.factory.create_entity('barrel', (40, 40))
+        # Set level switch coordinates
+        self.level_switch.switch_pos = (45, 7)
+        self.level_switch.switch_size = (15, 4)
 
     def _ghetto_tutorial(self):
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))

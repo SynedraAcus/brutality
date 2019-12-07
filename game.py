@@ -15,7 +15,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 from entities import MapObjectFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, SpawnItem,\
-    SpawningListener
+    SpawningListener, LevelSwitchListener
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -108,6 +108,12 @@ dispatcher.register_listener(spawner, 'ecs_move')
 # Level generator
 levelgen = LevelManager(dispatcher, factory,
                         spawner=spawner, player_entity='cop_1')
+
+# Level switcher
+level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
+                                   level_sequence=['ghetto_test', 'ghetto_tutorial'])
+dispatcher.register_listener(level_switch, 'ecs_move')
+levelgen.level_switch = level_switch
 
 ################################################################################
 # Creating initial entities

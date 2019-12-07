@@ -241,3 +241,53 @@ class SavingListener(Listener):
             with open('save.json', mode='w') as savefile:
                 for entity in EntityTracker().filter_entities():
                     print(repr(entity), file=savefile)
+
+
+class LevelSwitchListener(Listener):
+    """
+    Changes level when player walks into a predefined area.
+
+    Currently only able to switch them in a fixed sequence.
+    """
+    def __init__(self, player_id, switch_pos = None, switch_size = None,
+                 level_manager=None, level_sequence=[], **kwargs):
+        super().__init__(**kwargs)
+        self.player_id = player_id
+        self.player_entity = None
+        # LevelManager type not checked to avoid circular import
+        self.level_manager = level_manager
+        for x in level_sequence:
+            if x not in self.level_manager.methods:
+                raise ValueError(f'Invalid level {x} supplied to LevelSwitchListener')
+        self.level_sequence = level_sequence
+        # Assumes that it starts from 0th level
+        self.current_level = 0
+        self.switch_pos = switch_pos
+        self.switch_size = switch_size
+        self.enabled = True
+
+    def on_event(self, event):
+        if not self.enabled:
+            return
+        if event.event_type == 'ecs_move' and \
+                    event.event_value[0] == self.player_id:
+            if not self.player_entity:
+                self.player_entity = EntityTracker().entities[self.player_id]
+            if rectangles_collide(self.switch_pos, self.switch_size,
+                                  self.player_entity.position.pos,
+                                  self.player_entity.widget.size):
+                print('Trying to change level')
+                self.current_level += 1
+                self.level_manager.set_level(self.level_sequence[self.current_level])
+
+    def disable(self):
+        """
+        Do not use LevelSwitchListener on current level
+        """
+        self.enabled = False
+
+    def enable(self):
+        """
+        Use LevelSwitchListener on current level
+        """
+        self.enabled = True
