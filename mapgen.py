@@ -27,7 +27,7 @@ class LevelManager:
         self.current_level = None
         self.methods = {'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial'}
-        self.starting_positions = {'ghetto_test': (30, 20),
+        self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25)}
 
     def should_remove(self, entity):
@@ -87,19 +87,16 @@ class LevelManager:
         self.current_level = level_id
 
     def _ghetto_test(self):
-        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('level_switch', (45, 25))
+        # self.factory.create_entity('level_switch', (45, 25))
         self.factory.create_entity('nunchaku', (10, 20))
-        self.factory.create_entity('barrel', (2, 17))
-        self.factory.create_entity('barrel', (2, 35))
-        self.factory.create_entity('barrel', (40, 17))
-        self.factory.create_entity('barrel', (40, 40))
+        self.factory.create_entity('dept_table_boss', (25, 20))
         # Set level switch coordinates
-        self.level_switch.switch_pos = (45, 7)
+        self.level_switch.switch_pos = (450, 7)
         self.level_switch.switch_size = (15, 4)
 
     def _ghetto_tutorial(self):

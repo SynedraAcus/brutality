@@ -48,6 +48,14 @@ ghetto_transition = {'wall_1': {'wall_2': 0.2,
                              'house_win': 0.3,
                              'house_door': 0.3}}
 
+dept_transition = {'dept_wall_1': {'dept_wall_1': 0.9,
+                                   'dept_wall_2': 0.05,
+                                   'dept_wall_3': 0.05},
+                   'dept_wall_2': {'dept_wall_1': 0.85,
+                                   'dept_wall_3': 0.15},
+                   'dept_wall_3': {'dept_wall_1': 0.85,
+                                   'dept_wall_2': 0.15}}
+
 
 def generate_tiled(atlas, pattern, size):
     """

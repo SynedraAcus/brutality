@@ -84,6 +84,13 @@
     "ysize": 12
   },
   {
+    "name": "dept_chair_2",
+    "x": 27,
+    "y": 27,
+    "xsize": 7,
+    "ysize": 12
+  },
+  {
     "name": "dept_table_boss",
     "x": 0,
     "y": 40,

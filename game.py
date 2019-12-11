@@ -34,8 +34,8 @@ dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
 atlas = Multiatlas((Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json'),
-                    Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json')))
-                   # TODO: add dept to multiatlas
+                    Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
+                    Atlas(XpLoader('department.xp'), 'department.json')))
 
 # Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]

@@ -11,7 +11,8 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 from bear_hug.resources import Atlas, XpLoader
 
 from components import *
-from background import generate_tiled, tile_randomly, generate_bg, ghetto_transition
+from background import generate_tiled, tile_randomly, generate_bg,\
+    ghetto_transition, dept_transition
 
 
 class Multiatlas:
@@ -82,15 +83,38 @@ class MapObjectFactory:
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
-                         'barricade_3'}
+                         'barricade_3', 'dept_locker', 'dept_fence',
+                         'dept_bench', 'dept_range_table', 'dept_wall_inner',
+                         'dept_table_1', 'dept_table_2', 'dept_chair_1',
+                         'dept_chair_2', 'dept_table_boss'}
         self.shadow_positions = {'broken_car': (0, 7),
                                  'barricade_1': (1, 9),
                                  'barricade_2': (0, 6),
-                                 'barricade_3': (0, 6)}
+                                 'barricade_3': (0, 6),
+                                 'dept_locker': (0, 17),
+                                 'dept_fence': (0, 13),
+                                 'dept_bench': (0, 5),
+                                 'dept_range_table': (3, 0),
+                                 'dept_wall_inner': (0, 0),
+                                 'dept_table_1': (0, 11),
+                                 'dept_table_2': (0, 12),
+                                 'dept_chair_1': (0, 10),
+                                 'dept_chair_2': (0, 10),
+                                 'dept_table_boss': (0, 19)}
         self.shadow_sizes = {'broken_car': (38, 7),
                              'barricade_1': (11, 7),
                              'barricade_2': (14, 8),
-                             'barricade_3': (13, 8)}
+                             'barricade_3': (13, 8),
+                             'dept_locker': (9, 3),
+                             'dept_fence': (21, 2),
+                             'dept_bench': (19, 2),
+                             'dept_range_table': (13, 19),
+                             'dept_wall_inner': (15, 32),
+                             'dept_table_1': (17, 7),
+                             'dept_table_2': (18, 7),
+                             'dept_chair_1': (7, 3),
+                             'dept_chair_2': (7, 3),
+                             'dept_table_boss': (30, 7)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -187,10 +211,21 @@ class MapObjectFactory:
                                                         spawn_kwargs=kwargs))
         return spawner
 
-    def _create_ghetto_bg(self, entity_id, size=(50, 30), **kwargs):
+    def _create_ghetto_bg(self, entity_id, size=(50, 20), **kwargs):
         wall = Entity(id=entity_id)
         # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(self.atlas, ghetto_transition, size[0])
+        widget = Widget(*w)
+        wall.add_component(WidgetComponent(self.dispatcher, widget))
+        wall.add_component(PositionComponent(self.dispatcher))
+        wall.add_component(PassingComponent(self.dispatcher))
+        wall.add_component(DestructorComponent(self.dispatcher))
+        return wall
+
+    def _create_dept_bg(self, entity_id, size=(50, 20), **kwargs):
+        wall = Entity(id=entity_id)
+        # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
+        w = generate_bg(self.atlas, dept_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))
@@ -234,10 +269,8 @@ class MapObjectFactory:
 
         This method is used for various un-passable entities without complex
         logic or animations, like walls, fences, barriers, trees and whatnot.
-        All _create_{barrier_type_item} methods will redirect here to avoid
-        writing tons of boilerplate methods. It relies on the factory class
-        having self.shadow_positions and self.shadow_sizes dictionaries for the
-        PassingComponents.
+        It relies on the factory class having self.shadow_positions and
+        self.shadow_sizes dictionaries for the PassingComponents.
         :param entity_id:
         :param type:
         :return:
@@ -292,8 +325,8 @@ class MapObjectFactory:
         cop_entity.add_component(WalkerComponent(self.dispatcher))
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         cop_entity.add_component(WalkerCollisionComponent(self.dispatcher))
-        cop_entity.add_component(PassingComponent(self.dispatcher, shadow_pos=(0, 15),
-                                                  shadow_size=(13, 3)))
+        cop_entity.add_component(PassingComponent(self.dispatcher, shadow_pos=(0, 16),
+                                                  shadow_size=(5, 2)))
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
