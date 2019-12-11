@@ -113,7 +113,7 @@ levelgen = LevelManager(dispatcher, factory,
 
 # Level switcher
 level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
-                                   level_sequence=['ghetto_test', 'ghetto_tutorial'])
+                                   level_sequence=['ghetto_test', 'department', 'ghetto_tutorial'])
 dispatcher.register_listener(level_switch, 'ecs_move')
 levelgen.level_switch = level_switch
 
@@ -132,7 +132,7 @@ else:
     # RUn a single tick so EntityTracker is aware of everything before level
     # is being generated
     loop._run_iteration(0)
-    levelgen.set_level('ghetto_test')
+    levelgen.set_level('department')
 
 
 # Actually starting

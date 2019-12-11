@@ -90,11 +90,12 @@ class ScrollListener(Listener):
             # 'ecs_scroll*' events coming from outside this class.
             try:
                 x = EntityTracker().entities[self.target_entity].position.x
+                xsize = EntityTracker().entities[self.target_entity].widget.width
             except KeyError:
                 # Do nothing if entity no longer exists (possible when PC is
                 # destroyed and leaves a corpse)
                 return
-            if x <= self.layout.view_pos[0]:
+            if x + xsize <= self.layout.view_pos[0]:
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x - self.distance - self.layout.view_pos[0], 0))
             elif x >= self.layout.view_pos[0] + self.layout.view_size[0] \

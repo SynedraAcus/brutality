@@ -26,15 +26,17 @@ class LevelManager:
         self.player_entity = player_entity
         self.current_level = None
         self.methods = {'ghetto_test': '_ghetto_test',
-                        'ghetto_tutorial': '_ghetto_tutorial'}
+                        'ghetto_tutorial': '_ghetto_tutorial',
+                        'department': '_department'}
         self.starting_positions = {'ghetto_test': (10, 20),
-                                   'ghetto_tutorial': (5, 25)}
+                                   'ghetto_tutorial': (5, 25),
+                                   'department': (10, 20)}
 
     def should_remove(self, entity):
         """
         Return True if this entity should be removed during level change
 
-        This function returns False for:
+        This method returns False for:
         1. Player himself (self.player_entity)
         2. Items in player's posession (those that have ItemBehaviourComponent
         and its owning_entity is set to player's ID)
@@ -60,7 +62,6 @@ class LevelManager:
         self.current_level = None
         # Remove every entity except self.player_entity
         for entity in EntityTracker().filter_entities(self.should_remove):
-            # TODO: Do not remove players hands and items
             entity.destructor.destroy()
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
@@ -92,11 +93,60 @@ class LevelManager:
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        # self.factory.create_entity('level_switch', (45, 25))
+        self.factory.create_entity('level_switch', (60, 30))
         self.factory.create_entity('nunchaku', (10, 20))
         self.factory.create_entity('dept_table_boss', (25, 20))
         # Set level switch coordinates
-        self.level_switch.switch_pos = (450, 7)
+        self.level_switch.switch_pos = (60, 30)
+        self.level_switch.switch_size = (15, 4)
+
+    def _department(self):
+        self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('floor', (0, 20), size=(500, 30))
+        self.factory.create_entity('invis', (0, 51), size=(500, 9))
+        self.factory.create_entity('dept_wall_inner', (0, 0))
+        # Lockers and benches
+        self.factory.create_entity('dept_locker', (8, 4))
+        self.factory.create_entity('dept_locker', (4, 8))
+        self.factory.create_entity('dept_locker', (0, 12))
+        self.factory.create_entity('dept_bench', (25, 18))
+        self.factory.create_entity('dept_locker', (58, 4))
+        self.factory.create_entity('dept_locker', (54, 8))
+        self.factory.create_entity('dept_locker', (50, 12))
+        self.factory.create_entity('dept_locker', (46, 16))
+        self.factory.create_entity('dept_locker', (42, 20))
+        self.factory.create_entity('dept_locker', (64, 4))
+        self.factory.create_entity('dept_locker', (60, 8))
+        self.factory.create_entity('dept_locker', (56, 12))
+        self.factory.create_entity('dept_locker', (52, 16))
+        self.factory.create_entity('dept_locker', (48, 20))
+        self.factory.create_entity('dept_bench', (80, 18))
+        self.factory.create_entity('dept_bench', (100, 18))
+        # Shooting range
+        self.factory.create_entity('dept_wall_inner', (120, 0))
+        self.factory.create_entity('dept_wall_inner', (101, 20))
+        self.factory.create_entity('pistol', (130, 30))
+        self.factory.create_entity('dept_range_table', (160, 13))
+        self.factory.create_entity('target', (210, 14))
+        self.factory.create_entity('dept_fence', (163, 22))
+        self.factory.create_entity('dept_fence', (184, 22))
+        self.factory.create_entity('dept_fence', (205, 22))
+        self.factory.create_entity('dept_wall_inner', (226, 0))
+        self.factory.create_entity('dept_wall_inner', (215, 11))
+        # Corridor
+        self.factory.create_entity('dept_bench', (240, 18))
+        self.factory.create_entity('dept_wall_inner', (265, 0))
+        self.factory.create_entity('dept_wall_inner', (254, 11))
+        # Office
+        self.factory.create_entity('dept_chair_1', (287, 17))
+        self.factory.create_entity('dept_table_1', (290, 12))
+        self.factory.create_entity('dept_table_2', (305, 12))
+        self.factory.create_entity('dept_chair_2', (320, 17))
+        self.factory.create_entity('dept_table_boss', (350, 7))
+        self.factory.create_entity('dept_wall_inner', (415, 0))
+        self.factory.create_entity('dept_wall_inner', (395, 20))
+        self.factory.create_entity('level_switch', (415, 33))
+        self.level_switch.switch_pos = (415, 33)
         self.level_switch.switch_size = (15, 4)
 
     def _ghetto_tutorial(self):

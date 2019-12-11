@@ -84,7 +84,7 @@ class MapObjectFactory:
                             'bucket', 'pizza_box'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
                          'barricade_3', 'dept_locker', 'dept_fence',
-                         'dept_bench', 'dept_range_table', 'dept_wall_inner',
+                         'dept_bench', 'dept_wall_inner',
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
                          'dept_chair_2', 'dept_table_boss'}
         self.shadow_positions = {'broken_car': (0, 7),
@@ -94,8 +94,7 @@ class MapObjectFactory:
                                  'dept_locker': (0, 17),
                                  'dept_fence': (0, 13),
                                  'dept_bench': (0, 5),
-                                 'dept_range_table': (3, 0),
-                                 'dept_wall_inner': (0, 0),
+                                 'dept_wall_inner': (0, 19),
                                  'dept_table_1': (0, 11),
                                  'dept_table_2': (0, 12),
                                  'dept_chair_1': (0, 10),
@@ -109,7 +108,7 @@ class MapObjectFactory:
                              'dept_fence': (21, 2),
                              'dept_bench': (19, 2),
                              'dept_range_table': (13, 19),
-                             'dept_wall_inner': (15, 32),
+                             'dept_wall_inner': (15, 12),
                              'dept_table_1': (17, 7),
                              'dept_table_2': (18, 7),
                              'dept_chair_1': (7, 3),
@@ -283,6 +282,23 @@ class MapObjectFactory:
         e.add_component(PassingComponent(self.dispatcher,
                                  shadow_size=self.shadow_sizes[entity_type],
                                  shadow_pos=self.shadow_positions[entity_type]))
+        e.add_component(DestructorComponent(self.dispatcher))
+        return e
+
+    def _create_dept_range_table(self, entity_id, **kwargs):
+        """
+        Doesn't have CollisionComponent to permit shooting
+        :param entity_id:
+        :param kwargs:
+        :return:
+        """
+        e = Entity(id=entity_id)
+        widget = Widget(*self.atlas.get_element('dept_range_table'))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(PassingComponent(self.dispatcher,
+                                         shadow_size=(13, 19),
+                                         shadow_pos=(3, 0)))
         e.add_component(DestructorComponent(self.dispatcher))
         return e
 
