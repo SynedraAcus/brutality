@@ -1,0 +1,93 @@
+[
+  {
+    "name": "dept_wall_1",
+    "x": 0,
+    "y": 0,
+    "xsize": 5,
+    "ysize": 20
+  },
+  {
+    "name": "dept_wall_2",
+    "x": 6,
+    "y": 0,
+    "xsize": 7,
+    "ysize": 20
+  },
+  {
+    "name": "dept_wall_3",
+    "x": 14,
+    "y": 0,
+    "xsize": 9,
+    "ysize": 20
+  },
+  {
+    "name": "punchbag",
+    "x": 24,
+    "y": 0,
+    "xsize": 3,
+    "ysize": 26
+  },
+  {
+    "name": "dept_locker",
+    "x": 28,
+    "y": 0,
+    "xsize": 9,
+    "ysize": 20
+  },
+  {
+    "name": "dept_fence",
+    "x": 38,
+    "y": 0,
+    "xsize": 21,
+    "ysize": 14
+  },
+  {
+    "name": "dept_bench",
+    "x": 38,
+    "y": 15,
+    "xsize": 19,
+    "ysize": 7
+  },
+  {
+    "name": "dept_range_table",
+    "x": 60,
+    "y": 0,
+    "xsize": 17,
+    "ysize": 19
+  },
+  {
+    "name": "dept_wall_inner",
+    "x": 78,
+    "y": 0,
+    "xsize": 15,
+    "ysize": 32
+  },
+  {
+    "name": "dept_table_1",
+    "x": 0,
+    "y": 21,
+    "xsize": 18,
+    "ysize": 18
+  },
+  {
+    "name": "dept_table_2",
+    "x": 35,
+    "y": 23,
+    "xsize": 19,
+    "ysize": 19
+  },
+  {
+    "name": "dept_chair_1",
+    "x": 19,
+    "y": 27,
+    "xsize": 7,
+    "ysize": 12
+  },
+  {
+    "name": "dept_table_boss",
+    "x": 0,
+    "y": 40,
+    "xsize": 30,
+    "ysize": 25
+  }
+]
