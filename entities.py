@@ -26,11 +26,11 @@ class Multiatlas:
     :param atlases: an iterable of Atlas instances
 
     """
-    def __init__(self, *args, atlases, **kwargs):
-        super().__init__(*args, **kwargs)
+    # TODO: move multiatlas to bear_hug.resources
+    def __init__(self, atlases):
+        self.atlases = []
         for atlas in atlases:
             self.add_atlas(atlas)
-        self.atlases = []
 
     def add_atlas(self, atlas):
         """
@@ -190,8 +190,7 @@ class MapObjectFactory:
     def _create_ghetto_bg(self, entity_id, size=(50, 30), **kwargs):
         wall = Entity(id=entity_id)
         # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
-        w = generate_bg(Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
-                              ghetto_transition, size[0])
+        w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher))

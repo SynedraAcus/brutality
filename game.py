@@ -12,7 +12,7 @@ from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, XpLoader
 from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
-from entities import MapObjectFactory
+from entities import MapObjectFactory, Multiatlas
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener
@@ -33,7 +33,9 @@ t = BearTerminal(font_path='cp437_12x12.png', size='81x61',
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
-atlas = Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json')
+atlas = Multiatlas((Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json'),
+                    Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json')))
+                   # TODO: add dept to multiatlas
 
 # Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]
