@@ -113,7 +113,7 @@ levelgen = LevelManager(dispatcher, factory,
 
 # Level switcher
 level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
-                                   level_sequence=['ghetto_test', 'department', 'ghetto_tutorial'])
+                                   level_sequence=['department', 'ghetto_tutorial'])
 dispatcher.register_listener(level_switch, 'ecs_move')
 levelgen.level_switch = level_switch
 

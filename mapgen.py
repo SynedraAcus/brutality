@@ -101,6 +101,9 @@ class LevelManager:
         self.level_switch.switch_size = (15, 4)
 
     def _department(self):
+        self.factory.create_entity('level_switch', (115, 33))
+        self.level_switch.switch_pos = (115, 33)
+        self.level_switch.switch_size = (115, 4)
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -145,9 +148,7 @@ class LevelManager:
         self.factory.create_entity('dept_table_boss', (350, 7))
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))
-        self.factory.create_entity('level_switch', (415, 33))
-        self.level_switch.switch_pos = (415, 33)
-        self.level_switch.switch_size = (15, 4)
+
 
     def _ghetto_tutorial(self):
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))

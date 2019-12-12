@@ -96,8 +96,11 @@ class ScrollListener(Listener):
                 # destroyed and leaves a corpse)
                 return
             if x + xsize <= self.layout.view_pos[0]:
+                x_scroll = x - self.distance - self.layout.view_pos[0]
+                if abs(x_scroll) > self.layout.view_pos[0]:
+                    x_scroll = -1 * self.layout.view_pos[0]
                 return BearEvent(event_type='ecs_scroll_by',
-                                 event_value=(x - self.distance - self.layout.view_pos[0], 0))
+                                 event_value=(x_scroll, 0))
             elif x >= self.layout.view_pos[0] + self.layout.view_size[0] \
                        - self.layout.entities[self.target_entity].widget.size[0]:
                 return BearEvent(event_type='ecs_scroll_by',
@@ -277,8 +280,8 @@ class LevelSwitchListener(Listener):
             if rectangles_collide(self.switch_pos, self.switch_size,
                                   self.player_entity.position.pos,
                                   self.player_entity.widget.size):
-                print('Trying to change level')
                 self.current_level += 1
+                print(f'Trying to change level to {self.level_sequence[self.current_level]}')
                 self.level_manager.set_level(self.level_sequence[self.current_level])
 
     def disable(self):
