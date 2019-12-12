@@ -101,9 +101,9 @@ class LevelManager:
         self.level_switch.switch_size = (15, 4)
 
     def _department(self):
-        self.factory.create_entity('level_switch', (115, 33))
-        self.level_switch.switch_pos = (115, 33)
-        self.level_switch.switch_size = (115, 4)
+        self.factory.create_entity('level_switch', (415, 33))
+        self.level_switch.switch_pos = (415, 33)
+        self.level_switch.switch_size = (415, 4)
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))

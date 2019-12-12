@@ -141,4 +141,4 @@ loop.run()
 # TODO: directions for corpses
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
-# TODO: Z-levels
+# TODO: Z-levels-aware collision detector

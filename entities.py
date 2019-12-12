@@ -186,9 +186,10 @@ class MapObjectFactory:
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
                         **kwargs):
         message = Entity(id=entity_id)
-        widget = Label(text)
+        widget = Label(text, z_level=200)
         message.add_component(WidgetComponent(self.dispatcher, widget))
-        message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy))
+        message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy,
+                                                affect_z=False))
         message.add_component(DestructorComponent(self.dispatcher))
         message.add_component(DecayComponent(self.dispatcher, destroy_condition=destroy_condition,
                                              lifetime=lifetime))
@@ -216,7 +217,7 @@ class MapObjectFactory:
         w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher))
+        wall.add_component(PositionComponent(self.dispatcher,affect_z=False))
         wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
         return wall
@@ -227,7 +228,7 @@ class MapObjectFactory:
         w = generate_bg(self.atlas, dept_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=False))
         wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
         return wall
@@ -238,7 +239,8 @@ class MapObjectFactory:
                                                   'floor_tile_2',
                                                   'floor_tile_3',
                                                   size=size))
-        floor.add_component(PositionComponent(self.dispatcher))
+        # Disable affect_z so that floor won't overlap everything
+        floor.add_component(PositionComponent(self.dispatcher, affect_z=False))
         floor.add_component(WidgetComponent(self.dispatcher, widget))
         floor.add_component(DestructorComponent(self.dispatcher))
         return floor
@@ -725,7 +727,7 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'cop_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -738,7 +740,7 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'cop_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -751,7 +753,7 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -765,7 +767,7 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -779,7 +781,7 @@ class MapObjectFactory:
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -794,7 +796,7 @@ class MapObjectFactory:
             f'bottle_punk_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -808,7 +810,7 @@ class MapObjectFactory:
             f'bottle_punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',

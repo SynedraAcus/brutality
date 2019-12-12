@@ -724,9 +724,10 @@ class HandInterfaceComponent(Component):
             hand = 'back_r'
         else:
             hand = 'forward_l'
-        # Have to call the HidingComponent directly because show/hide logic does
-        # not use the event for communication
-        EntityTracker().entities[self.hand_entities[hand]].hiding.show()
+        # Have to call the HidingComponent and WidgetComponent directly
+        hand_entity = EntityTracker().entities[self.hand_entities[hand]]
+        hand_entity.widget.z_level = self.owner.widget.z_level + 1
+        hand_entity.hiding.show()
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
@@ -735,6 +736,7 @@ class HandInterfaceComponent(Component):
         if self.left_item:
             item = EntityTracker().entities[self.left_item]
             item.widget.switch_to_image(self.owner.position.direction)
+            item.widget.z_level = self.owner.widget.z_level + 1
             item.hiding.show()
             item_x = hand_x + self.item_offsets[hand][0]
             item_y = hand_y + self.item_offsets[hand][1]
@@ -749,7 +751,9 @@ class HandInterfaceComponent(Component):
             hand = 'forward_r'
         else:
             hand = 'back_l'
-        EntityTracker().entities[self.hand_entities[hand]].hiding.show()
+        hand_entity = EntityTracker().entities[self.hand_entities[hand]]
+        hand_entity.widget.z_level = self.owner.widget.z_level + 1
+        hand_entity.hiding.show()
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
         self.dispatcher.add_event(BearEvent(event_type='ecs_move',
@@ -759,6 +763,7 @@ class HandInterfaceComponent(Component):
         if self.right_item:
             item = EntityTracker().entities[self.right_item]
             item.widget.switch_to_image(self.owner.position.direction)
+            item.widget.z_level = self.owner.widget.z_level + 1
             item.hiding.show()
             item_x = hand_x + self.item_offsets[hand][0]
             item_y = hand_y + self.item_offsets[hand][1]
