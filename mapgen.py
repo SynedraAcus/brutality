@@ -243,8 +243,6 @@ class LevelManager:
                 self.factory.create_entity(t, (x + random.randint(-5, 5),
                                           22 + random.randint(-2, 2)))
         # Tutorial area entities
-        self.factory.create_entity('target', (50, 20))
-        self.factory.create_entity('target', (90, 20))
         self.factory.create_entity('pistol', (65, 30))
         # Central area
         self.factory.create_entity('broken_car', (150, 12))
