@@ -46,6 +46,7 @@ class WalkerComponent(PositionComponent):
             self.phase = '2'
         else:
             self.phase = '1'
+        self.dispatcher.add_event(BearEvent('play_sound', 'step'))
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
 
     def turn(self, direction):
@@ -113,6 +114,7 @@ class ProjectileCollisionComponent(CollisionComponent):
         if not entity:
             self.owner.destructor.destroy()
         elif hasattr(EntityTracker().entities[entity], 'collision'):
+            self.dispatcher.add_event(BearEvent('play_sound', 'punch'))
             self.dispatcher.add_event(BearEvent(event_type='brut_damage',
                                                 event_value=(entity, self.damage)))
             self.owner.destructor.destroy()
@@ -940,6 +942,8 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
             self.owner.spawner.spawn(item,
                                      self.spawned_items[item][direction],
                                      direction=direction)
+        if 'pistol' in self.owner.id:
+            self.dispatcher.add_event(BearEvent('play_sound', 'shot'))
 
     def __repr__(self):
         d = loads(super().__repr__())
