@@ -107,10 +107,54 @@ class LevelManager:
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('dept_wall_inner', (0, 0))
+        # All messages
+        self.factory.create_entity('message', (20, 20),
+                                   text='Walk with WASD or arrow keys.',
+                                   destroy_condition='timeout',
+                                   vy=-2, lifetime=5)
+        spawns = (SpawnItem(item='message',
+                            pos=(20, 20),
+                            size=(10, 20),
+                            kwargs={
+                                'text': 'Use your hands with Q and E\nWith no weapons, you still can punch',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(130, 20),
+                            size=(10, 20),
+                            kwargs={
+                                'text': 'Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(150, 20),
+                            size=(10, 8),
+                            kwargs={
+                                'text': 'You can look around with numpad',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(350, 20),
+                            size=(10, 30),
+                            kwargs={
+                                'text': 'Hey, come here',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(350, 20),
+                            size=(30, 8),
+                            kwargs={
+                                'text': 'We got a damn punk infestation\ndown the street.\n\nGo do something about it',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}))
+        self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
-        self.factory.create_entity('dept_locker', (8, 4))
-        self.factory.create_entity('dept_locker', (4, 8))
+        self.factory.create_entity('dept_wall_inner', (0, 0))
         self.factory.create_entity('dept_locker', (0, 12))
         self.factory.create_entity('dept_bench', (25, 18))
         self.factory.create_entity('dept_locker', (58, 4))
@@ -149,13 +193,36 @@ class LevelManager:
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))
 
-
     def _ghetto_tutorial(self):
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
+        self.spawner.add_spawn(SpawnItem(item='message',
+                                         pos=(150, 20),
+                                         size=(10, 30),
+                                         kwargs={
+                      'text': 'I don\'t see any punks',
+                      'destroy_condition': 'timeout',
+                      'lifetime': 5,
+                      'vy': -2}))
+        self.spawner.add_spawn(SpawnItem(item='message',
+                                         pos=(240, 20),
+                                         size=(10, 30),
+                                         kwargs={
+                                             'text': 'Oh, here\'s one',
+                                             'destroy_condition': 'timeout',
+                                             'lifetime': 5,
+                                             'vy': -2}))
+        self.spawner.add_spawn(SpawnItem(item='message',
+                                         pos=(430, 20),
+                                         size=(10, 30),
+                                         kwargs={
+                                             'text': 'That\'s all for now. Thanks for playing!',
+                                             'destroy_condition': 'timeout',
+                                             'lifetime': 5,
+                                             'vy': -2}))
         # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
         # other items (possibly incuding more bags)
         garbage_pos = []
@@ -179,35 +246,6 @@ class LevelManager:
         self.factory.create_entity('target', (50, 20))
         self.factory.create_entity('target', (90, 20))
         self.factory.create_entity('pistol', (65, 30))
-        self.factory.create_entity('message', (20, 20),
-                              text='Walk with WASD or arrow keys.',
-                              destroy_condition='timeout',
-                              vy=-2, lifetime=5)
-        spawns = (SpawnItem(item='message',
-                            pos=(20, 20),
-                            size=(10, 20),
-                            kwargs={
-                                'text': 'Use your hands with Q and E\nCurrently, you can only punch with your fists,\nso beat the shit out of this target',
-                                'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}),
-                  SpawnItem(item='message',
-                            pos=(55, 20),
-                            size=(10, 20),
-                            kwargs={
-                                'text': 'Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
-                                'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}),
-                  SpawnItem(item='message',
-                            pos=(95, 20),
-                            size=(10, 20),
-                            kwargs={
-                                'text': 'Now go along and finish those punks!',
-                                'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}))
-        self.spawner.add_spawns_iterable(spawns)
         # Central area
         self.factory.create_entity('broken_car', (150, 12))
         self.factory.create_entity('barricade_3', (250, 35))
