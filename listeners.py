@@ -239,7 +239,7 @@ class SavingListener(Listener):
     from EntityTracker()
     """
     # TODO: save game state besides entities
-    # Stuff like screen scroll position, settings and so on.
+    # Stuff like screen scroll position, current level, player entity ID, etc.
     def on_event(self, event):
         if event.event_type == 'key_down' and event.event_value == 'TK_F5':
             with open('save.json', mode='w') as savefile:
@@ -254,7 +254,8 @@ class LevelSwitchListener(Listener):
     Currently only able to switch them in a fixed sequence.
     """
     def __init__(self, player_id, switch_pos = None, switch_size = None,
-                 level_manager=None, level_sequence=[], **kwargs):
+                 level_manager=None, level_sequence={}, **kwargs):
+        # TODO: next_level dict for current levels
         super().__init__(**kwargs)
         self.player_id = player_id
         self.player_entity = None
@@ -264,8 +265,6 @@ class LevelSwitchListener(Listener):
             if x not in self.level_manager.methods:
                 raise ValueError(f'Invalid level {x} supplied to LevelSwitchListener')
         self.level_sequence = level_sequence
-        # Assumes that it starts from 0th level
-        self.current_level = 0
         self.switch_pos = switch_pos
         self.switch_size = switch_size
         self.enabled = True
@@ -274,15 +273,16 @@ class LevelSwitchListener(Listener):
         if not self.enabled:
             return
         if event.event_type == 'ecs_move' and \
-                    event.event_value[0] == self.player_id:
+                event.event_value[0] == self.player_id:
+            print('switch at ', self.switch_pos, self.switch_size)
             if not self.player_entity:
                 self.player_entity = EntityTracker().entities[self.player_id]
             if rectangles_collide(self.switch_pos, self.switch_size,
                                   self.player_entity.position.pos,
                                   self.player_entity.widget.size):
-                self.current_level += 1
-                print(f'Trying to change level to {self.level_sequence[self.current_level]}')
-                self.level_manager.set_level(self.level_sequence[self.current_level])
+                next_level = self.level_sequence[self.level_manager.current_level]
+                print(f'Trying to change level to {next_level}')
+                self.level_manager.set_level(next_level)
 
     def disable(self):
         """

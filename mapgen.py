@@ -3,10 +3,11 @@ Map generators
 """
 
 import random
-from listeners import SpawnItem
+from listeners import SpawnItem, SpawningListener
+from entities import EntityFactory
 
 from bear_hug.ecs import EntityTracker
-from bear_hug.event import BearEvent
+from bear_hug.event import BearEvent, BearEventDispatcher
 
 
 class LevelManager:
@@ -18,9 +19,14 @@ class LevelManager:
     """
     def __init__(self, dispatcher, factory, spawner=None, level_switch=None,
                  player_entity=None):
-        # TODO: check types
+        if not isinstance(dispatcher, BearEventDispatcher):
+            raise TypeError(f'{type(dispatcher)} used as a dispatcher for LevelManager instead of BearEventDispatcher')
         self.dispatcher = dispatcher
+        if not isinstance(factory, EntityFactory):
+            raise TypeError(f'{type(factory)} used as a factory for LevelManager instead of EntityFactory')
         self.factory = factory
+        if not isinstance(spawner, SpawningListener):
+            raise TypeError(f'{type(spawner)} used as a spawner for LevelManager instead of SpawningListener')
         self.spawner = spawner
         self.level_switch = level_switch
         self.player_entity = player_entity
@@ -42,7 +48,6 @@ class LevelManager:
         and its owning_entity is set to player's ID)
         3. Hands whose name includes player name (strictly speaking, entities
         where both `player_entity` and `hand` are parts of the id).
-        :return:
         """
         if entity.id == self.player_entity:
             return False
@@ -65,6 +70,7 @@ class LevelManager:
             entity.destructor.destroy()
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
+        # Disable level switch to make sure it doesn't trigger mid-level change
         self.level_switch.disable()
 
     def set_level(self, level_id):
@@ -86,9 +92,10 @@ class LevelManager:
         player = EntityTracker().entities[self.player_entity]
         player.position.move(*self.starting_positions[level_id])
         self.current_level = level_id
+        self.level_switch.enable()
 
     def _ghetto_test(self):
-        self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
@@ -103,7 +110,7 @@ class LevelManager:
     def _department(self):
         self.factory.create_entity('level_switch', (415, 33))
         self.level_switch.switch_pos = (415, 33)
-        self.level_switch.switch_size = (415, 4)
+        self.level_switch.switch_size = (15, 4)
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -188,7 +195,7 @@ class LevelManager:
         self.factory.create_entity('dept_chair_1', (287, 17))
         self.factory.create_entity('dept_table_1', (290, 12))
         self.factory.create_entity('dept_table_2', (305, 12))
-        self.factory.create_entity('dept_chair_2', (320, 17))
+        self.factory.create_entity('dept_chair_2', (319, 19))
         self.factory.create_entity('dept_table_boss', (350, 7))
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))

@@ -9,10 +9,10 @@ from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs import EntityTracker
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
-from bear_hug.resources import Atlas, XpLoader
+from bear_hug.resources import Atlas, Multiatlas, XpLoader
 from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
-from entities import MapObjectFactory, Multiatlas
+from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener
@@ -42,7 +42,7 @@ chars = [[' ' for _ in range(500)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 50))
 dispatcher.register_listener(layout, 'all')
-factory = MapObjectFactory(atlas, dispatcher, layout)
+factory = EntityFactory(atlas, dispatcher, layout)
 
 # Game-specific event types
 # Expected values shown for each type
@@ -63,6 +63,11 @@ t.add_widget(layout, (0, 0), layer=1)
 # HUD elements
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
              (0, 50), layer=1)
+# TODO: remove cop_1 and create variable for player char ID
+# The current system in bunch of places relies on player's entity ID always
+# being cop_1. This may not be correct and normally should be stored as a
+# variable. But this is probably not gonna be important until saves save stuff
+# besides entities
 hp_bar = HitpointBar(target_entity='cop_1')
 dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
 left_item_window = ItemWindow('cop_1', 'left', atlas)
@@ -93,7 +98,7 @@ dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
 # Save test
 saving = SavingListener()
 dispatcher.register_listener(saving, 'key_down')
-# TODO: find some free sounds that actually fit the game
+# TODO: TSLD sounds
 # TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
@@ -103,7 +108,6 @@ if not args.disable_sound:
     dispatcher.register_listener(jukebox, 'play_sound')
 
 # Message spawner for tutorial messages
-# TODO: un-hardcode player ID in tutorial SpawnerListener
 spawner = SpawningListener('cop_1', factory=factory)
 dispatcher.register_listener(spawner, 'ecs_move')
 
@@ -113,7 +117,9 @@ levelgen = LevelManager(dispatcher, factory,
 
 # Level switcher
 level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
-                                   level_sequence=['department', 'ghetto_tutorial'])
+                                   level_sequence={
+                                       'ghetto_test': 'department',
+                                       'department': 'ghetto_tutorial'})
 dispatcher.register_listener(level_switch, 'ecs_move')
 levelgen.level_switch = level_switch
 
@@ -132,13 +138,12 @@ else:
     # RUn a single tick so EntityTracker is aware of everything before level
     # is being generated
     loop._run_iteration(0)
-    levelgen.set_level('department')
+    levelgen.set_level('ghetto_test')
 
 
 # Actually starting
 loop.run()
 
-# TODO: directions for corpses
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
 # TODO: Z-levels-aware collision detector

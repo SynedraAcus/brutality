@@ -72,6 +72,9 @@ class WalkerComponent(PositionComponent):
         return dumps(d)
 
 
+# TODO: AttachedPositionComponent
+# Something that makes its entity follow some other entity (eg hands and
+# attached items with the player)
 class GravityPositionComponent(PositionComponent):
     """
     A PositionComponent that maintains a constant downward acceleration.
