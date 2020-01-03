@@ -16,7 +16,7 @@ from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener
-from widgets import HitpointBar, ItemWindow
+from widgets import HitpointBar, ItemWindow, MenuItem, MenuWidget
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
@@ -123,6 +123,13 @@ level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
 dispatcher.register_listener(level_switch, 'ecs_move')
 levelgen.level_switch = level_switch
 
+################################################################################
+# Test menu
+################################################################################
+
+menu_items = [MenuItem(f'Button{i}') for i in range(5)]
+menu = MenuWidget(dispatcher, items=menu_items, header='TEST MENU')
+t.add_widget(menu, (10, 10), layer=3)
 ################################################################################
 # Creating initial entities
 ################################################################################
