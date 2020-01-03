@@ -3,6 +3,7 @@ import random
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException, \
     generate_box, BearLayoutException
 from bear_hug.widgets import Widget, Label, Layout
+from bear_hug.bear_hug import BearTerminal
 
 
 class HitpointBar(Layout):
@@ -72,7 +73,7 @@ class MenuWidget(Layout):
     :param items: an iterable of MenuItems
     """
     # TODO: modality: pause everything when shown
-    def __init__(self, dispatcher, items=[], header=None,
+    def __init__(self, dispatcher, terminal=None, items=[], header=None,
                  color='white',
                  background=None, **kwargs):
         self.items = []
@@ -82,6 +83,8 @@ class MenuWidget(Layout):
         self.color = color
         for item in items:
             self._add_item(item)
+        if terminal and not isinstance(terminal, BearTerminal):
+            raise TypeError(f'{type(terminal)} used as a terminal for MenuWidget instead of BearTerminal')
         # Set background, if supplied
         if not background:
             bg_chars = generate_box((self.w, self.h), 'double')
@@ -108,8 +111,12 @@ class MenuWidget(Layout):
         for item in self.items:
             self.add_child(item, (2, current_height))
             current_height += item.height + 1
-        print(self.children[-1].background.chars)
-        dispatcher.register_listener(self, ['service', 'misc_input', 'key_down'])
+        dispatcher.register_listener(self, ['tick', 'service', 'misc_input', 'key_down'])
+        # Prevent scrolling multiple times when key is pressed
+        self.input_delay = 0.2
+        self.current_delay = self.input_delay
+        self._current_highlight = 0
+        self.items[self.current_highlight].highlight()
         # TODO: do something about menu transparency
         # Some background chars are visible because they overlap menu item chars
         # I should either add a screening widget at lower bearlibterminal layer,
@@ -130,6 +137,55 @@ class MenuWidget(Layout):
         self.h += item.height + 1
         if item.width > self.w - 4:
             self.w = item.width + 4
+
+    @property
+    def current_highlight(self):
+        return self._current_highlight
+
+    @current_highlight.setter
+    def current_highlight(self, value):
+        if not 0 <= value <= len(self.items) - 1:
+            raise ValueError('current_highlight can only be set to a valid item index')
+        self.items[self._current_highlight].unhighlight()
+        self._current_highlight = value
+        self.items[self._current_highlight].highlight()
+
+    def on_event(self, event):
+        if event.event_type == 'tick' and self.current_delay <= self.input_delay:
+            self.current_delay += event.event_value
+        elif event.event_type == 'key_down' and self.current_delay >= self.input_delay:
+            self.current_delay = 0
+            if event.event_value in ('TK_SPACE', 'TK_ENTER'):
+                self.items[self.current_highlight].activate()
+            elif event.event_value in ('TK_UP', 'TK_W') \
+                    and self.current_highlight > 0:
+                self.current_highlight -= 1
+            elif event.event_value in ('TK_DOWN', 'TK_S') \
+                    and self.current_highlight < len(self.items) - 1:
+                self.current_highlight += 1
+            elif event.event_value == 'TK_MOUSE_LEFT':
+                if self.terminal:
+                    # Silently ignore mouse input if terminal is not set
+                    mouse_x = self.terminal.check_state('TK_MOUSE_X')
+                    mouse_y = self.terminal.check_state('TK_MOUSE_Y')
+                    x, y = self.terminal.widget_locations[self].pos
+                    if x <= mouse_x <= x + self.width and y <= mouse_y <= y + self.height:
+                        b = self.get_child_on_pos((mouse_x - x, mouse_y -y))
+                        # self.current_highlight = self.items.index(b)
+                        if isinstance(b, MenuItem):
+                            self.items[self.current_highlight].activate()
+        elif event.event_type == 'misc_input' and event.event_value == 'TK_MOUSE_MOVE':
+            if self.terminal:
+                # Silently ignore mouse input if terminal is not set
+                mouse_x = self.terminal.check_state('TK_MOUSE_X')
+                mouse_y = self.terminal.check_state('TK_MOUSE_Y')
+                x, y = self.terminal.widget_locations[self].pos
+                if x <= mouse_x < x + self.width and y <= mouse_y < y + self.height:
+                    b = self.get_child_on_pos((mouse_x - x, mouse_y - y))
+                    # Could be the menu header
+                    if isinstance(b, MenuItem):
+                        self.current_highlight = self.items.index(b)
+        return super().on_event(event)
 
 
 class MenuItem(Layout):
@@ -156,7 +212,7 @@ class MenuItem(Layout):
                  color='white', highlight_color='green',
                  **kwargs):
         self.color = color
-        self.highligh_color = highlight_color
+        self.highlight_color = highlight_color
         # Widget generation
         label = Label(text, color=self.color)
         bg_chars = generate_box((label.width+2, label.height+2),
@@ -175,6 +231,7 @@ class MenuItem(Layout):
         """
         self.background.colors = copy_shape(self.background.colors,
                                             self.highlight_color)
+        self._rebuild_self()
 
     def unhighlight(self):
         """
@@ -183,6 +240,7 @@ class MenuItem(Layout):
         """
         self.background.colors = copy_shape(self.background.colors,
                                             self.color)
+        self._rebuild_self()
 
     def activate(self):
         """

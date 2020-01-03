@@ -274,14 +274,12 @@ class LevelSwitchListener(Listener):
             return
         if event.event_type == 'ecs_move' and \
                 event.event_value[0] == self.player_id:
-            print('switch at ', self.switch_pos, self.switch_size)
             if not self.player_entity:
                 self.player_entity = EntityTracker().entities[self.player_id]
             if rectangles_collide(self.switch_pos, self.switch_size,
                                   self.player_entity.position.pos,
                                   self.player_entity.widget.size):
                 next_level = self.level_sequence[self.level_manager.current_level]
-                print(f'Trying to change level to {next_level}')
                 self.level_manager.set_level(next_level)
 
     def disable(self):

@@ -127,9 +127,18 @@ levelgen.level_switch = level_switch
 # Test menu
 ################################################################################
 
-menu_items = [MenuItem(f'Button{i}') for i in range(5)]
-menu = MenuWidget(dispatcher, items=menu_items, header='TEST MENU')
-t.add_widget(menu, (10, 10), layer=3)
+menu_items = [MenuItem(f'Button1', color='white', highlight_color='blue',
+                       action=lambda: print('Button 1')),
+              MenuItem(f'Button2', color='white', highlight_color='blue',
+                       action=lambda: print('Button 2')),
+              MenuItem(f'Button3', color='white', highlight_color='blue',
+                       action=lambda: print('Button 3')),
+              MenuItem(f'Button4', color='white', highlight_color='blue',
+                       action=lambda: print('Button 4')),
+              MenuItem(f'Button5', color='white', highlight_color='blue',
+                       action=lambda: print('Button 5'))]
+menu = MenuWidget(dispatcher, terminal=t, items=menu_items, header='TEST MENU')
+t.add_widget(menu, (10, 15), layer=3)
 ################################################################################
 # Creating initial entities
 ################################################################################
