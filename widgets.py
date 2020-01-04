@@ -70,7 +70,15 @@ class MenuWidget(Layout):
     """
     A menu widget that includes multiple buttons.
 
+    :param dispatcher: BearEventDispatcher instance to which the menu will subscribe
+
     :param items: an iterable of MenuItems
+
+    :param background: A background widget for the menu. If not supplied, a default double-thickness box is used. If background widget needs to get events (ie for animation), it should be subscribed by the time it's passed here.
+
+    :param color: A bearlibterminal-compatible color. Used for a menu frame and header text
+
+    :param header: str or None. A menu header. This should not be longer than menu width, otherwise an exception is thrown.
     """
     # TODO: modality: pause everything when shown
     def __init__(self, dispatcher, terminal=None, items=[], header=None,
@@ -93,10 +101,17 @@ class MenuWidget(Layout):
                 for x in range(len(bg_chars[0]) - 2):
                     bg_chars[y + 1][x + 1] = '\u2588'
                     bg_colors[y + 1][x + 1] = 'black'
+            super().__init__(bg_chars, bg_colors)
         else:
-            # TODO: set background, if supplied
-            raise NotImplementedError
-        super().__init__(bg_chars, bg_colors)
+            if background.width < self.w or background.height < self.h:
+                raise BearLayoutException('Background for MenuWidget is too small')
+            # Creating tmp BG widget instead of just taking BG chars and colors
+            # because the background could be some complex widget, eg animation
+            bg_chars = [[' ' for x in range(background.width)]
+                        for y in range(background.height)]
+            bg_colors = copy_shape(bg_chars, 'black')
+            super().__init__(bg_chars, bg_colors)
+            self.background = background
         # Adding header, if any
         if header:
             if not isinstance(header, str):

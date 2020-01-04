@@ -137,7 +137,8 @@ menu_items = [MenuItem(f'Button1', color='white', highlight_color='blue',
                        action=lambda: print('Button 4')),
               MenuItem(f'Button5', color='white', highlight_color='blue',
                        action=lambda: print('Button 5'))]
-menu = MenuWidget(dispatcher, terminal=t, items=menu_items, header='TEST MENU')
+menu = MenuWidget(dispatcher, terminal=t, items=menu_items,
+                  background=bg, header='TEST MENU')
 t.add_widget(menu, (10, 15), layer=3)
 ################################################################################
 # Creating initial entities
