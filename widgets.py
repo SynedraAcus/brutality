@@ -78,11 +78,13 @@ class MenuWidget(Layout):
 
     :param color: A bearlibterminal-compatible color. Used for a menu frame and header text
 
+    :param items_pos: A 2-tuple of ints. A position of top-left corner of the 1st MenuItem
+
     :param header: str or None. A menu header. This should not be longer than menu width, otherwise an exception is thrown.
     """
     # TODO: modality: pause everything when shown
     def __init__(self, dispatcher, terminal=None, items=[], header=None,
-                 color='white',
+                 color='white', items_pos=(2, 2),
                  background=None, **kwargs):
         self.items = []
         # Separate from self.heigh and self.width to avoid overwriting attrs
@@ -122,9 +124,9 @@ class MenuWidget(Layout):
             x = round((self.width - header_label.width) / 2)
             self.add_child(header_label, (x, 0))
         # Adding buttons
-        current_height = 2
+        current_height = items_pos[1]
         for item in self.items:
-            self.add_child(item, (2, current_height))
+            self.add_child(item, (items_pos[0], current_height))
             current_height += item.height + 1
         dispatcher.register_listener(self, ['tick', 'service', 'misc_input', 'key_down'])
         # Prevent scrolling multiple times when key is pressed

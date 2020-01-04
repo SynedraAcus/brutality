@@ -96,5 +96,12 @@
     "y": 40,
     "xsize": 30,
     "ysize": 25
+  },
+  {
+    "name": "police_menu_bg",
+    "x": 31,
+    "y": 43,
+    "xsize": 61,
+    "ysize": 37
   }
 ]

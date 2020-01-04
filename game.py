@@ -138,8 +138,9 @@ menu_items = [MenuItem(f'Button1', color='white', highlight_color='blue',
               MenuItem(f'Button5', color='white', highlight_color='blue',
                        action=lambda: print('Button 5'))]
 menu = MenuWidget(dispatcher, terminal=t, items=menu_items,
-                  background=bg, header='TEST MENU')
-t.add_widget(menu, (10, 15), layer=3)
+                  header='TEST MENU', items_pos=(5, 6),
+                  background=Widget(*atlas.get_element('police_menu_bg')))
+t.add_widget(menu, (5, 5), layer=3)
 ################################################################################
 # Creating initial entities
 ################################################################################
