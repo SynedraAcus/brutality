@@ -46,13 +46,21 @@ factory = EntityFactory(atlas, dispatcher, layout)
 
 # Game-specific event types
 # Expected values shown for each type
+# Combat system
 dispatcher.register_event_type('brut_damage') # value (int)
 dispatcher.register_event_type('brut_heal') # value (int)
-dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
-dispatcher.register_event_type('brut_temporary_focus') # Entity ID
+# Item manipulations
 dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 dispatcher.register_event_type('brut_use_hand') #hand entity ID
 dispatcher.register_event_type('brut_pick_up') # owner entity ID, which hand (left or right), picked up entity ID
+# View operations
+dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
+dispatcher.register_event_type('brut_temporary_focus') # Entity ID
+# Service
+dispatcher.register_event_type('brut_open_menu') # Value ignored
+dispatcher.register_event_type('brut_close_menu') # Value ignored
+dispatcher.register_event_type('brut_save_game') # Path to savefile
+
 
 ################################################################################
 # Starting the game terminal and adding main widgets
@@ -97,7 +105,7 @@ logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
 # Save test
 saving = SavingListener()
-dispatcher.register_listener(saving, 'key_down')
+dispatcher.register_listener(saving, 'brut_save_game')
 # TODO: TSLD sounds
 # TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
@@ -127,24 +135,27 @@ levelgen.level_switch = level_switch
 # Test menu
 ################################################################################
 
-menu_items = [MenuItem(f'Button1', color='white', highlight_color='blue',
-                       action=lambda: print('Button 1')),
-              MenuItem(f'Button2', color='white', highlight_color='blue',
+menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
+                       action=lambda: BearEvent('brut_close_menu', None)),
+              MenuItem(f'Plot (TBD)', color='white', highlight_color='blue',
                        action=lambda: print('Button 2')),
-              MenuItem(f'Button3', color='white', highlight_color='blue',
+              MenuItem(f'Items (TBD)', color='white', highlight_color='blue',
                        action=lambda: print('Button 3')),
-              MenuItem(f'Button4', color='white', highlight_color='blue',
+              MenuItem(f'Load (TBD)', color='white', highlight_color='blue',
                        action=lambda: print('Button 4')),
-              MenuItem(f'Button5', color='white', highlight_color='blue',
-                       action=lambda: print('Button 5')),
-              MenuItem(f'Button6', color='white', highlight_color='blue',
-                       action=lambda: print('Button 6'))
+              MenuItem(f'Save', color='white', highlight_color='blue',
+                       action=lambda: BearEvent('brut_save_game',
+                                                'save.json')),
+              MenuItem(f'Quit', color='white', highlight_color='blue',
+                       action=lambda: BearEvent('misc_input', 'TK_CLOSE'))
               ]
 menu = MenuWidget(dispatcher, terminal=t, items=menu_items, items_pos=(5, 6),
                   background=Widget(*atlas.get_element('police_menu_bg')))
 menu_listener = MenuListener(dispatcher, terminal=t,
                              menu_widget=menu, menu_pos=(6, 6))
-dispatcher.register_listener(menu_listener, ['key_down', 'tick'])
+dispatcher.register_listener(menu_listener, ['key_down', 'tick',
+                                             'brut_open_menu',
+                                             'brut_close_menu'])
 ################################################################################
 # Creating initial entities
 ################################################################################
@@ -169,3 +180,4 @@ loop.run()
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
 # TODO: Z-levels-aware collision detector
+# TODO: saves are broken again

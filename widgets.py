@@ -2,6 +2,7 @@ import random
 
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException, \
     generate_box, BearLayoutException
+from bear_hug.event import BearEvent
 from bear_hug.widgets import Widget, Label, Layout
 from bear_hug.bear_hug import BearTerminal
 
@@ -128,7 +129,6 @@ class MenuWidget(Layout):
         for item in self.items:
             self.add_child(item, (items_pos[0], current_height))
             current_height += item.height + 1
-        dispatcher.register_listener(self, ['tick', 'service', 'misc_input', 'key_down'])
         # Prevent scrolling multiple times when key is pressed
         self.input_delay = 0.2
         self.current_delay = self.input_delay
@@ -164,12 +164,13 @@ class MenuWidget(Layout):
         self.items[self._current_highlight].highlight()
 
     def on_event(self, event):
+        r = None
         if event.event_type == 'tick' and self.current_delay <= self.input_delay:
             self.current_delay += event.event_value
         elif event.event_type == 'key_down' and self.current_delay >= self.input_delay:
             self.current_delay = 0
             if event.event_value in ('TK_SPACE', 'TK_ENTER'):
-                self.items[self.current_highlight].activate()
+                r  = self.items[self.current_highlight].activate()
             elif event.event_value in ('TK_UP', 'TK_W') \
                     and self.current_highlight > 0:
                 self.current_highlight -= 1
@@ -186,7 +187,7 @@ class MenuWidget(Layout):
                         b = self.get_child_on_pos((mouse_x - x, mouse_y -y))
                         # self.current_highlight = self.items.index(b)
                         if isinstance(b, MenuItem):
-                            self.items[self.current_highlight].activate()
+                            r = self.items[self.current_highlight].activate()
         elif event.event_type == 'misc_input' and event.event_value == 'TK_MOUSE_MOVE':
             if self.terminal:
                 # Silently ignore mouse input if terminal is not set
@@ -198,7 +199,31 @@ class MenuWidget(Layout):
                     # Could be the menu header
                     if isinstance(b, MenuItem):
                         self.current_highlight = self.items.index(b)
-        return super().on_event(event)
+        # Whatever type r was, convert it into a (possibly empty) list of BearEvents
+        ret = []
+        if r:
+            if isinstance(r, BearEvent):
+                ret = [r]
+            else:
+                for e in r:
+                    if isinstance(e, BearEvent):
+                        ret.append(e)
+                    else:
+                        raise TypeError(f'MenuItem action returned {type(e)} instead of a BearEvent')
+        else:
+            ret = []
+        s = super().on_event(event)
+        if s:
+            if isinstance(s, BearEvent):
+                ret.append(s)
+            else:
+                for e in s:
+                    if isinstance(e, BearEvent):
+                        ret.append(e)
+                    else:
+                        raise TypeError(
+                            f'Layout on_event returned {type(e)} instead of a BearEvent')
+        return ret
 
 
 class MenuItem(Layout):
@@ -213,7 +238,7 @@ class MenuItem(Layout):
 
     :param text: str. A button label
 
-    :param action: callable. An action that this MenuItem performs.
+    :param action: callable. An action that this MenuItem performs. This should return either None, BearEvent or an iterable of BearEvents
 
     :param color: a bearlibterminal-compatible color that this button has by
     default
@@ -260,4 +285,4 @@ class MenuItem(Layout):
         """
         Perform the button's action
         """
-        self.action()
+        return self.action()

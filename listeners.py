@@ -243,8 +243,8 @@ class SavingListener(Listener):
     # TODO: save game state besides entities
     # Stuff like screen scroll position, current level, player entity ID, etc.
     def on_event(self, event):
-        if event.event_type == 'key_down' and event.event_value == 'TK_F5':
-            with open('save.json', mode='w') as savefile:
+        if event.event_type == 'brut_save_game':
+            with open(event.event_value, mode='w') as savefile:
                 for entity in EntityTracker().filter_entities():
                     print(repr(entity), file=savefile)
 
@@ -307,6 +307,12 @@ class MenuListener(Listener):
     ``['tick', 'service', 'key_down', 'misc_input']`` events. When menu is
     hidden, removes all the Widgets from terminal. MenuWidget is not destroyed,
     but is unsubscribed from all events.
+
+    This listener is activated/inactivated either directly by ``'TK_ESCAPE'``
+    keypress in a ``'key_down'`` event (which also has a delay of 0.1 sec
+    between opening and closing a menu) or via ``'brut_open_menu'`` and
+    ``'brut_close_menu'`` events, any number of which can be processed even in a
+    single frame.
     """
     def __init__(self, dispatcher, terminal, menu_widget, *args,
                  menu_pos = (5,5), **kwargs):
@@ -337,6 +343,10 @@ class MenuListener(Listener):
                 self.show_menu()
             else:
                 self.hide_menu()
+        elif event.event_type == 'brut_open_menu' and not self.currently_showing:
+            self.show_menu()
+        elif event.event_type == 'brut_close_menu' and self.currently_showing:
+            self.hide_menu()
 
     def show_menu(self):
         self.terminal.add_widget(self.menu_widget, self.menu_pos, layer=3)
