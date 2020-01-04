@@ -393,6 +393,7 @@ class InputComponent(Component):
         self.action_delay = 0.4
         self.current_action_delay = 0
         self.next_move = [0, 0]
+        self.accepts_input = True
 
     def on_event(self, event):
         #TODO: Support non-hardcoded actions and keys
@@ -416,7 +417,7 @@ class InputComponent(Component):
                     self.current_walk_delay = self.walk_delay
             if self.current_action_delay > 0:
                 self.current_action_delay -= event.event_value
-        if event.event_type == 'key_down':
+        if event.event_type == 'key_down' and self.accepts_input:
             if self.owner.health.hitpoints > 0:
                 # These actions are only available to a non-dead player char
                 if event.event_value == 'TK_Q' and self.current_action_delay <= 0:

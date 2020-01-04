@@ -80,7 +80,7 @@ class MenuWidget(Layout):
 
     :param items_pos: A 2-tuple of ints. A position of top-left corner of the 1st MenuItem
 
-    :param header: str or None. A menu header. This should not be longer than menu width, otherwise an exception is thrown.
+    :param header: str or None. A menu header. This should not be longer than menu width, otherwise an exception is thrown. Header may look ugly with custom backgrounds, since it's only intended for non-custom menus.
     """
     # TODO: modality: pause everything when shown
     def __init__(self, dispatcher, terminal=None, items=[], header=None,
@@ -134,10 +134,6 @@ class MenuWidget(Layout):
         self.current_delay = self.input_delay
         self._current_highlight = 0
         self.items[self.current_highlight].highlight()
-        # TODO: do something about menu transparency
-        # Some background chars are visible because they overlap menu item chars
-        # I should either add a screening widget at lower bearlibterminal layer,
-        # or find some way to disable char overlap in the necessary range
 
     def _add_item(self, item):
         """
@@ -217,7 +213,7 @@ class MenuItem(Layout):
 
     :param text: str. A button label
 
-    :param action: callable. An action that this MenuItem performs
+    :param action: callable. An action that this MenuItem performs.
 
     :param color: a bearlibterminal-compatible color that this button has by
     default
@@ -225,6 +221,7 @@ class MenuItem(Layout):
     :param highlight_color: a bearlibterminal-compatible color that this button
     has when highlighted via keyboard menu choice or mouse hover.
     """
+    # TODO: return BearEvents from MenuItem.activate()
     def __init__(self, text='Test', action=lambda: print('Button pressed'),
                  color='white', highlight_color='green',
                  **kwargs):

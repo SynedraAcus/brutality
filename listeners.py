@@ -6,11 +6,13 @@ merit a complete entity, or to complicated to be limited to one.
 from collections import namedtuple
 
 from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
-    BearECSException
+    BearECSException, copy_shape
 from bear_hug.ecs import EntityTracker
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
-from bear_hug.widgets import Listener
+from bear_hug.widgets import Widget, Listener
+
+from widgets import MenuWidget
 
 
 class ScrollListener(Listener):
@@ -293,3 +295,64 @@ class LevelSwitchListener(Listener):
         Use LevelSwitchListener on current level
         """
         self.enabled = True
+
+
+class MenuListener(Listener):
+    """
+    Responsible for showing the menu when need be.
+
+    When activated, displays the menu widget on layer 3 and black screen under
+    it on layer 2 (to help with transparency issues). Menu widget is also
+    automatically subscribed to the
+    ``['tick', 'service', 'key_down', 'misc_input']`` events. When menu is
+    hidden, removes all the Widgets from terminal. MenuWidget is not destroyed,
+    but is unsubscribed from all events.
+    """
+    def __init__(self, dispatcher, terminal, menu_widget, *args,
+                 menu_pos = (5,5), **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dispatcher = dispatcher
+        self.dispatcher.register_listener(self, 'key_down')
+        self.terminal = terminal
+        if not isinstance(menu_widget, MenuWidget):
+            raise TypeError(f'{type(menu_widget)} supplied to MenuListener instead of MenuWidget')
+        self.menu_widget = menu_widget
+        screen_chars = [['\u2588' for x in range(self.menu_widget.width)]
+                        for y in range(self.menu_widget.height)]
+        screen_colors = copy_shape(screen_chars, 'black')
+        self.screen_widget = Widget(screen_chars, screen_colors)
+        self.menu_pos = menu_pos
+        self.currently_showing = False
+        self.input_delay = 0.1
+        self.current_delay = 0
+
+    def on_event(self, event):
+        if event.event_type == 'tick' and self.current_delay <= self.input_delay:
+            self.current_delay += event.event_value
+        elif event.event_type == 'key_down' \
+                and event.event_value == 'TK_ESCAPE' \
+                and self.current_delay >= self.input_delay:
+            self.current_delay = 0
+            if self.currently_showing == False:
+                self.show_menu()
+            else:
+                self.hide_menu()
+
+    def show_menu(self):
+        self.terminal.add_widget(self.menu_widget, self.menu_pos, layer=3)
+        self.terminal.add_widget(self.screen_widget, self.menu_pos, layer=2)
+        self.dispatcher.register_listener(self.menu_widget,
+                                  ['tick', 'service', 'misc_input', 'key_down'])
+        self.currently_showing = True
+        # Disabling character input
+        # TODO: method to get a single entity from EntityTracker()?
+        for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
+            entity.controller.accepts_input = False
+
+    def hide_menu(self):
+        self.terminal.remove_widget(self.menu_widget)
+        self.terminal.remove_widget(self.screen_widget)
+        self.dispatcher.unregister_listener(self.menu_widget, 'all')
+        self.currently_showing = False
+        for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
+            entity.controller.accepts_input = True

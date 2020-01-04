@@ -15,7 +15,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, SpawnItem,\
-    SpawningListener, LevelSwitchListener
+    SpawningListener, LevelSwitchListener, MenuListener
 from widgets import HitpointBar, ItemWindow, MenuItem, MenuWidget
 
 parser = ArgumentParser('A game about beating people')
@@ -136,11 +136,15 @@ menu_items = [MenuItem(f'Button1', color='white', highlight_color='blue',
               MenuItem(f'Button4', color='white', highlight_color='blue',
                        action=lambda: print('Button 4')),
               MenuItem(f'Button5', color='white', highlight_color='blue',
-                       action=lambda: print('Button 5'))]
-menu = MenuWidget(dispatcher, terminal=t, items=menu_items,
-                  header='TEST MENU', items_pos=(5, 6),
+                       action=lambda: print('Button 5')),
+              MenuItem(f'Button6', color='white', highlight_color='blue',
+                       action=lambda: print('Button 6'))
+              ]
+menu = MenuWidget(dispatcher, terminal=t, items=menu_items, items_pos=(5, 6),
                   background=Widget(*atlas.get_element('police_menu_bg')))
-t.add_widget(menu, (5, 5), layer=3)
+menu_listener = MenuListener(dispatcher, terminal=t,
+                             menu_widget=menu, menu_pos=(6, 6))
+dispatcher.register_listener(menu_listener, ['key_down', 'tick'])
 ################################################################################
 # Creating initial entities
 ################################################################################
