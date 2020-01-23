@@ -4,7 +4,7 @@ merit a complete entity, or to complicated to be limited to one.
 """
 
 from collections import namedtuple
-from json import dump
+from json import dump, load
 
 from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
     BearECSException, copy_shape
@@ -251,12 +251,61 @@ class SavingListener(Listener):
             r['entities'] = [repr(entity) for entity in EntityTracker().entities.values()]
             # Saving listeners
             r['level_switch_state'] = LevelSwitchListener().get_state()
-            # A bit hacky, but I cannot import mapgen here
-            # because of circular import
             r['current_level'] = LevelSwitchListener().current_level
             # Loading spawns from SpawnListener
             r['spawns'] = SpawningListener().spawns
         dump(r, open(event.event_value, mode='w'))
+
+
+class LoadingListener(Listener):
+    """
+    A Listener class that waits for a 'brut_load_game' event and loads
+
+    Deserializes stuff from a file and sets attributes for various listeners.
+    """
+    def __init__(self, dispatcher, factory, levelgen, loop, **kwargs):
+        super().__init__(**kwargs)
+        self.dispatcher = dispatcher
+        self.factory = factory
+        self.levelgen = levelgen
+        self.loop = loop
+
+    def on_event(self, event):
+        # TODO: Items on the floor do not display after loading
+        # TODO: Don't create second PC on loading
+        if event.event_type == 'brut_load_game':
+            # creating variables for the singletons to avoid running through
+            # object creation when they are used
+            level_switch = LevelSwitchListener()
+            spawner = SpawningListener()
+            save = load(open(event.event_value))
+            for line in save['entities']:
+                self.factory.load_entity_from_JSON(line)
+            for attr in save['level_switch_state']:
+                level_switch.__dict__[attr] = save['level_switch_state'][attr]
+            self.levelgen.current_level = save['current_level']
+            spawner.spawns = [SpawnItem(*x) for x in save['spawns']]
+            # Make all entities available for EntityTracker before the first tick
+            self.loop._run_iteration(0)
+            # Fixes and workarounds to display everything correctly on the first
+            # frame
+            self.dispatcher.add_event(BearEvent('brut_focus', 'cop_1'))
+            # Set correct z-order for the cop
+            cop_entity = EntityTracker().entities['cop_1']
+            z = cop_entity.position.y + cop_entity.widget.height
+            cop_entity.widget.widget.z_level = z
+            # Pseudo-events to redraw items in the HUD
+            left_item = cop_entity.hands.left_item
+            right_item = cop_entity.hands.right_item
+            self.dispatcher.add_event(
+                BearEvent('brut_pick_up',
+                          ('cop_1', 'left', f'{left_item}_pseudo')))
+            self.dispatcher.add_event(
+                BearEvent('brut_pick_up',
+                          ('cop_1', 'right', f'{right_item}_pseudo')))
+            # Make sure all fixes got drawn
+            self.loop._run_iteration(0)
+
 
 
 class LevelSwitchListener(Listener, metaclass=Singleton):

@@ -14,7 +14,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener
 
 from entities import EntityFactory
 from mapgen import LevelManager
-from listeners import ScrollListener, SavingListener, SpawnItem,\
+from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener, MenuListener
 from widgets import HitpointBar, ItemWindow, MenuItem, MenuWidget
 
@@ -60,6 +60,7 @@ dispatcher.register_event_type('brut_temporary_focus') # Entity ID
 dispatcher.register_event_type('brut_open_menu') # Value ignored
 dispatcher.register_event_type('brut_close_menu') # Value ignored
 dispatcher.register_event_type('brut_save_game') # Path to savefile
+dispatcher.register_event_type('brut_load_game') # Path to savefile
 
 
 ################################################################################
@@ -103,9 +104,7 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
-# Save test
-saving = SavingListener()
-dispatcher.register_listener(saving, 'brut_save_game')
+
 # TODO: TSLD sounds
 # TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
@@ -131,6 +130,11 @@ level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
 dispatcher.register_listener(level_switch, 'ecs_move')
 levelgen.level_switch = level_switch
 
+# Saving and loading
+saving = SavingListener()
+dispatcher.register_listener(saving, 'brut_save_game')
+loading = LoadingListener(dispatcher, factory, levelgen, loop)
+dispatcher.register_listener(loading, 'brut_load_game')
 ################################################################################
 # Test menu
 ################################################################################
@@ -141,8 +145,9 @@ menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: print('Button 2')),
               MenuItem(f'Items (TBD)', color='white', highlight_color='blue',
                        action=lambda: print('Button 3')),
-              MenuItem(f'Load (TBD)', color='white', highlight_color='blue',
-                       action=lambda: print('Button 4')),
+              MenuItem(f'Load', color='white', highlight_color='blue',
+                       action=lambda: BearEvent('brut_load_game',
+                                                'save.json')),
               MenuItem(f'Save', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_save_game',
                                                 'save.json')),
@@ -161,29 +166,7 @@ dispatcher.register_listener(menu_listener, ['key_down', 'tick',
 ################################################################################
 
 if args.s:
-    save = json.load(open(args.s))
-    for line in save['entities']:
-        factory.load_entity_from_JSON(line)
-    for attr in save['level_switch_state']:
-        level_switch.__dict__[attr] = save['level_switch_state'][attr]
-    levelgen.current_level = save['current_level']
-    spawner.spawns = [SpawnItem(*x) for x in save['spawns']]
-    # ScrollListener is initialized anew, so the scroll position is not kept
-    dispatcher.add_event(BearEvent('brut_focus', 'cop_1'))
-    # Make all entities available for EntityTracker before the first tick
-    loop._run_iteration(0)
-    # Fixes and workarounds to display everything correctly on the first frame
-    # Pseudo-events to redraw items in the HUD
-    cop_entity = EntityTracker().entities['cop_1']
-    left_item = cop_entity.hands.left_item
-    right_item = cop_entity.hands.right_item
-    dispatcher.add_event(
-        BearEvent('brut_pick_up', ('cop_1', 'left', f'{left_item}_pseudo')))
-    dispatcher.add_event(
-        BearEvent('brut_pick_up', ('cop_1', 'right', f'{right_item}_pseudo')))
-    # Set correct z-order for the cop
-    z = cop_entity.position.y + cop_entity.widget.height
-    cop_entity.widget.widget.z_level = z
+    dispatcher.add_event(BearEvent('brut_load_game', 'save.json'))
 
 else:
     factory.create_entity('cop', (5, 25))
@@ -199,4 +182,3 @@ loop.run()
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
 # TODO: Z-levels-aware collision detector
-# TODO: saves are broken again

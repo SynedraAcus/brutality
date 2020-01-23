@@ -83,7 +83,6 @@ class MenuWidget(Layout):
 
     :param header: str or None. A menu header. This should not be longer than menu width, otherwise an exception is thrown. Header may look ugly with custom backgrounds, since it's only intended for non-custom menus.
     """
-    # TODO: modality: pause everything when shown
     def __init__(self, dispatcher, terminal=None, items=[], header=None,
                  color='white', items_pos=(2, 2),
                  background=None, **kwargs):
