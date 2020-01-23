@@ -272,21 +272,23 @@ class LoadingListener(Listener):
 
     def on_event(self, event):
         # TODO: Items on the floor do not display after loading
-        # TODO: Don't create second PC on loading
         if event.event_type == 'brut_load_game':
+            self.levelgen.destroy_current_level(destroy_player=True)
             # creating variables for the singletons to avoid running through
             # object creation when they are used
             level_switch = LevelSwitchListener()
             spawner = SpawningListener()
+            spawner.player_entity = None
+            level_switch.player_entity = None
             save = load(open(event.event_value))
             for line in save['entities']:
                 self.factory.load_entity_from_JSON(line)
+            # Make all entities available for EntityTracker
+            self.loop._run_iteration(0)
             for attr in save['level_switch_state']:
                 level_switch.__dict__[attr] = save['level_switch_state'][attr]
             self.levelgen.current_level = save['current_level']
             spawner.spawns = [SpawnItem(*x) for x in save['spawns']]
-            # Make all entities available for EntityTracker before the first tick
-            self.loop._run_iteration(0)
             # Fixes and workarounds to display everything correctly on the first
             # frame
             self.dispatcher.add_event(BearEvent('brut_focus', 'cop_1'))
@@ -305,7 +307,6 @@ class LoadingListener(Listener):
                           ('cop_1', 'right', f'{right_item}_pseudo')))
             # Make sure all fixes got drawn
             self.loop._run_iteration(0)
-
 
 
 class LevelSwitchListener(Listener, metaclass=Singleton):

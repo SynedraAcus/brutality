@@ -245,7 +245,6 @@ class MenuItem(Layout):
     :param highlight_color: a bearlibterminal-compatible color that this button
     has when highlighted via keyboard menu choice or mouse hover.
     """
-    # TODO: return BearEvents from MenuItem.activate()
     def __init__(self, text='Test', action=lambda: print('Button pressed'),
                  color='white', highlight_color='green',
                  **kwargs):

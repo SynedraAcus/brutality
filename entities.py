@@ -303,7 +303,8 @@ class EntityFactory:
         cop_entity.add_component(FactionComponent(self.dispatcher,
                                                   faction='police'))
         cop_entity.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                        corpse_type='cop_corpse', hitpoints=10))
+                                                        corpse='cop_corpse',
+                                                        hitpoints=10))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
         f_l = self._create_cop_hand_forward(f'{entity_id}_hand_fl',
@@ -363,7 +364,7 @@ class EntityFactory:
         nunchaku.add_component(SpawnerComponent(self.dispatcher, factory=self))
         nunchaku.add_component(DestructorComponent(self.dispatcher))
         nunchaku.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                      corpse_type='nunchaku_punk_corpse',
+                                                      corpse='nunchaku_punk_corpse',
                                                       hitpoints=5))
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
@@ -420,7 +421,7 @@ class EntityFactory:
         punk.add_component(SpawnerComponent(self.dispatcher, factory=self))
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                  corpse_type='bottle_punk_corpse',
+                                                  corpse='bottle_punk_corpse',
                                                   hitpoints=5))
         punk.add_component(BottleControllerComponent(self.dispatcher))
         # punk.add_component(InputComponent(self.dispatcher))

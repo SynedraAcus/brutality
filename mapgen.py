@@ -62,9 +62,10 @@ class LevelManager(metaclass=Singleton):
             return False
         return True
 
-    def destroy_current_level(self):
+    def destroy_current_level(self, destroy_player=False):
         # Remove every entity except self.player_entity
-        for entity in EntityTracker().filter_entities(self.should_remove):
+        filter_method = self.should_remove if not destroy_player else lambda x: True
+        for entity in EntityTracker().filter_entities(filter_method):
             entity.destructor.destroy()
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()

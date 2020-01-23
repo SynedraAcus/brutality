@@ -176,31 +176,31 @@ class HazardCollisionComponent(CollisionComponent):
         d['have_waited'] = self.have_waited
         d['on_cooldown'] = self.on_cooldown
 
-
-class SpawnerCollisionComponent(CollisionComponent):
-    """
-    Spawns something when a correct entity collides into it
-
-    Expects the owner to have SpawnComponent, PositionComponent and WidgetComponent
-    """
-    def __init__(self, *args, entity_filter=lambda x: True,
-                 spawned_item='message', spawn_kwargs={'text': 'Spawned text'},
-                 **kwargs):
-        super().__init__(*args, **kwargs)
-        if not hasattr(entity_filter, '__call__'):
-            raise BearECSException('entity_filter should be callable')
-        self.entity_filter = entity_filter
-        self.spawned_item = spawned_item
-        self.spawn_kwargs = spawn_kwargs
-
-    def collided_by(self, entity):
-        if self.entity_filter(entity):
-            # If collided into by a correct entity
-            self.owner.spawner.spawn(self.spawned_item,
-                                     (round(self.owner.widget.width/2),
-                                      round(self.owner.widget.height/2)),
-                                     **self.spawn_kwargs)
-            self.owner.destructor.destroy()
+#
+# class SpawnerCollisionComponent(CollisionComponent):
+#     """
+#     Spawns something when a correct entity collides into it
+#
+#     Expects the owner to have SpawnComponent, PositionComponent and WidgetComponent
+#     """
+#     def __init__(self, *args, entity_filter=lambda x: True,
+#                  spawned_item='message', spawn_kwargs={'text': 'Spawned text'},
+#                  **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if not hasattr(entity_filter, '__call__'):
+#             raise BearECSException('entity_filter should be callable')
+#         self.entity_filter = entity_filter
+#         self.spawned_item = spawned_item
+#         self.spawn_kwargs = spawn_kwargs
+#
+#     def collided_by(self, entity):
+#         if self.entity_filter(entity):
+#             # If collided into by a correct entity
+#             self.owner.spawner.spawn(self.spawned_item,
+#                                      (round(self.owner.widget.width/2),
+#                                       round(self.owner.widget.height/2)),
+#                                      **self.spawn_kwargs)
+#             self.owner.destructor.destroy()
 
 
 class ScreenEdgeCollisionComponent(CollisionComponent):
@@ -242,6 +242,11 @@ class GrenadeComponent(Component):
                                          (round(self.owner.widget.width/2),
                                           round(self.owner.widget.height/2)))
                 self.owner.destructor.destroy()
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        {}.update({'spawned_item': self.spawned_item,
+                   'target_y': self.target_y})
 
     
 class HealthComponent(Component):
@@ -298,15 +303,20 @@ class SpawnerHealthComponent(HealthComponent):
 
     Expects owner to have SpawnerComponent and DestructorComponent
     """
-    def __init__(self, *args, corpse_type=None, **kwargs):
+    def __init__(self, *args, corpse=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.corpse_type = corpse_type
+        self.corpse_type = corpse
 
     def process_hitpoint_update(self):
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
                                      relative_pos=(0, self.owner.widget.height - 5))
             self.owner.destructor.destroy()
+
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'hitpoints': self.hitpoints,
+                      'corpse': self.corpse_type})
 
 
 class VisualDamageHealthComponent(HealthComponent):
@@ -887,15 +897,15 @@ class ItemBehaviourComponent(Component):
             # The item entity can be created (eg during deserialization) before
             # its owning entity has been announced via 'ecs_create'. If so,
             # remember owning entity ID and attempt to find the actual entity
-            # when the item is first used. An attempt to use an item without a
-            # correct owning_entity will cause AttributeError (via attempting
-            # to adress 'str.position', 'str.spawner' or something) and will be
-            # caught by self.on_event. If the entity is still not created by
+            # when the item is first used. If the entity is still not created by
             # then, no attempt to catch the resulting KeyError is made.
-            try:
-                self._owning_entity = EntityTracker().entities[value]
-            except KeyError:
-                self._future_owner = value
+            #
+            # Trying to set entity outright via EntityTracker() causes a bug
+            # empty component-less entity being used upon loading. It's easier
+            # to postpone everything than try to figure out this weird bug,
+            # probably related to the exact order in which entities are
+            # deserialized
+            self._future_owner = value
         elif value is not None:
             # owning_entity can be empty, but not some incorrect type
             raise BearECSException(f'A {type(value)} used as an owning_entity for item')
@@ -908,7 +918,6 @@ class ItemBehaviourComponent(Component):
             try:
                 self.use_item()
             except AttributeError:
-                print(self.owner)
                 self.owning_entity = EntityTracker().entities[self._future_owner]
                 self.use_item()
 
