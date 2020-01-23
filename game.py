@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 import sys
-import random
+import json
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
@@ -161,10 +161,29 @@ dispatcher.register_listener(menu_listener, ['key_down', 'tick',
 ################################################################################
 
 if args.s:
-    for line in open(args.s):
-        factory.load_entity_from_JSON(line.rstrip())
+    save = json.load(open(args.s))
+    for line in save['entities']:
+        factory.load_entity_from_JSON(line)
+    for attr in save['level_switch_state']:
+        level_switch.__dict__[attr] = save['level_switch_state'][attr]
+    levelgen.current_level = save['current_level']
+    spawner.spawns = [SpawnItem(*x) for x in save['spawns']]
     # ScrollListener is initialized anew, so the scroll position is not kept
     dispatcher.add_event(BearEvent('brut_focus', 'cop_1'))
+    # Make all entities available for EntityTracker before the first tick
+    loop._run_iteration(0)
+    # Fixes and workarounds to display everything correctly on the first frame
+    # Pseudo-events to redraw items in the HUD
+    cop_entity = EntityTracker().entities['cop_1']
+    left_item = cop_entity.hands.left_item
+    right_item = cop_entity.hands.right_item
+    dispatcher.add_event(
+        BearEvent('brut_pick_up', ('cop_1', 'left', f'{left_item}_pseudo')))
+    dispatcher.add_event(
+        BearEvent('brut_pick_up', ('cop_1', 'right', f'{right_item}_pseudo')))
+    # Set correct z-order for the cop
+    z = cop_entity.position.y + cop_entity.widget.height
+    cop_entity.widget.widget.z_level = z
 
 else:
     factory.create_entity('cop', (5, 25))

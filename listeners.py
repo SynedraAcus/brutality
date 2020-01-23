@@ -4,10 +4,11 @@ merit a complete entity, or to complicated to be limited to one.
 """
 
 from collections import namedtuple
+from json import dump
 
 from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
     BearECSException, copy_shape
-from bear_hug.ecs import EntityTracker
+from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
 from bear_hug.widgets import Widget, Listener
@@ -15,7 +16,7 @@ from bear_hug.widgets import Widget, Listener
 from widgets import MenuWidget
 
 
-class ScrollListener(Listener):
+class ScrollListener(Listener, metaclass=Singleton):
     """
     A listener that keeps ScrollableECSLayout focused on an entity.
     Keeps a ScrollableECSLayout reference and an entity ID.
@@ -43,6 +44,8 @@ class ScrollListener(Listener):
     `BearEvent(event_type='ecs_destroy')` and `BearEvent(event_type='ecs_move')`
      are necessary for this Listener to work, but should not be used to interact
      with it directly.
+
+     This Listener is a singleton, and creating more than one is impossible.
     """
     def __init__(self, *args, layout=None, distance=10, **kwargs):
         super().__init__(*args, **kwargs)
@@ -145,7 +148,7 @@ class ScrollListener(Listener):
 SpawnItem = namedtuple('SpawnItem', ('item', 'pos', 'size', 'kwargs'))
 
 
-class SpawningListener(Listener):
+class SpawningListener(Listener, metaclass=Singleton):
     """
     Spawns items when player walks into a predefined area.
 
@@ -236,33 +239,45 @@ class SpawningListener(Listener):
 
 class SavingListener(Listener):
     """
-    A Listener class that waits for a signal (currently keypress 'TK_F5') and,
-    upon getting this signal, attempts to serialize all entities available
-    from EntityTracker()
+    A Listener class that waits for a ''brut_save_game'' event and saves
+
+    Serializes all existing entities, LevelSwitchListener state and spawns in
+    the SpawnListener.
     """
-    # TODO: save game state besides entities
-    # Stuff like screen scroll position, current level, player entity ID, etc.
     def on_event(self, event):
         if event.event_type == 'brut_save_game':
-            with open(event.event_value, mode='w') as savefile:
-                for entity in EntityTracker().filter_entities():
-                    print(repr(entity), file=savefile)
+            r = {}
+            # Saving entities
+            r['entities'] = [repr(entity) for entity in EntityTracker().entities.values()]
+            # Saving listeners
+            r['level_switch_state'] = LevelSwitchListener().get_state()
+            # A bit hacky, but I cannot import mapgen here
+            # because of circular import
+            r['current_level'] = LevelSwitchListener().current_level
+            # Loading spawns from SpawnListener
+            r['spawns'] = SpawningListener().spawns
+        dump(r, open(event.event_value, mode='w'))
 
 
-class LevelSwitchListener(Listener):
+class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     Changes level when player walks into a predefined area.
+
+    This Listener is a singleton, and creating more than one is impossible.
 
     Currently only able to switch them in a fixed sequence.
     """
     def __init__(self, player_id, switch_pos = None, switch_size = None,
+                 current_level=None,
                  level_manager=None, level_sequence={}, **kwargs):
         # TODO: next_level dict for current levels
+        # This will permit multiple exits per level
         super().__init__(**kwargs)
         self.player_id = player_id
         self.player_entity = None
         # LevelManager type not checked to avoid circular import
         self.level_manager = level_manager
+        self.current_level = current_level
         for x in level_sequence:
             if x not in self.level_manager.methods:
                 raise ValueError(f'Invalid level {x} supplied to LevelSwitchListener')
@@ -281,7 +296,7 @@ class LevelSwitchListener(Listener):
             if rectangles_collide(self.switch_pos, self.switch_size,
                                   self.player_entity.position.pos,
                                   self.player_entity.widget.size):
-                next_level = self.level_sequence[self.level_manager.current_level]
+                next_level = self.level_sequence[self.current_level]
                 self.level_manager.set_level(next_level)
 
     def disable(self):
@@ -295,6 +310,13 @@ class LevelSwitchListener(Listener):
         Use LevelSwitchListener on current level
         """
         self.enabled = True
+
+    def get_state(self):
+        return {'player_id': self.player_id,
+                'switch_pos': self.switch_pos,
+                'switch_size': self.switch_size,
+                'level_sequence': self.level_sequence,
+                'current_level': self.current_level}
 
 
 class MenuListener(Listener):

@@ -6,11 +6,11 @@ import random
 from listeners import SpawnItem, SpawningListener
 from entities import EntityFactory
 
-from bear_hug.ecs import EntityTracker
+from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
 
 
-class LevelManager:
+class LevelManager(metaclass=Singleton):
     """
     A class responsible for creating levels.
 
@@ -30,7 +30,6 @@ class LevelManager:
         self.spawner = spawner
         self.level_switch = level_switch
         self.player_entity = player_entity
-        self.current_level = None
         self.methods = {'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
                         'department': '_department'}
@@ -64,7 +63,6 @@ class LevelManager:
         return True
 
     def destroy_current_level(self):
-        self.current_level = None
         # Remove every entity except self.player_entity
         for entity in EntityTracker().filter_entities(self.should_remove):
             entity.destructor.destroy()
@@ -84,14 +82,13 @@ class LevelManager:
         :return:
         """
         # if current level is set, destroy it
-        if self.current_level:
-            self.destroy_current_level()
+        self.destroy_current_level()
         # call correct level-generation method
         getattr(self, self.methods[level_id])()
         # set player position to whatever it should be
         player = EntityTracker().entities[self.player_entity]
         player.position.move(*self.starting_positions[level_id])
-        self.current_level = level_id
+        self.level_switch.current_level = level_id
         self.level_switch.enable()
 
     def _ghetto_test(self):
