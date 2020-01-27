@@ -111,8 +111,13 @@ if not args.disable_sound:
     from bear_hug.sound import SoundListener
     jukebox = SoundListener(sounds={'step': 'sounds/step.wav',
                                     'shot': 'sounds/shot.wav',
-                                    'punch': 'sounds/punch.wav'})
-    dispatcher.register_listener(jukebox, 'play_sound')
+                                    'punch': 'sounds/punch.wav',
+                                    'beat': '117856__day-tripper13__breaks-beat-4811.wav'})
+    # Test beat from https://freesound.org/people/day_tripper13/sounds/117856/
+    # day-tripper13, CC-BY 3.0
+    dispatcher.register_listener(jukebox,
+                                 ['play_sound', 'tick', 'set_bg_sound'])
+    dispatcher.add_event(BearEvent('set_bg_sound', 'beat'))
 
 # Message spawner for tutorial messages
 spawner = SpawningListener('cop_1', factory=factory)
