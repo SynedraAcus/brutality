@@ -631,7 +631,7 @@ class HidingComponent(Component):
     Expects owner to have PositionComponent and WidgetComponent
     """
     def __init__(self, *args, hide_condition='keypress',
-                 lifetime=1.0, age=0, is_working=True,
+                 lifetime=1.0, age=0, is_working=False,
                  should_hide=True,
                  **kwargs):
         super().__init__(*args, name='hiding', **kwargs)
@@ -671,6 +671,7 @@ class HidingComponent(Component):
         """
         if not self.is_working:
             self.is_working = True
+            self.should_hide = True
             self.dispatcher.add_event(BearEvent(event_type='ecs_add',
                                                 event_value=(self.owner.id,
                                                              self.owner.position.x,

@@ -86,10 +86,13 @@ class EntityFactory:
         # simple event emitter
         if hasattr(entity, 'spawner'):
             entity.spawner.factory = self
-        if emit_show and not hasattr(entity, 'hiding'):
+        if emit_show:
+            if hasattr(entity, 'hiding') and entity.hiding.should_hide:
+                # If the entity needs to be hidden, don't add it
+                return
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id,
-                                                            entity.position.x,
-                                                            entity.position.y)))
+                                                        entity.position.x,
+                                                        entity.position.y)))
 
     def create_entity(self, entity_type, pos, emit_show=True, **kwargs):
         """
@@ -788,7 +791,8 @@ class EntityFactory:
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
-                                             is_working=False))
+                                             is_working=False,
+                                             should_hide=False))
         entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
@@ -810,7 +814,8 @@ class EntityFactory:
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
-                                             is_working=False))
+                                             is_working=False,
+                                             should_hide=False))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
@@ -831,7 +836,8 @@ class EntityFactory:
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
-                                             is_working=False))
+                                             is_working=False,
+                                             should_hide=False))
         entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
@@ -854,7 +860,8 @@ class EntityFactory:
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
-                                             is_working=False))
+                                             is_working=False,
+                                             should_hide=False))
         entity.add_component(PositionComponent(self.dispatcher))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))

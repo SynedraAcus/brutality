@@ -100,7 +100,6 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (60, 30))
         self.factory.create_entity('nunchaku', (10, 20))
-        self.factory.create_entity('dept_table_boss', (25, 20))
         # Set level switch coordinates
         self.level_switch.switch_pos = (60, 30)
         self.level_switch.switch_size = (15, 4)
