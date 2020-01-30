@@ -103,7 +103,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up'])
+dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up', 'set_bg_sound'])
 
 # TODO: TSLD sounds
 # TODO: correct paths for sounds, atlas and font
@@ -112,12 +112,12 @@ if not args.disable_sound:
     jukebox = SoundListener(sounds={'step': 'sounds/step.wav',
                                     'shot': 'sounds/shot.wav',
                                     'punch': 'sounds/punch.wav',
-                                    'beat': '117856__day-tripper13__breaks-beat-4811.wav'})
-    # Test beat from https://freesound.org/people/day_tripper13/sounds/117856/
-    # day-tripper13, CC-BY 3.0
+                                    'supercop_bg': 'sounds/supercop.wav',
+                                    'punk_bg': 'sounds/punk_bg.wav',
+                                    'test_beat': '117856__day-tripper13__breaks-beat-4811.wav'})
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
-    dispatcher.add_event(BearEvent('set_bg_sound', 'beat'))
+    dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
 
 # Message spawner for tutorial messages
 spawner = SpawningListener('cop_1', factory=factory)
