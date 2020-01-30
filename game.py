@@ -1,6 +1,7 @@
 #! /usr/bin/env python3.6
 
 from argparse import ArgumentParser
+from os import path
 import sys
 import json
 
@@ -105,16 +106,20 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up', 'set_bg_sound'])
 
-# TODO: TSLD sounds
 # TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
-    jukebox = SoundListener(sounds={'step': 'sounds/step.wav',
-                                    'shot': 'sounds/shot.wav',
-                                    'punch': 'sounds/punch.wav',
-                                    'supercop_bg': 'sounds/supercop.wav',
-                                    'punk_bg': 'sounds/punk_bg.wav',
-                                    'test_beat': '117856__day-tripper13__breaks-beat-4811.wav'})
+    sound_files = {'step': 'step.wav',
+                   'shot': 'shot.wav',
+                   'punch': 'punch.wav',
+                   'supercop_bg': 'supercop.wav',
+                   'punk_bg': 'punk_bg.wav',
+                   'test_beat':'117856__day-tripper13__breaks-beat-4811.wav'}
+    sounds = {}
+    cwd = path.split(sys.argv[0])[0]
+    for file in sound_files:
+        sounds[file] = path.join(cwd, 'sounds', sound_files[file])
+    jukebox = SoundListener(sounds=sounds)
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
     dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
