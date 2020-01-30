@@ -34,7 +34,8 @@ class EntityFactory:
         self.layout = layout
         self.counts = {}
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
-                            'bucket', 'pizza_box'}
+                            'bucket', 'pizza_box',
+                            'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
                          'barricade_3', 'dept_locker', 'dept_fence',
                          'dept_bench', 'dept_wall_inner',
@@ -468,18 +469,6 @@ class EntityFactory:
                                                       right_item=launcher.id))
         return punk
 
-    def _create_cop_corpse(self, entity_id, **kwargs):
-        """
-        Cop corpse: inactive, just lays there
-        :return:
-        """
-        corpse = Entity(id=entity_id)
-        corpse.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(*self.atlas.get_element('cop_corpse'))))
-        corpse.add_component(DestructorComponent(self.dispatcher))
-        corpse.add_component(PositionComponent(self.dispatcher))
-        return corpse
-
     def _create_cop_jump(self, entity_id, direction='r', **kwargs):
         e = Entity(id=entity_id)
         widget=Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
@@ -492,26 +481,6 @@ class EntityFactory:
                                        lifetime=0.1))
         e.add_component(DestructorComponent(self.dispatcher))
         return e
-
-    def _create_nunchaku_punk_corpse(self, entity_id, **kwargs):
-        """
-        Like cop corpse, except for the punk
-        :return:
-        """
-        corpse = Entity(id=entity_id)
-        corpse.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(*self.atlas.get_element('nunchaku_punk_corpse'))))
-        corpse.add_component(DestructorComponent(self.dispatcher))
-        corpse.add_component(PositionComponent(self.dispatcher))
-        return corpse
-
-    def _create_bottle_punk_corpse(self, entity_id, **kwargs):
-        corpse = Entity(id=entity_id)
-        corpse.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(*self.atlas.get_element('bottle_punk_corpse'))))
-        corpse.add_component(DestructorComponent(self.dispatcher))
-        corpse.add_component(PositionComponent(self.dispatcher))
-        return corpse
 
     def _create_invis(self, entity_id, size=(0, 0), **kwargs):
         """
@@ -662,22 +631,6 @@ class EntityFactory:
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.
-    # TODO: Move corpses to decorations or barriers
-    def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        if direction == 'r':
-            chars, colors = self.atlas.get_element('shot_r')
-        else:
-            chars, colors = self.atlas.get_element('shot_l')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=0.1))
-        entity.add_component(PositionComponent(self.dispatcher))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        return entity
-
     # TODO: merge boilerplate hand generators into a single `_create_hand(hand_type)`
     def _create_cop_hand_back(self, entity_id, direction='r', **kwargs):
         entity = Entity(entity_id)
