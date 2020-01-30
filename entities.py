@@ -501,6 +501,27 @@ class EntityFactory:
         bg_entity.add_component(DestructorComponent(self.dispatcher))
         return bg_entity
 
+    def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
+        """
+        A muzzle flash for a pistol
+        :param entity_id:
+        :param direction:
+        :param kwargs:
+        :return:
+        """
+        muzzle = Entity(id=entity_id)
+        if direction == 'r':
+            widget = Widget(*self.atlas.get_element('shot_r'))
+        else:
+            widget = Widget(*self.atlas.get_element('shot_l'))
+        muzzle.add_component(WidgetComponent(self.dispatcher, widget))
+        muzzle.add_component(DestructorComponent(self.dispatcher))
+        muzzle.add_component(PositionComponent(self.dispatcher))
+        muzzle.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.1))
+        return muzzle
+
     def _create_bullet(self, entity_id, direction='r', **kwargs):
         """
         Create a simple projectile
@@ -522,7 +543,8 @@ class EntityFactory:
                                                                  damage=1))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
-    
+
+
     def _create_punch(self, entity_id, direction='r', **kwargs):
         """
         Send a punch
@@ -737,9 +759,9 @@ class EntityFactory:
                                                    widget))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                 owning_entity=owning_entity,
-                                spawned_items={'bullet': {'r': (0, 0),
+                                spawned_items={'bullet': {'r': (1, 0),
                                                          'l': (-2, 0)},
-                                               'muzzle_flash': {'r': (4, -1),
+                                               'muzzle_flash': {'r': (5, -1),
                                                                'l': (-2, -1)}}))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
