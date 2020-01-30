@@ -11,9 +11,7 @@ from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
-from bear_hug.widgets import Widget, Listener
-
-from widgets import MenuWidget
+from bear_hug.widgets import Widget, Listener, MenuWidget
 
 
 class ScrollListener(Listener, metaclass=Singleton):
@@ -271,7 +269,6 @@ class LoadingListener(Listener):
         self.loop = loop
 
     def on_event(self, event):
-        # TODO: Items on the floor do not display after loading
         if event.event_type == 'brut_load_game':
             self.levelgen.destroy_current_level(destroy_player=True)
             # creating variables for the singletons to avoid running through
@@ -431,9 +428,7 @@ class MenuListener(Listener):
                                   ['tick', 'service', 'misc_input', 'key_down'])
         self.currently_showing = True
         # Disabling character input
-        # TODO: method to get a single entity from EntityTracker()?
-        for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
-            entity.controller.accepts_input = False
+        EntityTracker().entities['cop_1'].controller.accepts_input = False
 
     def hide_menu(self):
         self.terminal.remove_widget(self.menu_widget)

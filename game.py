@@ -11,13 +11,14 @@ from bear_hug.ecs import EntityTracker
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, Multiatlas, XpLoader
-from bear_hug.widgets import Widget, ClosingListener, LoggingListener
+from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
+    MenuWidget, MenuItem
 
 from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener, MenuListener
-from widgets import HitpointBar, ItemWindow, MenuItem, MenuWidget
+from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
@@ -111,7 +112,6 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up', 'set_bg_sound'])
 
-# TODO: correct paths for sounds, atlas and font
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
     sound_files = {'step': 'step.wav',
