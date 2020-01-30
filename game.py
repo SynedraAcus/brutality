@@ -28,15 +28,20 @@ args = parser.parse_args()
 # Preparing stuff before game launch
 ################################################################################
 
+path_base = path.split(sys.argv[0])[0]
 #Bear_hug boilerplate
-t = BearTerminal(font_path='cp437_12x12.png', size='81x61',
+t = BearTerminal(font_path=path.join(path_base, 'cp437_12x12.png'), size='81x61',
                  title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
-atlas = Multiatlas((Atlas(XpLoader('test_atlas.xp'), 'test_atlas.json'),
-                    Atlas(XpLoader('ghetto_bg.xp'), 'ghetto_bg.json'),
-                    Atlas(XpLoader('department.xp'), 'department.json')))
+
+atlas = Multiatlas((Atlas(XpLoader(path.join(path_base, 'test_atlas.xp')),
+                          path.join(path_base, 'test_atlas.json')),
+                    Atlas(XpLoader(path.join(path_base, 'ghetto_bg.xp')),
+                          path.join(path_base, 'ghetto_bg.json')),
+                    Atlas(XpLoader(path.join(path_base, 'department.xp')),
+                          path.join(path_base, 'department.json'))))
 
 # Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]
@@ -116,9 +121,8 @@ if not args.disable_sound:
                    'punk_bg': 'punk_bg.wav',
                    'test_beat':'117856__day-tripper13__breaks-beat-4811.wav'}
     sounds = {}
-    cwd = path.split(sys.argv[0])[0]
     for file in sound_files:
-        sounds[file] = path.join(cwd, 'sounds', sound_files[file])
+        sounds[file] = path.join(path_base, 'sounds', sound_files[file])
     jukebox = SoundListener(sounds=sounds)
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
