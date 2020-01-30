@@ -280,6 +280,7 @@ class LoadingListener(Listener):
             spawner = SpawningListener()
             spawner.player_entity = None
             level_switch.player_entity = None
+            level_switch.player_id = None
             save = load(open(event.event_value))
             for line in save['entities']:
                 self.factory.load_entity_from_JSON(line)
@@ -299,6 +300,8 @@ class LoadingListener(Listener):
             # Pseudo-events to redraw items in the HUD
             left_item = cop_entity.hands.left_item
             right_item = cop_entity.hands.right_item
+            EntityTracker().entities[left_item].hiding.hide()
+            EntityTracker().entities[right_item].hiding.hide()
             self.dispatcher.add_event(
                 BearEvent('brut_pick_up',
                           ('cop_1', 'left', f'{left_item}_pseudo')))
@@ -366,7 +369,8 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
                 'switch_pos': self.switch_pos,
                 'switch_size': self.switch_size,
                 'level_sequence': self.level_sequence,
-                'current_level': self.current_level}
+                'current_level': self.current_level,
+                'enabled': self.enabled}
 
 
 class MenuListener(Listener):
