@@ -15,12 +15,20 @@ class WalkerComponent(PositionComponent):
     A simple PositionComponent that switches widgets appropriately
     """
     
-    def __init__(self, *args, direction='r', initial_phase='1', **kwargs):
+    def __init__(self, *args, direction='r', initial_phase='1',
+                 jump_duration=0.4, jump_timer=0,
+                 jump_direction=0,
+                 jump_vx=60, jump_vy=-40, **kwargs):
         super().__init__(*args, **kwargs)
-        self.dispatcher.register_listener(self, ['tick'])
+        self.dispatcher.register_listener(self, ['tick', 'ecs_collision'])
         self.direction = direction
         self.phase = initial_phase
         self.moved_this_tick = False
+        self.jump_vx = jump_vx
+        self.jump_vy = jump_vy
+        self.jump_direction = jump_direction
+        self.jump_timer = jump_timer
+        self.jump_duration = jump_duration
         
     def walk(self, move):
         """
@@ -49,6 +57,21 @@ class WalkerComponent(PositionComponent):
         self.dispatcher.add_event(BearEvent('play_sound', 'step'))
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
 
+    def jump(self):
+        """
+        Jump in currently set direction
+        :return:
+        """
+        # Jump direction is set to 1 while raising and to -1 while falling
+        # Zero when not in jump state
+        if self.jump_direction:
+            # No double jumps
+            return
+        self.jump_direction = 1
+        self.jump_timer = 0
+        self.vx = self.jump_vx if self.direction == 'r' else -1 * self.jump_vx
+        self.vy = self.jump_vy
+
     def turn(self, direction):
         """
         Set direction and set correct widget
@@ -61,14 +84,52 @@ class WalkerComponent(PositionComponent):
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):
+        # TODO: hang if colliding into edge during jump
         if event.event_type == 'tick':
             self.moved_this_tick = False
+            if self.jump_direction:
+                self.jump_timer += event.event_value
+                if self.jump_timer >= self.jump_duration:
+                    self.vx = 0
+                    self.vy = 0
+                    self.jump_direction = 0
+                elif self.jump_direction == 1 and \
+                        self.jump_timer >= self.jump_duration/2:
+                    self.jump_direction = -1
+                    self.vy = -1 * self.vy
+        elif event.event_type == 'ecs_collision' \
+                and event.event_value[0] == self.owner.id \
+                and self.jump_direction:
+            # This part covers some weird bug when after changing level mid-jump
+            # it attempts to process ecs_collision event with an already
+            # nonexistent exit highlight entity, and crashes with KeyError
+            should_fall = False
+            if event.event_value[1]:
+                try:
+                    should_fall = True if hasattr(EntityTracker().entities[event.event_value[1]], 'collision') else False
+                except KeyError:
+                    should_fall = True
+            else:
+                should_fall = True
+            if should_fall:
+                self.vx = 0
+                if self.jump_direction == 1:
+                    # Currently raising, need to drop
+                    self.jump_direction = -1
+                    self.jump_timer = self.jump_duration - self.jump_timer
+                    self.vy = -1 * self.vy
+
         return super().on_event(event)
-            
+
     def __repr__(self):
         d = loads(super().__repr__())
         {}.update({'direction': self.direction,
-                   'initial_phase': self.phase})
+                   'initial_phase': self.phase,
+                   'jump_vx': self.jump_vx,
+                   'jump_vy': self.jump_vy,
+                   'jump_direction': self.jump_direction,
+                   'jump_timer': self.jump_timer,
+                   'jump_duration': self.jump_duration})
         return dumps(d)
 
 
@@ -450,14 +511,15 @@ class InputComponent(Component):
                     # TODO: jump that makes sense
                     # Current placeholder solution just teleports the cop
                     # immediately and spawns a separate jumping animation entity
-                    if self.owner.position.direction == 'r':
-                        self.owner.spawner.spawn('cop_jump', (2, -5),
-                                                 direction='r')
-                        self.next_move[0] += 30
-                    else:
-                        self.next_move[0] -= 30
-                        self.owner.spawner.spawn('cop_jump', (-8, -5),
-                                                 direction='l')
+                    # if self.owner.position.direction == 'r':
+                    #     self.owner.spawner.spawn('cop_jump', (2, -5),
+                    #                              direction='r')
+                    #     self.next_move[0] += 30
+                    # else:
+                    #     self.next_move[0] -= 30
+                    #     self.owner.spawner.spawn('cop_jump', (-8, -5),
+                    #                              direction='l')
+                    self.owner.position.jump()
                     self.current_action_delay = self.action_delay
             # These actions are available whether or not the player is dead
             if event.event_value in ('TK_D', 'TK_RIGHT') and self.current_walk_delay <= 0:

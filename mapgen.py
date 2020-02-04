@@ -84,7 +84,6 @@ class LevelManager(metaclass=Singleton):
         """
         # if current level is set, destroy it
         self.destroy_current_level()
-        # call correct level-generation method
         getattr(self, self.methods[level_id])()
         # set player position to whatever it should be
         player = EntityTracker().entities[self.player_entity]
@@ -97,6 +96,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
+        self.factory.create_entity('barricade_3', (30, 35))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (60, 30))
         self.factory.create_entity('nunchaku', (10, 20))
