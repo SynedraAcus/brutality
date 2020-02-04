@@ -11,6 +11,7 @@ from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
+from bear_hug.sound import SoundListener
 from bear_hug.widgets import Widget, Listener, MenuWidget
 
 
@@ -252,6 +253,7 @@ class SavingListener(Listener):
             r['current_level'] = LevelSwitchListener().current_level
             # Loading spawns from SpawnListener
             r['spawns'] = SpawningListener().spawns
+            r['bg_sound'] = SoundListener().bg_sound
         dump(r, open(event.event_value, mode='w'))
 
 
@@ -305,7 +307,9 @@ class LoadingListener(Listener):
             self.dispatcher.add_event(
                 BearEvent('brut_pick_up',
                           ('cop_1', 'right', f'{right_item}_pseudo')))
-            # Make sure all fixes got drawn
+            self.dispatcher.add_event(BearEvent('set_bg_sound',
+                                                save['bg_sound']))
+            # Make sure all fixes got processed
             self.loop._run_iteration(0)
 
 
