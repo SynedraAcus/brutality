@@ -84,7 +84,6 @@ class WalkerComponent(PositionComponent):
         self.owner.widget.switch_to_image(f'{self.direction}_{self.phase}')
     
     def on_event(self, event):
-        # TODO: hang if colliding into edge during jump
         if event.event_type == 'tick':
             self.moved_this_tick = False
             if self.jump_direction:
@@ -100,25 +99,44 @@ class WalkerComponent(PositionComponent):
         elif event.event_type == 'ecs_collision' \
                 and event.event_value[0] == self.owner.id \
                 and self.jump_direction:
-            # This part covers some weird bug when after changing level mid-jump
-            # it attempts to process ecs_collision event with an already
-            # nonexistent exit highlight entity, and crashes with KeyError
             should_fall = False
             if event.event_value[1]:
+                # This part covers some weird bug when after changing level mid-jump
+                # it attempts to process ecs_collision event with an already
+                # nonexistent exit highlight entity, and crashes with KeyError
                 try:
-                    should_fall = True if hasattr(EntityTracker().entities[event.event_value[1]], 'collision') else False
+                    other = EntityTracker().entities[event.event_value[1]]
+                    if 'collision' in other.__dict__:
+                        # Assumes that owner always has PassabilityComponent
+                        if 'passability' in other.__dict__ and \
+                                rectangles_collide((self.owner.position.x +
+                                               self.owner.passability.shadow_pos[
+                                                   0],
+                                               self.owner.position.y +
+                                               self.owner.passability.shadow_pos[
+                                                   1]),
+                                              self.owner.passability.shadow_size,
+                                              (other.position.x +
+                                               other.passability.shadow_pos[0],
+                                               other.position.y +
+                                               other.passability.shadow_pos[1]),
+                                              other.passability.shadow_size):
+                            should_fall = True
+                        else:
+                            # passability-less widgets collide by their widgets
+                            should_fall = False
                 except KeyError:
                     should_fall = True
-            else:
-                should_fall = True
+            # else:
+            #     should_fall = True
             if should_fall:
                 self.vx = 0
+                #self.move(-self.last_move[0], -self.last_move[1])
                 if self.jump_direction == 1:
                     # Currently raising, need to drop
                     self.jump_direction = -1
                     self.jump_timer = self.jump_duration - self.jump_timer
                     self.vy = -1 * self.vy
-
         return super().on_event(event)
 
     def __repr__(self):
