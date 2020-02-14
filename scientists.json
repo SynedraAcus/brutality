@@ -1,0 +1,58 @@
+[
+  {
+    "name":  "scientist_f_r_1",
+    "x": 0,
+    "y": 0,
+    "xsize": 6,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f_r_2",
+    "x": 7,
+    "y": 0,
+    "xsize": 6,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f_l_1",
+    "x": 14,
+    "y": 0,
+    "xsize": 6,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f_l_2",
+    "x": 21,
+    "y": 0,
+    "xsize": 6,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f_hand_back_l",
+    "x": 28,
+    "y": 10,
+    "xsize": 3,
+    "ysize": 2
+  },
+  {
+    "name":  "scientist_f_hand_back_r",
+    "x": 28,
+    "y": 19,
+    "xsize": 3,
+    "ysize": 2
+  },
+  {
+    "name":  "scientist_f_hand_forward_r",
+    "x": 28,
+    "y": 1,
+    "xsize": 6,
+    "ysize": 8
+  },
+  {
+    "name": "scientist_f_hand_forward_l",
+    "x": 35,
+    "y": 1,
+    "xsize": 6,
+    "ysize": 8
+  }
+]
