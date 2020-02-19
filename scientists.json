@@ -28,31 +28,206 @@
     "ysize": 19
   },
   {
-    "name":  "scientist_f_hand_back_l",
+    "name":  "scientist_hand_back_l",
     "x": 28,
     "y": 10,
     "xsize": 3,
     "ysize": 2
   },
   {
-    "name":  "scientist_f_hand_back_r",
+    "name":  "scientist_hand_back_r",
     "x": 28,
     "y": 19,
     "xsize": 3,
     "ysize": 2
   },
   {
-    "name":  "scientist_f_hand_forward_r",
+    "name":  "scientist_hand_forward_r",
     "x": 28,
     "y": 1,
     "xsize": 6,
     "ysize": 8
   },
   {
-    "name": "scientist_f_hand_forward_l",
+    "name": "scientist_hand_forward_l",
     "x": 35,
     "y": 1,
     "xsize": 6,
     "ysize": 8
+  },
+  {
+    "name":  "scientist_skinny_hand_back_l",
+    "x": 32,
+    "y": 10,
+    "xsize": 4,
+    "ysize": 2
+  },
+  {
+    "name":  "scientist_skinny_hand_back_r",
+    "x": 37,
+    "y": 10,
+    "xsize": 4,
+    "ysize": 2
+  },
+  {
+    "name":  "scientist_skinny_hand_forward_r",
+    "x": 91,
+    "y": 2,
+    "xsize": 6,
+    "ysize": 8
+  },
+  {
+    "name": "scientist_skinny_hand_forward_l",
+    "x": 90,
+    "y": 11,
+    "xsize": 6,
+    "ysize": 8
+  },
+  {
+    "name":  "scientist_f2_r_1",
+    "x": 43,
+    "y": 0,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f2_r_2",
+    "x": 50,
+    "y": 0,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f2_l_1",
+    "x": 56,
+    "y": 0,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_f2_l_2",
+    "x": 63,
+    "y": 0,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_m_r_1",
+    "x": 70,
+    "y": 1,
+    "xsize": 4,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_m_r_2",
+    "x": 75,
+    "y": 1,
+    "xsize": 4,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_m_l_1",
+    "x": 80,
+    "y": 1,
+    "xsize": 4,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_m_l_2",
+    "x": 85,
+    "y": 1,
+    "xsize": 4,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_m2_r_1",
+    "x": 1,
+    "y": 20,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name":  "scientist_m2_r_2",
+    "x": 8,
+    "y": 20,
+    "xsize": 5,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_m2_l_1",
+    "x": 14,
+    "y": 20,
+    "xsize": 5,
+    "ysize": 18
+  },
+  {
+    "name":  "scientist_f_l_2",
+    "x": 21,
+    "y": 20,
+    "xsize": 5,
+    "ysize": 18
+  },
+  {
+    "name": "scientist_f_corpse",
+    "x": 27,
+    "y": 20,
+    "xsize": 21,
+    "ysize": 6
+  },
+  {
+    "name": "scientist_f2_corpse",
+    "x": 49,
+    "y": 20,
+    "xsize": 19,
+    "ysize": 8
+  },
+  {
+    "name": "scientist_m_corpse",
+    "x": 69,
+    "y": 20,
+    "xsize": 18,
+    "ysize": 6
+  },
+  {
+    "name": "scientist_m2_corpse",
+    "x": 27,
+    "y": 28,
+    "xsize": 18,
+    "ysize": 6
+  },
+  {
+    "name": "science_table_1",
+    "x": 0,
+    "y": 39,
+    "xsize": 19,
+    "ysize": 19
+  },
+  {
+    "name": "science_table_2",
+    "x": 20,
+    "y": 40,
+    "xsize": 33,
+    "ysize": 15
+  },
+  {
+    "name": "science_device_1",
+    "x": 58,
+    "y": 29,
+    "xsize": 9,
+    "ysize": 20
+  },
+  {
+    "name": "science_device_2",
+    "x": 74,
+    "y": 29,
+    "xsize": 10,
+    "ysize": 15
+  },
+  {
+    "name": "science_spike",
+    "x": 68,
+    "y": 29,
+    "xsize": 5,
+    "ysize": 19
   }
 ]

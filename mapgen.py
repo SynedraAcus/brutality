@@ -96,7 +96,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
-        self.factory.create_entity('barricade_3', (30, 35))
+        self.factory.create_entity('science_spike', (10, 25))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (60, 30))
         self.factory.create_entity('nunchaku', (10, 20))

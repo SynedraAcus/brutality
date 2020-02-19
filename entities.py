@@ -40,7 +40,10 @@ class EntityFactory:
                          'barricade_3', 'dept_locker', 'dept_fence',
                          'dept_bench', 'dept_wall_inner',
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
-                         'dept_chair_2', 'dept_table_boss'}
+                         'dept_chair_2', 'dept_table_boss',
+                         'science_table_1', 'science_table_2',
+                         'science_device_1', 'science_device_2',
+                         'science_spike'}
         self.shadow_positions = {'broken_car': (0, 7),
                                  'barricade_1': (1, 9),
                                  'barricade_2': (0, 6),
@@ -53,7 +56,12 @@ class EntityFactory:
                                  'dept_table_2': (0, 12),
                                  'dept_chair_1': (0, 10),
                                  'dept_chair_2': (0, 10),
-                                 'dept_table_boss': (0, 19)}
+                                 'dept_table_boss': (0, 19),
+                                 'science_table_1': (0, 11),
+                                 'science_table_2': (0, 13),
+                                 'science_device_1': (1, 16),
+                                 'science_device_2': (0, 12),
+                                 'science_spike': (0, 19)}
         self.shadow_sizes = {'broken_car': (38, 7),
                              'barricade_1': (11, 7),
                              'barricade_2': (14, 8),
@@ -67,7 +75,12 @@ class EntityFactory:
                              'dept_table_2': (18, 7),
                              'dept_chair_1': (7, 3),
                              'dept_chair_2': (7, 3),
-                             'dept_table_boss': (30, 7)}
+                             'dept_table_boss': (30, 7),
+                             'science_table_1': (15, 8),
+                             'science_table_2': (29, 2),
+                             'science_device_1': (5, 4),
+                             'science_device_2': (10, 3),
+                             'science_spike': (3, 1)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
