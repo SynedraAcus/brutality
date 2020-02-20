@@ -37,7 +37,7 @@
   {
     "name":  "scientist_hand_back_r",
     "x": 28,
-    "y": 19,
+    "y": 10,
     "xsize": 3,
     "ysize": 2
   },
@@ -144,7 +144,7 @@
     "x": 1,
     "y": 20,
     "xsize": 5,
-    "ysize": 19
+    "ysize": 18
   },
   {
     "name":  "scientist_m2_r_2",
@@ -161,7 +161,7 @@
     "ysize": 18
   },
   {
-    "name":  "scientist_f_l_2",
+    "name":  "scientist_m2_l_2",
     "x": 21,
     "y": 20,
     "xsize": 5,

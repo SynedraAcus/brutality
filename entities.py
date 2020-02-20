@@ -35,7 +35,9 @@ class EntityFactory:
         self.counts = {}
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box',
-                            'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse'}
+                            'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse',
+                            'scientist_f_corpse', 'scientist_f2_corpse',
+                            'scientist_m_corpse', 'scientist_m2_corpse'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
                          'barricade_3', 'dept_locker', 'dept_fence',
                          'dept_bench', 'dept_wall_inner',
@@ -305,11 +307,18 @@ class EntityFactory:
     
     def _create_cop(self, entity_id, **kwargs):
         cop_entity = Entity(id=entity_id)
-        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
-                                              'r_2': self.atlas.get_element('cop_r_2'),
-                                              'l_1': self.atlas.get_element('cop_l_1'),
-                                              'l_2': self.atlas.get_element('cop_l_2')},
-                                 initial_image='r_1')
+        # widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
+        #                                       'r_2': self.atlas.get_element('cop_r_2'),
+        #                                       'l_1': self.atlas.get_element('cop_l_1'),
+        #                                       'l_2': self.atlas.get_element('cop_l_2')},
+        #                          initial_image='r_1')
+        # Useful for quickly testing assets
+        # widget = SwitchingWidget(
+        #     images_dict={'r_1': self.atlas.get_element('scientist_f_r_1'),
+        #                  'r_2': self.atlas.get_element('scientist_f_r_2'),
+        #                  'l_1': self.atlas.get_element('scientist_f_l_1'),
+        #                  'l_2': self.atlas.get_element('scientist_f_l_2')},
+        #     initial_image='r_1')
         cop_entity.add_component(WalkerComponent(self.dispatcher))
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         cop_entity.add_component(WalkerCollisionComponent(self.dispatcher))
@@ -332,6 +341,15 @@ class EntityFactory:
                                          direction='l')
         b_r = self._create_cop_hand_back(f'{entity_id}_hand_br',
                                          direction='r')
+        # Useful for quickly testing assets
+        # f_l = self._create_scientist_hand_forward(f'{entity_id}_hand_fl',
+        #                                     direction='l')
+        # f_r = self._create_scientist_hand_forward(f'{entity_id}_hand_fr',
+        #                                     direction='r')
+        # b_l = self._create_scientist_hand_back(f'{entity_id}_hand_bl',
+        #                                  direction='l')
+        # b_r = self._create_scientist_hand_back(f'{entity_id}_hand_br',
+        #                                  direction='r')
         self.dispatcher.add_event(BearEvent('ecs_create', f_l))
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
@@ -763,6 +781,66 @@ class EntityFactory:
                                              is_working=False))
         return entity
 
+    def _create_scientist_hand_forward(self, entity_id, direction='r', **kwargs):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(
+            f'scientist_hand_forward_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
+    def _create_scientist_hand_back(self, entity_id, direction='r', **kwargs):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(
+            f'scientist_hand_back_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
+    def _create_scientist_skinny_hand_forward(self,
+                                              entity_id, direction='r',
+                                              **kwargs):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(
+            f'scientist_skinny_hand_forward_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
+    def _create_scientist_skinny_hand_back(self,
+                                              entity_id, direction='r',
+                                              **kwargs):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(
+            f'scientist_skinny_hand_back_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
     def _create_pistol(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(images_dict={'l': self.atlas.get_element('pistol_l'),
@@ -854,3 +932,5 @@ class EntityFactory:
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
+
+#TODO: general character creation method
