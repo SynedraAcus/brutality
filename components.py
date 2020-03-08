@@ -151,9 +151,30 @@ class WalkerComponent(PositionComponent):
         return dumps(d)
 
 
-# TODO: AttachedPositionComponent
-# Something that makes its entity follow some other entity (eg hands and
-# attached items with the player)
+class AttachedPositionComponent(PositionComponent):
+    """
+    A PositionComponent that maintains its position relative to some other entity.
+
+    This component can have its own vx and vy, but it also listens to the
+    other's ``ecs_move`` events and repeats them.
+    :param tracked_entity: entity ID
+    """
+    def __init__(self, *args, tracked_entity=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Could be None, in which case it behaves like a regular PositionComponent
+        self.tracked_entity = tracked_entity
+        self.dispatcher.register_listener(self, 'ecs_move')
+
+    def on_event(self, event):
+        if event.event_type == 'ecs_move' and self.tracked_entity and \
+                event.event_value[0] == self.tracked_entity:
+            if not hasattr(self.owner, 'hiding') or self.owner.hiding.is_working:
+                rel_move = EntityTracker().entities[self.tracked_entity].\
+                                    position.last_move
+                self.relative_move(*rel_move)
+        return super().on_event(event)
+
+
 class GravityPositionComponent(PositionComponent):
     """
     A PositionComponent that maintains a constant downward acceleration.
@@ -824,12 +845,10 @@ class HandInterfaceComponent(Component):
         # Have to call the HidingComponent and WidgetComponent directly
         hand_entity = EntityTracker().entities[self.hand_entities[hand]]
         hand_entity.widget.z_level = self.owner.widget.z_level + 1
-        hand_entity.hiding.show()
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
-        self.dispatcher.add_event(BearEvent(event_type='ecs_move',
-                                            event_value=(self.hand_entities[hand],
-                                                         hand_x, hand_y)))
+        hand_entity.hiding.show()
+        hand_entity.position.move(hand_x, hand_y)
         if self.left_item:
             item = EntityTracker().entities[self.left_item]
             item.widget.switch_to_image(self.owner.position.direction)
@@ -850,24 +869,21 @@ class HandInterfaceComponent(Component):
             hand = 'back_l'
         hand_entity = EntityTracker().entities[self.hand_entities[hand]]
         hand_entity.widget.z_level = self.owner.widget.z_level + 1
-        hand_entity.hiding.show()
         hand_x = self.owner.position.x + self.hands_offsets[hand][0]
         hand_y = self.owner.position.y + self.hands_offsets[hand][1]
-        self.dispatcher.add_event(BearEvent(event_type='ecs_move',
-                                            event_value=(
-                                                self.hand_entities[hand],
-                                                hand_x, hand_y)))
+        hand_entity.hiding.show()
+        hand_entity.position.move(hand_x, hand_y)
         if self.right_item:
             item = EntityTracker().entities[self.right_item]
             item.widget.switch_to_image(self.owner.position.direction)
             item.widget.z_level = self.owner.widget.z_level + 1
-            item.hiding.show()
             item_x = hand_x + self.item_offsets[hand][0]
             item_y = hand_y + self.item_offsets[hand][1]
+            item.hiding.show()
             if self.owner.position.direction == 'l':
                 item_x -= item.widget.width
             EntityTracker().entities[self.right_item].position.move(item_x,
-                                                                   item_y)
+                                                                    item_y)
             self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
 
     def pick_up(self, hand='right'):

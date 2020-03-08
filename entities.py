@@ -307,11 +307,11 @@ class EntityFactory:
     
     def _create_cop(self, entity_id, **kwargs):
         cop_entity = Entity(id=entity_id)
-        # widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
-        #                                       'r_2': self.atlas.get_element('cop_r_2'),
-        #                                       'l_1': self.atlas.get_element('cop_l_1'),
-        #                                       'l_2': self.atlas.get_element('cop_l_2')},
-        #                          initial_image='r_1')
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
+                                              'r_2': self.atlas.get_element('cop_r_2'),
+                                              'l_1': self.atlas.get_element('cop_l_1'),
+                                              'l_2': self.atlas.get_element('cop_l_2')},
+                                 initial_image='r_1')
         # Useful for quickly testing assets
         # widget = SwitchingWidget(
         #     images_dict={'r_1': self.atlas.get_element('scientist_f_r_1'),
@@ -341,6 +341,9 @@ class EntityFactory:
                                          direction='l')
         b_r = self._create_cop_hand_back(f'{entity_id}_hand_br',
                                          direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
         # Useful for quickly testing assets
         # f_l = self._create_scientist_hand_forward(f'{entity_id}_hand_fl',
         #                                     direction='l')
@@ -350,10 +353,10 @@ class EntityFactory:
         #                                  direction='l')
         # b_r = self._create_scientist_hand_back(f'{entity_id}_hand_br',
         #                                  direction='r')
-        self.dispatcher.add_event(BearEvent('ecs_create', f_l))
-        self.dispatcher.add_event(BearEvent('ecs_create', f_r))
-        self.dispatcher.add_event(BearEvent('ecs_create', b_l))
-        self.dispatcher.add_event(BearEvent('ecs_create', b_r))
+        # self.dispatcher.add_event(BearEvent('ecs_create', f_l))
+        # self.dispatcher.add_event(BearEvent('ecs_create', f_r))
+        # self.dispatcher.add_event(BearEvent('ecs_create', b_l))
+        # self.dispatcher.add_event(BearEvent('ecs_create', b_r))
         left_fist = self._create_fist(f'fist_{entity_id}_left',
                                  owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
@@ -367,7 +370,7 @@ class EntityFactory:
                                                             'back_l': b_l.id,
                                                             'back_r': b_r.id},
                                                         hands_offsets={
-                                                            'forward_l': (-3, 5),
+                                                            'forward_l': (-2, 5),
                                                             'forward_r': (0, 5),
                                                             'back_l': (-3, 4),
                                                             'back_r': (3, 4)},
@@ -690,7 +693,8 @@ class EntityFactory:
         chars, colors = self.atlas.get_element(f'cop_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -703,7 +707,8 @@ class EntityFactory:
         chars, colors = self.atlas.get_element(f'cop_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -716,7 +721,8 @@ class EntityFactory:
         chars, colors = self.atlas.get_element(f'punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -730,7 +736,8 @@ class EntityFactory:
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -744,7 +751,8 @@ class EntityFactory:
         chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -759,7 +767,8 @@ class EntityFactory:
             f'bottle_punk_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -773,7 +782,8 @@ class EntityFactory:
             f'bottle_punk_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -787,7 +797,8 @@ class EntityFactory:
             f'scientist_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -801,7 +812,8 @@ class EntityFactory:
             f'scientist_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -817,7 +829,8 @@ class EntityFactory:
             f'scientist_skinny_hand_forward_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -833,7 +846,8 @@ class EntityFactory:
             f'scientist_skinny_hand_back_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
-        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
