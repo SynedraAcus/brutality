@@ -7,7 +7,7 @@ import json
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
-from bear_hug.ecs import EntityTracker
+from bear_hug.ecs import EntityTracker, CollisionListener
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEventDispatcher, BearEvent
 from bear_hug.resources import Atlas, Multiatlas, XpLoader
@@ -103,6 +103,12 @@ t.add_widget(hp_bar, (19, 54), layer=2)
 # Starting various listeners
 ################################################################################
 
+# Collision
+collision = CollisionListener()
+dispatcher.register_listener(collision, ['ecs_create', 'ecs_destroy',
+                                         'ecs_remove', 'ecs_add',
+                                         'ecs_move'])
+# Screen scrolling
 dispatcher.register_listener(ScrollListener(layout=layout,
                                             distance=30),
                              ['brut_focus',
@@ -112,7 +118,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['brut_damage', 'brut_pick_up', 'set_bg_sound'])
+dispatcher.register_listener(logger, ['ecs_collision', 'set_bg_sound'])
 
 if not args.disable_sound:
     from bear_hug.sound import SoundListener

@@ -46,6 +46,60 @@ class EntityFactory:
                          'science_table_1', 'science_table_2',
                          'science_device_1', 'science_device_2',
                          'science_spike'}
+        self.face_positions = {'broken_car': (0, 3),
+                               'barricade_1': (0, 2),
+                               'barricade_2': (0, 3),
+                               'barricade_3': (0, 5),
+                               'dept_locker': (0, 3),
+                               'dept_fence': (0, 0),
+                               'dept_bench': (0, 2),
+                               'dept_wall_inner': (0, 11),
+                               'dept_table_1': (0, 10),
+                               'dept_table_2': (0, 11),
+                               'dept_chair_1': (0, 2),
+                               'dept_chair_2': (0, 2),
+                               'dept_table_boss': (0, 14),
+                               'science_table_1': (0, 9),
+                               'science_table_2': (0, 6),
+                               'science_device_1': (0, 3),
+                               'science_device_2': (0, 2),
+                               'science_spike': (0, 0)}
+        self.face_sizes = {'broken_car': (33, 11),
+                           'barricade_1': (7, 14),
+                           'barricade_2': (9, 11),
+                           'barricade_3': (11, 8),
+                           'dept_locker': (6, 17),
+                           'dept_fence': (21, 14),
+                           'dept_bench': (17, 5),
+                           'dept_wall_inner': (3, 21),
+                           'dept_table_1': (10, 8),
+                           'dept_table_2': (11, 8),
+                           'dept_chair_1': (5, 10),
+                           'dept_chair_2': (5, 10),
+                           'dept_table_boss': (24, 10),
+                           'science_table_1': (11, 9),
+                           'science_table_2': (29, 9),
+                           'science_device_1': (6, 17),
+                           'science_device_2': (8, 13),
+                           'science_spike': (0, 0)}
+        self.depths = {'broken_car': 4,
+                       'barricade_1': 5,
+                       'barricade_2': 5,
+                       'barricade_3': 4,
+                       'dept_locker': 3,
+                       'dept_fence': 0,
+                       'dept_bench': 2,
+                       'dept_wall_inner': 11,
+                       'dept_table_1': 7,
+                       'dept_table_2': 7,
+                       'dept_chair_1': 1,
+                       'dept_chair_2': 1,
+                       'dept_table_boss': 6,
+                       'science_table_1': 7,
+                       'science_table_2': 2,
+                       'science_device_1': 3,
+                       'science_device_2': 3,
+                       'science_spike': 0}
         self.shadow_positions = {'broken_car': (0, 7),
                                  'barricade_1': (1, 9),
                                  'barricade_2': (0, 6),
@@ -189,9 +243,10 @@ class EntityFactory:
         w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher,affect_z=False))
+        wall.add_component(PositionComponent(self.dispatcher,affect_z=True))
         wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
+        wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
 
     def _create_dept_bg(self, entity_id, size=(50, 20), **kwargs):
@@ -200,9 +255,10 @@ class EntityFactory:
         w = generate_bg(self.atlas, dept_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
         wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
+        wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
 
     def _create_floor(self, entity_id, size=(150, 30), **kwargs):
@@ -252,7 +308,11 @@ class EntityFactory:
         widget = Widget(*self.atlas.get_element(entity_type))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher))
-        e.add_component(CollisionComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher,
+                                           face_position = self.face_positions[entity_type],
+                                           face_size=self.face_sizes[entity_type],
+                                           z_shift=(1, -1),
+                                           depth=self.depths[entity_type]))
         e.add_component(PassingComponent(self.dispatcher,
                                  shadow_size=self.shadow_sizes[entity_type],
                                  shadow_pos=self.shadow_positions[entity_type]))
@@ -270,10 +330,15 @@ class EntityFactory:
         widget = Widget(*self.atlas.get_element('dept_range_table'))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher))
-        e.add_component(PassingComponent(self.dispatcher,
-                                         shadow_size=(13, 19),
-                                         shadow_pos=(3, 0)))
+        # e.add_component(PassingComponent(self.dispatcher,
+        #                                  shadow_size=(13, 19),
+        #                                  shadow_pos=(3, 0)))
         e.add_component(DestructorComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher,
+                                           face_position=(0, 13),
+                                           face_size=(5, 7),
+                                           z_shift=(1, -1),
+                                           depth=12))
         return e
 
     def _create_barrel(self, entity_id, **kwargs):
@@ -289,7 +354,11 @@ class EntityFactory:
         barrel_entity.add_component(PassingComponent(self.dispatcher,
                                                      shadow_pos=(0, 7),
                                                      shadow_size=(6, 2)))
-        barrel_entity.add_component(CollisionComponent(self.dispatcher))
+        barrel_entity.add_component(CollisionComponent(self.dispatcher,
+                                                       face_position=(0, 2),
+                                                       face_size=(6, 7),
+                                                       z_shift=(1, -1),
+                                                       depth=2))
         barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
 
@@ -321,7 +390,8 @@ class EntityFactory:
         #     initial_image='r_1')
         cop_entity.add_component(WalkerComponent(self.dispatcher))
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
-        cop_entity.add_component(WalkerCollisionComponent(self.dispatcher))
+        cop_entity.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                          depth=1))
         cop_entity.add_component(PassingComponent(self.dispatcher, shadow_pos=(0, 16),
                                                   shadow_size=(5, 2)))
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
@@ -353,10 +423,6 @@ class EntityFactory:
         #                                  direction='l')
         # b_r = self._create_scientist_hand_back(f'{entity_id}_hand_br',
         #                                  direction='r')
-        # self.dispatcher.add_event(BearEvent('ecs_create', f_l))
-        # self.dispatcher.add_event(BearEvent('ecs_create', f_r))
-        # self.dispatcher.add_event(BearEvent('ecs_create', b_l))
-        # self.dispatcher.add_event(BearEvent('ecs_create', b_r))
         left_fist = self._create_fist(f'fist_{entity_id}_left',
                                  owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
@@ -395,7 +461,8 @@ class EntityFactory:
                                  initial_image='l_1')
         nunchaku.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         nunchaku.add_component(WalkerComponent(self.dispatcher))
-        nunchaku.add_component(WalkerCollisionComponent(self.dispatcher))
+        nunchaku.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                        depth=1))
         nunchaku.add_component(PassingComponent(self.dispatcher,
                                                 shadow_pos=(0, 15),
                                                 shadow_size=(8, 3)))
@@ -452,7 +519,8 @@ class EntityFactory:
             initial_image='l_1')
         punk.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         punk.add_component(WalkerComponent(self.dispatcher))
-        punk.add_component(WalkerCollisionComponent(self.dispatcher))
+        punk.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                    depth=1))
         punk.add_component(PassingComponent(self.dispatcher,
                                             shadow_pos=(0, 15),
                                             shadow_size=(6, 3)))
@@ -578,7 +646,6 @@ class EntityFactory:
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
 
-
     def _create_punch(self, entity_id, direction='r', **kwargs):
         """
         Send a punch
@@ -654,7 +721,8 @@ class EntityFactory:
         entity.add_component(DecayComponent(self.dispatcher,
                                             destroy_condition='timeout',
                                             lifetime=5.0))
-        entity.add_component(HazardCollisionComponent(self.dispatcher))
+        entity.add_component(HazardCollisionComponent(self.dispatcher,
+                                                      depth=2))
         return entity
 
     def _create_target(self, entity_id, **kwargs):
@@ -680,7 +748,11 @@ class EntityFactory:
                             hitpoints=4))
         target_entity.add_component(PositionComponent(self.dispatcher))
         target_entity.add_component(DestructorComponent(self.dispatcher))
-        target_entity.add_component(CollisionComponent(self.dispatcher))
+        target_entity.add_component(CollisionComponent(self.dispatcher,
+                                           face_position=(0, 2),
+                                           face_size=(7, 8),
+                                           z_shift=(1, -1),
+                                           depth=4))
         target_entity.add_component(PassingComponent(self.dispatcher,
                                                      shadow_pos=(0, 10),
                                                      shadow_size=(7, 5)))
