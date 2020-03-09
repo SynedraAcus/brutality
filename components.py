@@ -67,6 +67,7 @@ class WalkerComponent(PositionComponent):
         if self.jump_direction:
             # No double jumps
             return
+        self.affect_z = False
         self.jump_direction = 1
         self.jump_timer = 0
         self.vx = self.jump_vx if self.direction == 'r' else -1 * self.jump_vx
@@ -89,9 +90,11 @@ class WalkerComponent(PositionComponent):
             if self.jump_direction:
                 self.jump_timer += event.event_value
                 if self.jump_timer >= self.jump_duration:
+                    # Ending jump
                     self.vx = 0
                     self.vy = 0
                     self.jump_direction = 0
+                    self.affect_z = True
                 elif self.jump_direction == 1 and \
                         self.jump_timer >= self.jump_duration/2:
                     self.jump_direction = -1
@@ -101,26 +104,22 @@ class WalkerComponent(PositionComponent):
                 and self.jump_direction:
             should_fall = False
             # TODO: Change jump logic to preserve Z-level
-            # Currently the jump just sets vx and vy, so the vertical movement
-            # affects Z-level. Come to think of it, the same should be true
-            # of grenades
             if event.event_value[1]:
-                # This part covers some weird bug when after changing level mid-jump
+                # This exception covers some weird bug when after changing level mid-jump
                 # it attempts to process ecs_collision event with an already
                 # nonexistent exit highlight entity, and crashes with KeyError
                 try:
                     other = EntityTracker().entities[event.event_value[1]]
                     if other.collision.passable:
-                        should_fall = True
-                    else:
                         should_fall = False
+                    else:
+                        should_fall = True
                 except KeyError:
                     should_fall = True
             # else:
             #     should_fall = True
             if should_fall:
                 self.vx = 0
-                #self.move(-self.last_move[0], -self.last_move[1])
                 if self.jump_direction == 1:
                     # Currently raising, need to drop
                     self.jump_direction = -1

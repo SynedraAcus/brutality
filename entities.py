@@ -928,7 +928,7 @@ class EntityFactory:
                                              is_working=False,
                                              should_hide=False))
         entity.add_component(CollectableBehaviourComponent(self.dispatcher))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
@@ -950,7 +950,7 @@ class EntityFactory:
                                              lifetime=0.25,
                                              is_working=False,
                                              should_hide=False))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
@@ -973,7 +973,7 @@ class EntityFactory:
                                              is_working=False,
                                              should_hide=False))
         entity.add_component(CollectableBehaviourComponent(self.dispatcher))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
@@ -996,7 +996,7 @@ class EntityFactory:
                                              lifetime=0.25,
                                              is_working=False,
                                              should_hide=False))
-        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
