@@ -141,7 +141,7 @@ class WalkerComponent(PositionComponent):
 
     def __repr__(self):
         d = loads(super().__repr__())
-        {}.update({'direction': self.direction,
+        d.update({'direction': self.direction,
                    'initial_phase': self.phase,
                    'jump_vx': self.jump_vx,
                    'jump_vy': self.jump_vy,
@@ -173,6 +173,11 @@ class AttachedPositionComponent(PositionComponent):
                                     position.last_move
                 self.relative_move(*rel_move)
         return super().on_event(event)
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['tracked_entity'] = self.tracked_entity
+        return dumps(d)
 
 
 class GravityPositionComponent(PositionComponent):
@@ -455,8 +460,6 @@ class SpawnerComponent(Component):
     A component responsible for spawning stuff near its owner
     For projectiles and other such things
     """
-    # TODO: overhaul spawner logic
-    #  here and in SpawningItemBehaviourComponent
     def __init__(self, *args, factory=None, **kwargs):
         super().__init__(*args, name='spawner', **kwargs)
         self.factory = factory
@@ -547,7 +550,7 @@ class InputComponent(Component):
                     self.owner.hands.pick_up(hand='right')
                     self.current_action_delay = self.action_delay
                 elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
-                    # TODO: jump that makes sense
+                    # TODO: Call correct jump image
                     # Current placeholder solution just teleports the cop
                     # immediately and spawns a separate jumping animation entity
                     # if self.owner.position.direction == 'r':

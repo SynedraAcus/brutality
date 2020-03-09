@@ -262,7 +262,6 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('nunchaku_punk', (330, 15))
         self.factory.create_entity('nunchaku_punk', (330, 25))
         self.factory.create_entity('nunchaku_punk', (380, 15))
-        # TODO: something cool for the level end
         # Teleporter to the next level, probably
         # Setting BG sound
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
