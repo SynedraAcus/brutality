@@ -4,7 +4,7 @@ from bear_hug.bear_utilities import copy_shape, BearECSException,\
     BearResourceException
 from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
     DestructorComponent, deserialize_entity, CollisionComponent,\
-    WalkerCollisionComponent, PassingComponent, DecayComponent
+    WalkerCollisionComponent, DecayComponent
 from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
@@ -244,7 +244,6 @@ class EntityFactory:
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher,affect_z=True))
-        wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -256,7 +255,6 @@ class EntityFactory:
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
-        wall.add_component(PassingComponent(self.dispatcher))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -293,13 +291,12 @@ class EntityFactory:
 
     def generate_barrier(self, entity_id, entity_type, **kwargs):
         """
-        Generate a simple Entity with Widget, Position, CollisionComponent
-        and PassingComponent.
+        Generate a simple Entity with Widget, Position, and CollisionComponent.
 
         This method is used for various un-passable entities without complex
         logic or animations, like walls, fences, barriers, trees and whatnot.
-        It relies on the factory class having self.shadow_positions and
-        self.shadow_sizes dictionaries for the PassingComponents.
+        It relies on the factory class having self.face_positions,
+        self.face_sizes and self.depths dictionaries for CollisionComponents.
         :param entity_id:
         :param type:
         :return:
@@ -313,9 +310,6 @@ class EntityFactory:
                                            face_size=self.face_sizes[entity_type],
                                            z_shift=(1, -1),
                                            depth=self.depths[entity_type]))
-        e.add_component(PassingComponent(self.dispatcher,
-                                 shadow_size=self.shadow_sizes[entity_type],
-                                 shadow_pos=self.shadow_positions[entity_type]))
         e.add_component(DestructorComponent(self.dispatcher))
         return e
 
@@ -330,9 +324,6 @@ class EntityFactory:
         widget = Widget(*self.atlas.get_element('dept_range_table'))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher))
-        # e.add_component(PassingComponent(self.dispatcher,
-        #                                  shadow_size=(13, 19),
-        #                                  shadow_pos=(3, 0)))
         e.add_component(DestructorComponent(self.dispatcher))
         e.add_component(CollisionComponent(self.dispatcher,
                                            face_position=(0, 13),
@@ -351,9 +342,6 @@ class EntityFactory:
                                        emit_ecs=True)
         barrel_entity.add_component(PositionComponent(self.dispatcher))
         barrel_entity.add_component(WidgetComponent(self.dispatcher, widget))
-        barrel_entity.add_component(PassingComponent(self.dispatcher,
-                                                     shadow_pos=(0, 7),
-                                                     shadow_size=(6, 2)))
         barrel_entity.add_component(CollisionComponent(self.dispatcher,
                                                        face_position=(0, 2),
                                                        face_size=(6, 7),
@@ -392,8 +380,6 @@ class EntityFactory:
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         cop_entity.add_component(WalkerCollisionComponent(self.dispatcher,
                                                           depth=1))
-        cop_entity.add_component(PassingComponent(self.dispatcher, shadow_pos=(0, 16),
-                                                  shadow_size=(5, 2)))
         cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
@@ -463,9 +449,6 @@ class EntityFactory:
         nunchaku.add_component(WalkerComponent(self.dispatcher))
         nunchaku.add_component(WalkerCollisionComponent(self.dispatcher,
                                                         depth=1))
-        nunchaku.add_component(PassingComponent(self.dispatcher,
-                                                shadow_pos=(0, 15),
-                                                shadow_size=(8, 3)))
         nunchaku.add_component(SpawnerComponent(self.dispatcher, factory=self))
         nunchaku.add_component(DestructorComponent(self.dispatcher))
         nunchaku.add_component(SpawnerHealthComponent(self.dispatcher,
@@ -521,9 +504,6 @@ class EntityFactory:
         punk.add_component(WalkerComponent(self.dispatcher))
         punk.add_component(WalkerCollisionComponent(self.dispatcher,
                                                     depth=1))
-        punk.add_component(PassingComponent(self.dispatcher,
-                                            shadow_pos=(0, 15),
-                                            shadow_size=(6, 3)))
         punk.add_component(SpawnerComponent(self.dispatcher, factory=self))
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(SpawnerHealthComponent(self.dispatcher,
@@ -599,7 +579,6 @@ class EntityFactory:
         bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
                                                 owner=bg_entity))
         bg_entity.add_component(PositionComponent(self.dispatcher))
-        bg_entity.add_component(PassingComponent(self.dispatcher))
         bg_entity.add_component(DestructorComponent(self.dispatcher))
         return bg_entity
 
@@ -753,9 +732,6 @@ class EntityFactory:
                                            face_size=(7, 8),
                                            z_shift=(1, -1),
                                            depth=4))
-        target_entity.add_component(PassingComponent(self.dispatcher,
-                                                     shadow_pos=(0, 10),
-                                                     shadow_size=(7, 5)))
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.

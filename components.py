@@ -100,31 +100,20 @@ class WalkerComponent(PositionComponent):
                 and event.event_value[0] == self.owner.id \
                 and self.jump_direction:
             should_fall = False
+            # TODO: Change jump logic to preserve Z-level
+            # Currently the jump just sets vx and vy, so the vertical movement
+            # affects Z-level. Come to think of it, the same should be true
+            # of grenades
             if event.event_value[1]:
                 # This part covers some weird bug when after changing level mid-jump
                 # it attempts to process ecs_collision event with an already
                 # nonexistent exit highlight entity, and crashes with KeyError
                 try:
                     other = EntityTracker().entities[event.event_value[1]]
-                    if 'collision' in other.__dict__:
-                        # Assumes that owner always has PassabilityComponent
-                        if 'passability' in other.__dict__ and \
-                                rectangles_collide((self.owner.position.x +
-                                               self.owner.passability.shadow_pos[
-                                                   0],
-                                               self.owner.position.y +
-                                               self.owner.passability.shadow_pos[
-                                                   1]),
-                                              self.owner.passability.shadow_size,
-                                              (other.position.x +
-                                               other.passability.shadow_pos[0],
-                                               other.position.y +
-                                               other.passability.shadow_pos[1]),
-                                              other.passability.shadow_size):
-                            should_fall = True
-                        else:
-                            # passability-less widgets collide by their widgets
-                            should_fall = False
+                    if other.collision.passable:
+                        should_fall = True
+                    else:
+                        should_fall = False
                 except KeyError:
                     should_fall = True
             # else:
@@ -256,14 +245,9 @@ class HazardCollisionComponent(CollisionComponent):
                 other = EntityTracker().entities[entity]
             except KeyError:
                 return
-            if hasattr(other, 'passability'):
-                if rectangles_collide((self.owner.position.x, self.owner.position.y),
-                                      self.owner.widget.size,
-                                      (other.position.x + other.passability.shadow_pos[0],
-                                       other.position.y + other.passability.shadow_pos[1]),
-                                      other.passability.shadow_size):
-                    self.dispatcher.add_event(BearEvent(event_type='brut_damage',
-                                                        event_value=(entity, self.damage)))
+            if hasattr(other, 'health'):
+                self.dispatcher.add_event(BearEvent(event_type='brut_damage',
+                                                    event_value=(entity, self.damage)))
             self.on_cooldown = True
 
     def on_event(self, event):
