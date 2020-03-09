@@ -603,7 +603,7 @@ class EntityFactory:
                                             lifetime=0.1))
         return muzzle
 
-    def _create_bullet(self, entity_id, direction='r', **kwargs):
+    def _create_bullet(self, entity_id, direction='r', z_level=10, **kwargs):
         """
         Create a simple projectile
         :param speed:
@@ -618,14 +618,16 @@ class EntityFactory:
             SimpleAnimationWidget(Animation((self.atlas.get_element(f'bullet_{direction}_1'),
                                              self.atlas.get_element(f'bullet_{direction}_2'),
                                              self.atlas.get_element(f'bullet_{direction}_3'),
-                                             ), 10))))
-        bullet_entity.add_component(PositionComponent(self.dispatcher, vx=vx))
+                                             ), 10),
+                                  z_level=z_level)))
+        bullet_entity.add_component(PositionComponent(self.dispatcher, vx=vx,
+                                                      affect_z=False))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher,
                                                                  damage=1))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
 
-    def _create_punch(self, entity_id, direction='r', **kwargs):
+    def _create_punch(self, entity_id, direction='r', z_level=10, **kwargs):
         """
         Send a punch
         :param entity_id:
@@ -636,12 +638,14 @@ class EntityFactory:
         punch = Entity(id=entity_id)
         punch.add_component(WidgetComponent(self.dispatcher,
                                 Widget(*self.atlas.get_element(
-                                    f'punch_{direction}'))))
+                                    f'punch_{direction}'),
+                                       z_level=z_level)))
         if direction == 'r':
             vx = 50
         else:
             vx = -50
-        punch.add_component(PositionComponent(self.dispatcher, vx = vx))
+        punch.add_component(PositionComponent(self.dispatcher, vx=vx,
+                                              affect_z=False))
         punch.add_component(ProjectileCollisionComponent(self.dispatcher,
                                                          damage=3))
         punch.add_component(DestructorComponent(self.dispatcher))
@@ -650,7 +654,7 @@ class EntityFactory:
                                            lifetime=0.1))
         return punch
 
-    def _create_bottle(self, entity_id, direction='r', **kwargs):
+    def _create_bottle(self, entity_id, direction='r', z_level=10, **kwargs):
         """
         A rotating flying bottle
         :param entity_id:
@@ -663,6 +667,7 @@ class EntityFactory:
                                                       self.atlas.get_element('bottle_sw'),
                                                       self.atlas.get_element('bottle_nw')),
                                                       8),
+                                           z_level=z_level,
                                            emit_ecs=True)
             vx = 20
         else:
@@ -671,6 +676,7 @@ class EntityFactory:
                                                       self.atlas.get_element('bottle_se'),
                                                       self.atlas.get_element('bottle_ne')),
                                                       8),
+                                           z_level=z_level,
                                            emit_ecs=True)
             vx = -20
         entity.add_component(WidgetComponent(self.dispatcher, widget))

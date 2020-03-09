@@ -1033,12 +1033,13 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
 
     def use_item(self):
         direction = self.owning_entity.position.direction
-        # This component just passes the direction and expects projectile
+        # This component just passes the direction and Z, and expects projectile
         # creation code in entity factory to take care of speeds
         for item in self.spawned_items:
             self.owner.spawner.spawn(item,
                                      self.spawned_items[item][direction],
-                                     direction=direction)
+                                     direction=direction,
+                                     z_level=self.owning_entity.widget.z_level)
         if 'pistol' in self.owner.id:
             self.dispatcher.add_event(BearEvent('play_sound', 'shot'))
 
