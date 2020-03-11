@@ -376,6 +376,14 @@ class EntityFactory:
         #                  'l_1': self.atlas.get_element('scientist_f_l_1'),
         #                  'l_2': self.atlas.get_element('scientist_f_l_2')},
         #     initial_image='r_1')
+        # f_l = self._create_hand(f'{entity_id}_hand_fl',
+        #                         'scientist_hand_forward', direction='l')
+        # f_r = self._create_hand(f'{entity_id}_hand_fr',
+        #                         'scientist_hand_forward', direction='r')
+        # b_l = self._create_hand(f'{entity_id}_hand_bl', 'scientist_hand_back',
+        #                         direction='l')
+        # b_r = self._create_hand(f'{entity_id}_hand_br', 'scientist_hand_back',
+        #                         direction='r')
         cop_entity.add_component(WalkerComponent(self.dispatcher))
         cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         cop_entity.add_component(WalkerCollisionComponent(self.dispatcher,
@@ -389,26 +397,17 @@ class EntityFactory:
                                                         hitpoints=10))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
-        f_l = self._create_cop_hand_forward(f'{entity_id}_hand_fl',
-                                            direction='l')
-        f_r = self._create_cop_hand_forward(f'{entity_id}_hand_fr',
-                                            direction='r')
-        b_l = self._create_cop_hand_back(f'{entity_id}_hand_bl',
-                                         direction='l')
-        b_r = self._create_cop_hand_back(f'{entity_id}_hand_br',
+        f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr', 'cop_hand_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl', 'cop_hand_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br', 'cop_hand_back',
                                          direction='r')
         for hand in (f_l, f_r, b_l, b_r):
             self.dispatcher.add_event(BearEvent('ecs_create', hand))
             hand.position.tracked_entity = entity_id
-        # Useful for quickly testing assets
-        # f_l = self._create_scientist_hand_forward(f'{entity_id}_hand_fl',
-        #                                     direction='l')
-        # f_r = self._create_scientist_hand_forward(f'{entity_id}_hand_fr',
-        #                                     direction='r')
-        # b_l = self._create_scientist_hand_back(f'{entity_id}_hand_bl',
-        #                                  direction='l')
-        # b_r = self._create_scientist_hand_back(f'{entity_id}_hand_br',
-        #                                  direction='r')
         left_fist = self._create_fist(f'fist_{entity_id}_left',
                                  owning_entity=cop_entity)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
@@ -460,14 +459,14 @@ class EntityFactory:
         weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
         # Creating hand entities
-        f_l = self._create_nunchaku_punk_hand_forward(f'{entity_id}_hand_fl',
-                                            direction='l')
-        f_r = self._create_nunchaku_punk_hand_forward(f'{entity_id}_hand_fr',
-                                            direction='r')
-        b_l = self._create_nunchaku_punk_hand_back(f'{entity_id}_hand_bl',
-                                         direction='l')
-        b_r = self._create_nunchaku_punk_hand_back(f'{entity_id}_hand_br',
-                                         direction='r')
+        f_l = self._create_hand(f'{entity_id}_hand_fl',
+                                'nunchaku_punk_hand_forward', direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr',
+                                'nunchaku_punk_hand_forward', direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl',
+                                'nunchaku_punk_hand_back', direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br',
+                                'nunchaku_punk_hand_back', direction='r')
         self.dispatcher.add_event(BearEvent('ecs_create', f_l))
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
@@ -509,18 +508,18 @@ class EntityFactory:
         punk.add_component(SpawnerHealthComponent(self.dispatcher,
                                                   corpse='bottle_punk_corpse',
                                                   hitpoints=5))
-        punk.add_component(BottleControllerComponent(self.dispatcher))
-        # punk.add_component(InputComponent(self.dispatcher))
+        # punk.add_component(BottleControllerComponent(self.dispatcher))
+        punk.add_component(InputComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
-        f_l = self._create_bottle_punk_hand_forward(f'{entity_id}_hand_fl',
-                                                      direction='l')
-        f_r = self._create_bottle_punk_hand_forward(f'{entity_id}_hand_fr',
-                                                      direction='r')
-        b_l = self._create_bottle_punk_hand_back(f'{entity_id}_hand_bl',
-                                                   direction='l')
-        b_r = self._create_bottle_punk_hand_back(f'{entity_id}_hand_br',
-                                                   direction='r')
+        f_l = self._create_hand(f'{entity_id}_hand_fl',
+                                'bottle_punk_hand_forward', direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr',
+                                'bottle_punk_hand_forward', direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl',
+                                'bottle_punk_hand_back', direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br',
+                                'bottle_punk_hand_back', direction='r')
         self.dispatcher.add_event(BearEvent('ecs_create', f_l))
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
@@ -742,163 +741,9 @@ class EntityFactory:
         return target_entity
 
     # TODO: some common method for spawning single-use attack animations.
-    # TODO: merge boilerplate hand generators into a single `_create_hand(hand_type)`
-    def _create_cop_hand_back(self, entity_id, direction='r', **kwargs):
+    def _create_hand(self, entity_id, hand_type=None, direction='r', **kwargs):
         entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_hand_back_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_cop_hand_forward(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'cop_hand_forward_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_punk_hand_back(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'punk_hand_back_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_nunchaku_punk_hand_forward(self, entity_id, direction='r',
-                                           **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_forward_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_nunchaku_punk_hand_back(self, entity_id, direction='r',
-                                        **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'nunchaku_punk_hand_back_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_bottle_punk_hand_forward(self, entity_id, direction='r',
-                                         **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'bottle_punk_hand_forward_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_bottle_punk_hand_back(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'bottle_punk_hand_back_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_scientist_hand_forward(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'scientist_hand_forward_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_scientist_hand_back(self, entity_id, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'scientist_hand_back_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_scientist_skinny_hand_forward(self,
-                                              entity_id, direction='r',
-                                              **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'scientist_skinny_hand_forward_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
-
-    def _create_scientist_skinny_hand_back(self,
-                                              entity_id, direction='r',
-                                              **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(
-            f'scientist_skinny_hand_back_{direction}')
+        chars, colors = self.atlas.get_element(f'{hand_type}_{direction}')
         entity.add_component(WidgetComponent(self.dispatcher,
                                              Widget(chars, colors)))
         entity.add_component(AttachedPositionComponent(self.dispatcher,
