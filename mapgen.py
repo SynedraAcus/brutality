@@ -97,11 +97,11 @@ class LevelManager(metaclass=Singleton):
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('pistol', (20, 25))
-        self.factory.create_entity('science_table_1', (15, 25))
+        self.factory.create_entity('flame', (15, 25))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('level_switch', (60, 30))
+        self.factory.create_entity('level_switch', (100, 30))
         # Set level switch coordinates
-        self.level_switch.switch_pos = (60, 30)
+        self.level_switch.switch_pos = (100, 30)
         self.level_switch.switch_size = (15, 4)
 
     def _department(self):
@@ -246,8 +246,6 @@ class LevelManager(metaclass=Singleton):
                                    'bucket', 'pizza_box'))
                 self.factory.create_entity(t, (x + random.randint(-5, 5),
                                           22 + random.randint(-2, 2)))
-        # Tutorial area entities
-        self.factory.create_entity('pistol', (65, 30))
         # Central area
         self.factory.create_entity('broken_car', (150, 12))
         self.factory.create_entity('barricade_3', (250, 35))

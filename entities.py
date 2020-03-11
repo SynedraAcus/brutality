@@ -707,7 +707,8 @@ class EntityFactory:
                                             destroy_condition='timeout',
                                             lifetime=5.0))
         entity.add_component(HazardCollisionComponent(self.dispatcher,
-                                                      depth=2))
+                                                      depth=2,
+                                                      passable=True))
         return entity
 
     def _create_target(self, entity_id, **kwargs):
