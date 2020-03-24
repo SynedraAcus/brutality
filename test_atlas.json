@@ -36,10 +36,10 @@
   },
   {
     "name": "bottle_icon",
-    "x": 8,
-    "y": 53,
-    "xsize": 4,
-    "ysize": 5
+    "x": 21,
+    "y": 84,
+    "xsize": 14,
+    "ysize": 9
   },
   {
     "name": "cop_r_1",

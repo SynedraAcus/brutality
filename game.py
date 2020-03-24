@@ -209,3 +209,7 @@ loop.run()
 
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
+
+#TODO: draw appropriate item descriptions
+# Not really pressing, but it's better to avoid stupid jokes in item
+# descriptions. The general tone should be *somewhat* serious.

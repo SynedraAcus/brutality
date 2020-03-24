@@ -837,8 +837,8 @@ class EntityFactory:
     def _create_bottle_launcher(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
         widget = SwitchingWidget(
-            images_dict={'l': self.atlas.get_element('fist_l'),
-                         'r': self.atlas.get_element('fist_r')},
+            images_dict={'l': self.atlas.get_element('bottle_ne'),
+                         'r': self.atlas.get_element('bottle_nw')},
             initial_image='r')
         entity.add_component(SwitchWidgetComponent(self.dispatcher,
                                                    widget))
@@ -848,7 +848,7 @@ class EntityFactory:
                                     spawned_items={'bottle': {'r': (2, -2),
                                                               'l': (-4, -2)}},
                                     item_name='Molotov',
-                                    item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction"'))
+                                    item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction".'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,

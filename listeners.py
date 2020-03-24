@@ -453,7 +453,6 @@ class ItemDescriptionListener(Listener):
     :param Listener:
     :return:
     """
-    # TODO: Update item descriptions as necessary
     def __init__(self, dispatcher, terminal,  tracked_entity='cop_1',
                  text_pos = (25, 12), **kwargs):
         self.register_terminal(terminal)
@@ -478,9 +477,9 @@ class ItemDescriptionListener(Listener):
                                          right.item_behaviour.item_name,
                                          right.item_behaviour.item_description)
             chars = [[' ' for _ in range(28)] for _ in range(22)]
-            colors = copy_shape(chars, '#444444')
+            colors = copy_shape(chars, '#000000')
             self.widget = TypingLabelWidget(chars, colors,
-                                            chars_per_second=20,
+                                            chars_per_second=40,
                                             text=text,
                                             just='left', color='white')
             self.terminal.add_widget(self.widget, self.text_pos, layer=4)
