@@ -625,7 +625,8 @@ class EntityFactory:
         bullet_entity.add_component(PositionComponent(self.dispatcher, vx=vx,
                                                       affect_z=False))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher,
-                                                                 damage=1))
+                                                                 damage=1,
+                                                                 depth=3))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
 
@@ -649,7 +650,8 @@ class EntityFactory:
         punch.add_component(PositionComponent(self.dispatcher, vx=vx,
                                               affect_z=False))
         punch.add_component(ProjectileCollisionComponent(self.dispatcher,
-                                                         damage=3))
+                                                         damage=3,
+                                                         depth=3))
         punch.add_component(DestructorComponent(self.dispatcher))
         punch.add_component(DecayComponent(self.dispatcher,
                                            destroy_condition='timeout',
