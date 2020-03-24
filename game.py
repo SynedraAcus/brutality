@@ -17,7 +17,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
 from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
-    SpawningListener, LevelSwitchListener, MenuListener
+    SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -68,6 +68,7 @@ dispatcher.register_event_type('brut_temporary_focus') # Entity ID
 # Service
 dispatcher.register_event_type('brut_open_menu') # Value ignored
 dispatcher.register_event_type('brut_close_menu') # Value ignored
+dispatcher.register_event_type('brut_show_items') # Value ignored
 dispatcher.register_event_type('brut_save_game') # Path to savefile
 dispatcher.register_event_type('brut_load_game') # Path to savefile
 
@@ -165,8 +166,8 @@ menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_close_menu', None)),
               MenuItem(f'Plot (TBD)', color='white', highlight_color='blue',
                        action=lambda: print('Button 2')),
-              MenuItem(f'Items (TBD)', color='white', highlight_color='blue',
-                       action=lambda: print('Button 3')),
+              MenuItem(f'Items', color='white', highlight_color='blue',
+                       action=lambda: BearEvent('brut_show_items', None)),
               MenuItem(f'Load', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_load_game',
                                                 'save.json')),
@@ -183,6 +184,11 @@ menu_listener = MenuListener(dispatcher, terminal=t,
 dispatcher.register_listener(menu_listener, ['key_down', 'tick',
                                              'brut_open_menu',
                                              'brut_close_menu'])
+item_descriptions = ItemDescriptionListener(dispatcher, terminal=t,
+                                            tracked_entity='cop_1')
+dispatcher.register_listener(item_descriptions, ['brut_show_items',
+                                                 'brut_close_menu',
+                                                 'key_down'])
 ################################################################################
 # Creating initial entities
 ################################################################################

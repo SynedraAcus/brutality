@@ -771,7 +771,9 @@ class EntityFactory:
                                 spawned_items={'bullet': {'r': (1, 0),
                                                          'l': (-2, 0)},
                                                'muzzle_flash': {'r': (5, -1),
-                                                               'l': (-2, -1)}}))
+                                                               'l': (-2, -1)}},
+                                item_name='Service pistol',
+                                item_description='Reliable, if somewhat\nunderpowered, police sidearm\nCited as a main reason for\na bring-your-own-gun policy.'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -794,7 +796,9 @@ class EntityFactory:
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (-3, -2),
-                                                             'l': (2, -2)}}))
+                                                             'l': (2, -2)}},
+                                    item_name='Fist',
+                                    item_description='Your own hand in punch mode.\nIt is not gonna break down\nany walls, but at least it\'s\nalways with you.'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -816,7 +820,9 @@ class EntityFactory:
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (8, -1),
-                                                             'l': (-1, -2)}}))
+                                                             'l': (-1, -2)}},
+                                    item_name='Nunchaku',
+                                    item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,
@@ -840,7 +846,9 @@ class EntityFactory:
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                     owning_entity=owning_entity,
                                     spawned_items={'bottle': {'r': (2, -2),
-                                                              'l': (-4, -2)}}))
+                                                              'l': (-4, -2)}},
+                                    item_name='Molotov',
+                                    item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction"'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,

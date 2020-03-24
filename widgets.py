@@ -64,3 +64,52 @@ class ItemWindow(Widget):
                 icon_id = f"{event.event_value[2].split('_')[0]}_icon"
                 self.chars, self.colors = self.atlas.get_element(icon_id)
                 self.terminal.update_widget(self)
+
+
+class TypingLabelWidget(Layout):
+    """
+    Looks like a Label, but prints its content with little animation. It is
+    actually a Layout containing a Label. Accepts chars and colors (first two
+    unnamed arguments) for the Layout background; ``*args`` and ``**kwargs``
+    are passed to the Label to allow text justification, color, etc.
+    """
+    def __init__(self, chars, colors, *args, text='SAMPLE TEXT\nMORE OF SAMPLE TEXT\nLOTS OF IT',
+                 chars_per_second=10, **kwargs):
+        super().__init__(chars, colors)
+        self.label = Label(text, *args, **kwargs)
+        vis_chars = copy_shape(chars, ' ')
+        vis_colors = copy_shape(colors, '000')
+        self.visible_label = Widget(vis_chars, vis_colors)
+        self.add_child(self.visible_label, (0, 0))
+        self.is_drawing = True
+        self.current_draw_x = 0
+        self.current_draw_y = 0
+        self.char_delay = 1/chars_per_second
+        self.have_waited = 0
+
+    def on_event(self, event):
+        if event.event_type == 'tick':
+            if not self.is_drawing:
+                return
+            self.have_waited += event.event_value
+            while self.have_waited > self.char_delay:
+                # With small char_delay it's possible that a single tick will
+                # permit drawing multiple characters
+                drawn = False
+                while not drawn:
+                    c = self.label.chars[self.current_draw_y][self.current_draw_x]
+                    if c and c != ' ':
+                        # Draw a single char from a label, if there is one
+                        self.visible_label.chars[self.current_draw_y][self.current_draw_x] = c
+                        self.visible_label.colors[self.current_draw_y][self.current_draw_x] = self.label.colors[self.current_draw_y][self.current_draw_x]
+                        drawn = True
+                    self.current_draw_x += 1
+                    if self.current_draw_x >= self.label.width:
+                        self.current_draw_x = 0
+                        self.current_draw_y += 1
+                    if self.current_draw_y >= self.label.height:
+                        self.is_drawing = False
+                        drawn = True
+                self.have_waited -= self.char_delay
+            self._rebuild_self()
+            self.terminal.update_widget(self)

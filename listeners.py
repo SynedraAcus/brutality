@@ -14,6 +14,7 @@ from bear_hug.event import BearEvent
 from bear_hug.sound import SoundListener
 from bear_hug.widgets import Widget, Listener, MenuWidget
 
+from widgets import TypingLabelWidget
 
 class ScrollListener(Listener, metaclass=Singleton):
     """
@@ -441,3 +442,53 @@ class MenuListener(Listener):
         self.currently_showing = False
         for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
             entity.controller.accepts_input = True
+
+
+class ItemDescriptionListener(Listener):
+    """
+    Waits for `brut_show_items` and `brut_close_menu` events. On former,
+    displays TypingLabelWidget with item descriptions; on latter, hides it.
+
+    Displays on Layer 4, above the menu
+    :param Listener:
+    :return:
+    """
+    # TODO: Update item descriptions as necessary
+    def __init__(self, dispatcher, terminal,  tracked_entity='cop_1',
+                 text_pos = (25, 12), **kwargs):
+        self.register_terminal(terminal)
+        self.dispatcher = dispatcher
+        self.dispatcher.register_listener(self, ['brut_show_items',
+                                                 'brut_close_menu'])
+        self.tracked_entity = tracked_entity
+        self.text_pos = text_pos
+        self.text_mask = 'LEFT: {}\n\n{}\n\nRIGHT: {}\n\n{}'
+        self.widget = None
+        self.is_showing = False
+
+    def on_event(self, event):
+        if event.event_type == 'brut_show_items' and not self.is_showing:
+            self.is_showing = True
+            # Generating text
+            e = EntityTracker().entities[self.tracked_entity]
+            left = EntityTracker().entities[e.hands.left_item]
+            right = EntityTracker().entities[e.hands.right_item]
+            text = self.text_mask.format(left.item_behaviour.item_name,
+                                         left.item_behaviour.item_description,
+                                         right.item_behaviour.item_name,
+                                         right.item_behaviour.item_description)
+            chars = [[' ' for _ in range(28)] for _ in range(22)]
+            colors = copy_shape(chars, '#444444')
+            self.widget = TypingLabelWidget(chars, colors,
+                                            chars_per_second=20,
+                                            text=text,
+                                            just='left', color='white')
+            self.terminal.add_widget(self.widget, self.text_pos, layer=4)
+            self.dispatcher.register_listener(self.widget, 'tick')
+        elif (event.event_type == 'brut_close_menu' or
+              (event.event_type=='key_down' and event.event_value == 'TK_ESCAPE'))\
+                and self.is_showing:
+            # Menu is closed, hide this widget
+            self.is_showing = False
+            self.terminal.remove_widget(self.widget)
+            self.dispatcher.unregister_listener(self.widget, 'all')

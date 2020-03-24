@@ -955,10 +955,18 @@ class ItemBehaviourComponent(Component):
     A component that makes its Entity an owned item.
     """
 
-    def __init__(self, *args, owning_entity=None, **kwargs):
+    def __init__(self, *args, owning_entity=None,
+                 item_name = 'PLACEHOLDER',
+                 item_description = 'Someone failed to write\nan item description',
+                 **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
         # Actual entity (ie character) who uses the item. Not to be mistaken
         # for self.owner, which is item
+        self.item_name = item_name
+        d = item_description.split('\n')
+        if len(d) > 5 or any(len(x)>28 for x in d):
+            raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
+        self.item_description = item_description
         self._owning_entity = None
         self._future_owner = None
         self.owning_entity = owning_entity
