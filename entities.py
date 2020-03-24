@@ -861,4 +861,25 @@ class EntityFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
+    def _create_bandage(self, entity_id, owning_entity=None, **kwargs):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(
+            images_dict={'r': self.atlas.get_element('bandage_r'),
+                         'l': self.atlas.get_element('bandage_l')},
+            initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False,
+                                             should_hide=False))
+        entity.add_component(HealingItemBehaviourComponent(self.dispatcher,
+                                                    owning_entity=owning_entity,
+                                                    item_name='Bandage',
+                                                    item_description='A piece of sterile bandage.\nIt isn\'t much, but still \na lot better than nothing.'))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        return entity
+
 #TODO: general character creation method

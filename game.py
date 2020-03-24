@@ -56,8 +56,8 @@ factory = EntityFactory(atlas, dispatcher, layout)
 # Game-specific event types
 # Expected values shown for each type
 # Combat system
-dispatcher.register_event_type('brut_damage') # value (int)
-dispatcher.register_event_type('brut_heal') # value (int)
+dispatcher.register_event_type('brut_damage') # EntityID, value (int)
+dispatcher.register_event_type('brut_heal') # EntityID, value (int)
 # Item manipulations
 dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 dispatcher.register_event_type('brut_use_hand') #hand entity ID
@@ -119,7 +119,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['ecs_collision', 'set_bg_sound'])
+dispatcher.register_listener(logger, ['ecs_collision', 'set_bg_sound', 'brut_heal'])
 
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
@@ -213,3 +213,6 @@ loop.run()
 #TODO: draw appropriate item descriptions
 # Not really pressing, but it's better to avoid stupid jokes in item
 # descriptions. The general tone should be *somewhat* serious.
+
+#TODO: highlight collectables somehow
+# Currently they are not very visible, especially with bright punk corpses.

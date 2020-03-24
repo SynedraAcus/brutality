@@ -14,6 +14,13 @@
     "ysize": 11
   },
   {
+    "name": "bandage_icon",
+    "x": 6,
+    "y": 84,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
     "name": "nunchaku_icon",
     "x": 36,
     "y": 84,
@@ -117,6 +124,20 @@
     "y": 10,
     "xsize": 7,
     "ysize": 5
+  },
+  {
+    "name": "bandage_r",
+    "x": 7,
+    "y": 22,
+    "xsize": 3,
+    "ysize": 3
+  },
+  {
+    "name": "bandage_l",
+    "x": 7,
+    "y": 22,
+    "xsize": 3,
+    "ysize": 3
   },
   {
     "name": "pistol_r",

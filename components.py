@@ -350,7 +350,8 @@ class HealthComponent(Component):
     """
     def __init__(self, *args, hitpoints=3, **kwargs):
         super().__init__(*args, name='health', **kwargs)
-        self.dispatcher.register_listener(self, 'brut_damage')
+        self.dispatcher.register_listener(self, ('brut_damage', 'brut_heal'))
+        self.max_hitpoints = hitpoints
         self._hitpoints = hitpoints
 
     def on_event(self, event):
@@ -370,7 +371,10 @@ class HealthComponent(Component):
         self._hitpoints = value
         if self._hitpoints < 0:
             self._hitpoints = 0
+        if self._hitpoints > self.max_hitpoints:
+            self._hitpoints = self.max_hitpoints
         self.process_hitpoint_update()
+        print(self.hitpoints)
         
     def process_hitpoint_update(self):
         """
@@ -829,6 +833,9 @@ class HandInterfaceComponent(Component):
         # Offsets of items relative to the hand, ie the position of the
         # outer tip of the hand. For left-facing items, *right edge* of the item
         # should be at this position
+        # TODO: let items define their offsets
+        # Some items should not be grabbed by their topmost char and look stupid
+        # when they are (eg nunchaku)
         self.item_offsets = item_offsets
         self.left_item = left_item
         self.right_item = right_item
@@ -1018,6 +1025,21 @@ class ItemBehaviourComponent(Component):
         except AttributeError:
             d['owning_entity'] = self._future_owner
         return dumps(d)
+
+
+class HealingItemBehaviourComponent(ItemBehaviourComponent):
+    """
+    Heals owning_entity when used
+    """
+    # TODO: destroy bandage when used
+    def __init__(self, *args, healing=2, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.healing = healing
+
+    def use_item(self):
+        self.dispatcher.add_event(BearEvent('brut_heal',
+                                           (self.owning_entity.id,
+                                            self.healing)))
 
 
 class SpawningItemBehaviourComponent(ItemBehaviourComponent):
