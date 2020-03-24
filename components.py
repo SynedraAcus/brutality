@@ -185,9 +185,9 @@ class GravityPositionComponent(PositionComponent):
     def on_event(self, event):
         if event.event_type == 'tick':
             self.have_waited += event.event_value
-        if self.have_waited >= self.update_freq:
-            self.vy += round(self.have_waited/self.update_freq)
-            self.have_waited = 0
+            if self.have_waited >= self.update_freq:
+                self.vy += round(self.have_waited/self.update_freq)
+                self.have_waited = 0
         return super().on_event(event)
 
     def __repr__(self):
@@ -291,7 +291,7 @@ class HazardCollisionComponent(CollisionComponent):
 #             self.owner.destructor.destroy()
 
 
-class ScreenEdgeCollisionComponent(CollisionComponent):
+class GrenadeCollisionComponent(CollisionComponent):
     """
     Destroys the entity if collided into None (ie screen edge)
 
@@ -302,7 +302,14 @@ class ScreenEdgeCollisionComponent(CollisionComponent):
     """
     def collided_into(self, entity):
         if entity is None:
-            self.owner.destructor.destroy
+            # If vy is negative (ie on the rise), it's possible that the bottle
+            # collided into screen top. In that case, just bounce off it
+            if self.owner.position.vy < 0:
+                self.owner.position.vy = 0
+                self.owner.position.have_waited = self.owner.position.update_freq
+            # If not, it has definitely collided into left or right edge
+            elif self.owner.position.vy > 5:
+                self.owner.destructor.destroy()
 
 
 class GrenadeComponent(Component):
@@ -385,11 +392,13 @@ class DestructorHealthComponent(HealthComponent):
             self.owner.destructor.destroy()
 
 
-class SpawnerHealthComponent(HealthComponent):
+class CharacterHealthComponent(HealthComponent):
     """
-    Destroys entity and creates a corpse upon reaching zero HP
+    Health component for characters (both playable and NPCs). Upon death,
+    creates a corpse and drops whatever the character had in his hands.
 
-    Expects owner to have SpawnerComponent and DestructorComponent
+    Expects owner to have SpawnerComponent, HandInterfaceComponent and
+    DestructorComponent
     """
     def __init__(self, *args, corpse=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -398,7 +407,9 @@ class SpawnerHealthComponent(HealthComponent):
     def process_hitpoint_update(self):
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
-                                     relative_pos=(0, self.owner.widget.height - 5))
+                                     relative_pos=(0, self.owner.widget.height - 9))
+            self.owner.hands.drop('right')
+            self.owner.hands.drop('left')
             self.owner.destructor.destroy()
 
     def __repr__(self):
@@ -690,7 +701,7 @@ class BottleControllerComponent(Component):
                     # Try melee if caught in close quarters
                     self.owner.hands.use_left_hand()
                     self.action_cooldown = self.action_delay
-                elif abs(dx) < 30:
+                elif abs(dx) < 35:
                     # Run away if 5 < dx < 30, whatever dy
                     self.owner.position.walk((dx < 0 and -1 or 1, 0))
                     self.action_cooldown = self.walk_delay
@@ -822,6 +833,7 @@ class HandInterfaceComponent(Component):
         self.left_item = left_item
         self.right_item = right_item
 
+    # TODO: merge use_*_hand methods
     def use_left_hand(self):
         # Move the appropriate left hand widget to a position and show it
         if self.owner.position.direction == 'r':
@@ -894,16 +906,7 @@ class HandInterfaceComponent(Component):
                                   (self.owner.widget.width, 5)):
                 other_item = entity
                 break
-        # Drop any non-fist item in hand
-        # Drops after checking to avoid endless drop-and-pick-up cycle
-        item_id = hand == 'right' and self.right_item or self.left_item
-        if 'fist' not in item_id:
-            item = EntityTracker().entities[item_id]
-            item.item_behaviour.owning_entity = None
-            item.hiding.show()
-            item.position.move(self.owner.position.x,
-                               self.owner.position.y + self.owner.widget.height - item.widget.height)
-            item.hiding.unhide()
+        self.drop(hand)
         if other_item is None:
             # If there is no item, drop whatever there was and reactivate fist
             if hand == 'right':
@@ -930,6 +933,26 @@ class HandInterfaceComponent(Component):
                                                 (self.owner.id,
                                                  hand,
                                                  other_item.id)))
+
+    def drop(self, hand='right'):
+        """
+        Drop whatever is in the corresponding hand.
+
+        If the item held is fist (generally, any item with ``fist`` in entity
+        ID, so creating "Perverted sword of four-handed fisting" or something is
+        likely to cause all sorts of problems both to the engine and players'
+        sanity), does nothing.
+        """
+        item_id = hand == 'right' and self.right_item or self.left_item
+        if 'fist' not in item_id:
+            item = EntityTracker().entities[item_id]
+            item.item_behaviour.owning_entity = None
+            item.hiding.show()
+            item.position.move(self.owner.position.x + randint(-3, 3),
+                               self.owner.position.y + self.owner.widget.height
+                               - item.widget.height + randint(-3, 3))
+            item.widget.z_level = item.position.y + item.widget.height
+            item.hiding.unhide()
 
     def __repr__(self):
         d = loads(super().__repr__())

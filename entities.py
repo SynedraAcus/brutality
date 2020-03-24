@@ -392,9 +392,9 @@ class EntityFactory:
         cop_entity.add_component(InputComponent(self.dispatcher))
         cop_entity.add_component(FactionComponent(self.dispatcher,
                                                   faction='police'))
-        cop_entity.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                        corpse='cop_corpse',
-                                                        hitpoints=10))
+        cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
+                                                          corpse='cop_corpse',
+                                                          hitpoints=10))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
@@ -450,14 +450,17 @@ class EntityFactory:
                                                         depth=1))
         nunchaku.add_component(SpawnerComponent(self.dispatcher, factory=self))
         nunchaku.add_component(DestructorComponent(self.dispatcher))
-        nunchaku.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                      corpse='nunchaku_punk_corpse',
-                                                      hitpoints=5))
+        nunchaku.add_component(CharacterHealthComponent(self.dispatcher,
+                                                        corpse='nunchaku_punk_corpse',
+                                                        hitpoints=5))
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
         weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
+        fist = self._create_fist(f'fist_{entity_id}',
+                                       owning_entity=nunchaku)
+        self.dispatcher.add_event(BearEvent('ecs_create', fist))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl',
                                 'nunchaku_punk_hand_forward', direction='l')
@@ -487,7 +490,8 @@ class EntityFactory:
                                                             'forward_r': (8, 0),
                                                             'back_l': (0, -2),
                                                             'back_r': (4, 0)},
-                                                        right_item=weapon.id))
+                                                        right_item=weapon.id,
+                                                        left_item=fist.id))
         return nunchaku
 
     def _create_bottle_punk(self, entity_id, **kwargs):
@@ -505,11 +509,10 @@ class EntityFactory:
                                                     depth=1))
         punk.add_component(SpawnerComponent(self.dispatcher, factory=self))
         punk.add_component(DestructorComponent(self.dispatcher))
-        punk.add_component(SpawnerHealthComponent(self.dispatcher,
-                                                  corpse='bottle_punk_corpse',
-                                                  hitpoints=5))
-        # punk.add_component(BottleControllerComponent(self.dispatcher))
-        punk.add_component(InputComponent(self.dispatcher))
+        punk.add_component(CharacterHealthComponent(self.dispatcher,
+                                                    corpse='bottle_punk_corpse',
+                                                    hitpoints=5))
+        punk.add_component(BottleControllerComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
         f_l = self._create_hand(f'{entity_id}_hand_fl',
@@ -680,11 +683,12 @@ class EntityFactory:
             vx = -20
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
-                                               acceleration=40, vx=vx, vy=-35))
+                                               acceleration=40, vx=vx, vy=-35,
+                                               affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(GrenadeComponent(self.dispatcher,
                                               spawned_item='flame'))
-        entity.add_component(ScreenEdgeCollisionComponent(self.dispatcher))
+        entity.add_component(GrenadeCollisionComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
