@@ -530,11 +530,11 @@ class InputComponent(Component):
                 if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
                     # left-handed attack
                     self.current_action_delay = self.action_delay
-                    self.owner.hands.use_left_hand()
+                    self.owner.hands.use_hand('left')
                 elif event.event_value == 'TK_E' and self.current_action_delay <= 0:
                     # Right-handed attack
                     self.current_action_delay = self.action_delay
-                    self.owner.hands.use_right_hand()
+                    self.owner.hands.use_hand('right')
                 elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
                     # Left-handed pickup
                     self.owner.hands.pick_up(hand='left')
@@ -632,7 +632,7 @@ class MeleeControllerComponent(Component):
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
                 if abs(dx) <= 15 and abs(dy) <= 10:
                     # and change behaviours accordingly
-                    self.owner.hands.use_right_hand()
+                    self.owner.hands.use_hand('right')
                     self.action_cooldown = self.action_delay
                 else:
                     i = randint(0, abs(dx) + abs(dy))
@@ -695,11 +695,11 @@ class BottleControllerComponent(Component):
                     # Change direction
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
                 if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
-                    self.owner.hands.use_right_hand()
+                    self.owner.hands.use_hand('right')
                     self.action_cooldown = self.action_delay
                 elif abs(dx) < 10 and abs(dy) < 5:
                     # Try melee if caught in close quarters
-                    self.owner.hands.use_left_hand()
+                    self.owner.hands.use_hand('left')
                     self.action_cooldown = self.action_delay
                 elif abs(dx) < 35:
                     # Run away if 5 < dx < 30, whatever dy
@@ -832,57 +832,33 @@ class HandInterfaceComponent(Component):
         self.item_offsets = item_offsets
         self.left_item = left_item
         self.right_item = right_item
+        # A little helper to find correct hand for a given direction
+        self.which_hand = {'right': {'r': 'forward_r',
+                                     'l': 'back_l'},
+                           'left': {'r': 'back_r',
+                                    'l': 'forward_l'}}
 
-    # TODO: merge use_*_hand methods
-    def use_left_hand(self):
-        # Move the appropriate left hand widget to a position and show it
-        if self.owner.position.direction == 'r':
-            hand = 'back_r'
-        else:
-            hand = 'forward_l'
+    def use_hand(self, hand='right'):
+        hand_label = self.which_hand[hand][self.owner.position.direction]
         # Have to call the HidingComponent and WidgetComponent directly
-        hand_entity = EntityTracker().entities[self.hand_entities[hand]]
+        hand_entity = EntityTracker().entities[self.hand_entities[hand_label]]
         hand_entity.widget.z_level = self.owner.widget.z_level + 1
-        hand_x = self.owner.position.x + self.hands_offsets[hand][0]
-        hand_y = self.owner.position.y + self.hands_offsets[hand][1]
+        hand_x = self.owner.position.x + self.hands_offsets[hand_label][0]
+        hand_y = self.owner.position.y + self.hands_offsets[hand_label][1]
         hand_entity.hiding.show()
         hand_entity.position.move(hand_x, hand_y)
-        if self.left_item:
-            item = EntityTracker().entities[self.left_item]
-            item.widget.switch_to_image(self.owner.position.direction)
-            item.widget.z_level = self.owner.widget.z_level + 1
-            item.hiding.show()
-            item_x = hand_x + self.item_offsets[hand][0]
-            item_y = hand_y + self.item_offsets[hand][1]
-            if self.owner.position.direction == 'l':
-                item_x -= item.widget.width
-            EntityTracker().entities[self.left_item].position.move(item_x,
-                                                                   item_y)
-            self.dispatcher.add_event(BearEvent('brut_use_item', self.left_item))
-
-    def use_right_hand(self):
-        if self.owner.position.direction == 'r':
-            hand = 'forward_r'
-        else:
-            hand = 'back_l'
-        hand_entity = EntityTracker().entities[self.hand_entities[hand]]
-        hand_entity.widget.z_level = self.owner.widget.z_level + 1
-        hand_x = self.owner.position.x + self.hands_offsets[hand][0]
-        hand_y = self.owner.position.y + self.hands_offsets[hand][1]
-        hand_entity.hiding.show()
-        hand_entity.position.move(hand_x, hand_y)
-        if self.right_item:
-            item = EntityTracker().entities[self.right_item]
-            item.widget.switch_to_image(self.owner.position.direction)
-            item.widget.z_level = self.owner.widget.z_level + 1
-            item_x = hand_x + self.item_offsets[hand][0]
-            item_y = hand_y + self.item_offsets[hand][1]
-            item.hiding.show()
-            if self.owner.position.direction == 'l':
-                item_x -= item.widget.width
-            EntityTracker().entities[self.right_item].position.move(item_x,
-                                                                    item_y)
-            self.dispatcher.add_event(BearEvent('brut_use_item', self.right_item))
+        # Use item in hand
+        item_id = self.right_item if hand == 'right' else self.left_item
+        item = EntityTracker().entities[item_id]
+        item.widget.switch_to_image(self.owner.position.direction)
+        item.widget.z_level = self.owner.widget.z_level + 1
+        item.hiding.show()
+        item_x = hand_x + self.item_offsets[hand_label][0]
+        item_y = hand_y + self.item_offsets[hand_label][1]
+        if self.owner.position.direction == 'l':
+            item_x -= item.widget.width
+        item.position.move(item_x, item_y)
+        self.dispatcher.add_event(BearEvent('brut_use_item', item_id))
 
     def pick_up(self, hand='right'):
         """
@@ -939,8 +915,8 @@ class HandInterfaceComponent(Component):
         Drop whatever is in the corresponding hand.
 
         If the item held is fist (generally, any item with ``fist`` in entity
-        ID, so creating "Perverted sword of four-handed fisting" or something is
-        likely to cause all sorts of problems both to the engine and players'
+        ID, so creating a "Perverted sword of four-handed fisting" or something
+        is likely to cause all sorts of problems both to the engine and players'
         sanity), does nothing.
         """
         item_id = hand == 'right' and self.right_item or self.left_item
