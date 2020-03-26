@@ -157,9 +157,6 @@ class ParticleWidget(Widget):
         self.y_signs = [choice((-1, 1)) for _ in range(char_count)]
         self.x_delays = [abs(1/x) for x in x_speeds]
         self.y_delays = [1/y for y in y_speeds]
-        print(x_speeds)
-        print(y_speeds)
-        print(self.x_delays, '\n',self.y_delays)
         self.x_waited = [0 for _ in range(char_count)]
         self.y_waited = [0 for _ in range(char_count)]
         self.chars[self.y_list[0]][self.x_list[0]] = self.character
