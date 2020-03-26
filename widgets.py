@@ -1,4 +1,9 @@
-import random
+"""
+Various game-specific widgets
+"""
+
+from math import sqrt
+from random import choice, uniform
 
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException, \
     generate_box, BearLayoutException
@@ -120,3 +125,72 @@ class TypingLabelWidget(Layout):
                 self.have_waited -= self.char_delay
             self._rebuild_self()
             self.terminal.update_widget(self)
+
+
+class ParticleWidget(Widget):
+    """
+    Displays the explosion of particles from midpoint towards edges
+
+    :param size: A tuple of ints, widget size.
+
+    :param character: A character used for a particle
+
+    :param color: Particle color
+
+    :param char_speed: A speed for particles, in chars per second
+    """
+    def __init__(self, size=(5, 5), character='*', color='red',
+                 char_count=5, char_speed=2, **kwargs):
+        chars = [[' ' for _ in range(size[0])] for _ in range(size[1])]
+        colors = copy_shape(chars, color)
+        super().__init__(chars, colors, **kwargs)
+        self.character = character
+        # self.move_delay = 1 / char_speed
+        self.have_waited = 0
+        self.char_count = char_count
+        self.x_list = [round(size[0]/2) for _ in range(char_count)]
+        self.y_list = [round(size[1]/2) for _ in range(char_count)]
+        speed = abs(char_speed)
+        x_speeds = [uniform(-speed, speed) for _ in range(char_count)]
+        y_speeds = [sqrt(char_speed**2 - x_speeds[j]**2) for j in range(char_count)]
+        self.x_signs = [1 if x > 0 else -1 for x in x_speeds]
+        self.y_signs = [choice((-1, 1)) for _ in range(char_count)]
+        self.x_delays = [abs(1/x) for x in x_speeds]
+        self.y_delays = [1/y for y in y_speeds]
+        print(x_speeds)
+        print(y_speeds)
+        print(self.x_delays, '\n',self.y_delays)
+        self.x_waited = [0 for _ in range(char_count)]
+        self.y_waited = [0 for _ in range(char_count)]
+        self.chars[self.y_list[0]][self.x_list[0]] = self.character
+
+    def on_event(self, event):
+        if event.event_type == 'tick':
+            # with high speeds, multiple steps per tick are possible
+            for i in range(self.char_count):
+                if not self.x_list[i]:
+                    continue
+                self.x_waited[i] += event.event_value
+                while self.x_waited[i] > self.x_delays[i]:
+                    self.x_waited[i] -= event.event_value
+                    self.x_list[i] += self.x_signs[i]
+                self.y_waited[i] += event.event_value
+                while self.y_waited[i] > self.y_delays[i]:
+                    self.y_waited[i] -= event.event_value
+                    self.y_list[i] += self.y_signs[i]
+                if self.x_list[i] < 0 or self.x_list[i] >= self.width - 0.5 or \
+                        self.y_list[i] < 0 or self.y_list[i] >= self.height - 0.5:
+                    # If char flies outside the widget, it's ignored
+                    # Replacing with None to avoid rebuilding list for each
+                    # such character
+                    self.x_list[i] = None
+                    self.y_list[i] = None
+            # Draw only after movement has finished
+            chars = copy_shape(self.colors, ' ')
+            for index, x in enumerate(self.x_list):
+                if x:
+                    chars[round(self.y_list[index])][round(x)] = self.character
+            self.chars = chars
+        # Just in case nothing else was visible on this tick
+        return BearEvent('ecs_update')
+

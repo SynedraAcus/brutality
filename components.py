@@ -5,7 +5,8 @@ from random import randint
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
-    SwitchWidgetComponent, Entity, EntityTracker, CollisionComponent
+    SwitchWidgetComponent, Entity, EntityTracker, CollisionComponent,\
+    DestructorComponent
 from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
 from bear_hug.widgets import SwitchingWidget
 
@@ -374,8 +375,7 @@ class HealthComponent(Component):
         if self._hitpoints > self.max_hitpoints:
             self._hitpoints = self.max_hitpoints
         self.process_hitpoint_update()
-        print(self.hitpoints)
-        
+
     def process_hitpoint_update(self):
         """
         :return:
@@ -800,6 +800,50 @@ class HidingComponent(Component):
                       'is_working': self.is_working})
         
 
+class ParticleDestructorComponent(DestructorComponent):
+    """
+    A subclass of the DestructorComponent that spawns particles when owner is
+    destroyed.
+
+    Intended for use with single-use items (eg bandages) which need some sort of
+    a visual confirmation that it did indeed work.
+    """
+    def __init__(self, *args, spawned_item, relative_pos = (0, 0),
+                 size=(10, 10),
+                 character=',', char_count=8, char_speed=10,
+                 color='red', lifetime=0.3,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.spawned_item = spawned_item
+        self.relative_pos = relative_pos
+        self.size = size
+        self.character = character
+        self.char_count = char_count
+        self.char_speed = char_speed
+        self.color = color
+        self.lifetime = lifetime
+
+    def destroy(self):
+        self.owner.spawner.spawn(self.spawned_item, self.relative_pos,
+                                 size=self.size, character=self.character,
+                                 char_count=self.char_count,
+                                 char_speed=self.char_speed,
+                                 color=self.color, lifetime=self.lifetime)
+        super().destroy()
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['spawned_item'] = self.spawned_item
+        d['relative_pos'] = self.relative_pos
+        d['size'] = self.size
+        d['character'] = self.character
+        d['char_count'] = self.char_count
+        d['char_speed'] = self.char_speed
+        d['color'] = self.color
+        d['lifetime'] = self.lifetime
+        return dumps(d)
+
+
 class HandInterfaceComponent(Component):
     """
     A Component that allows human characters to use hands.
@@ -827,6 +871,8 @@ class HandInterfaceComponent(Component):
                  right_item=None,
                  **kwargs):
         super().__init__(*args, name='hands', **kwargs)
+        # In case the item is destroyed while it is held
+        self.dispatcher.register_listener(self, 'ecs_destroy')
         self.hand_entities = hand_entities
         # Offsets of hands relative to the character
         self.hands_offsets = hands_offsets
@@ -937,6 +983,21 @@ class HandInterfaceComponent(Component):
             item.widget.z_level = item.position.y + item.widget.height
             item.hiding.unhide()
 
+    def on_event(self, event):
+        if event.event_type == 'ecs_destroy':
+            if event.event_value == self.right_item:
+                self.left_item = f'fist_{self.owner.id}_right'
+                self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                    (self.owner.id,
+                                                     'right',
+                                                     self.left_item)))
+            elif event.event_value == self.left_item:
+                self.left_item = f'fist_{self.owner.id}_left'
+                self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                    (self.owner.id,
+                                                     'left',
+                                                     self.left_item)))
+
     def __repr__(self):
         d = loads(super().__repr__())
         d['hand_entities'] = self.hand_entities
@@ -963,13 +1024,14 @@ class ItemBehaviourComponent(Component):
     """
 
     def __init__(self, *args, owning_entity=None,
+                 single_use = False,
                  item_name = 'PLACEHOLDER',
                  item_description = 'Someone failed to write\nan item description',
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
-        # Actual entity (ie character) who uses the item. Not to be mistaken
-        # for self.owner, which is item
         self.item_name = item_name
+        self.single_use = single_use
+        self.is_destroying = False
         d = item_description.split('\n')
         if len(d) > 5 or any(len(x)>28 for x in d):
             raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
@@ -977,7 +1039,7 @@ class ItemBehaviourComponent(Component):
         self._owning_entity = None
         self._future_owner = None
         self.owning_entity = owning_entity
-        self.dispatcher.register_listener(self, 'brut_use_item')
+        self.dispatcher.register_listener(self, ('brut_use_item', 'tick'))
 
     @property
     def owning_entity(self):
@@ -1008,7 +1070,8 @@ class ItemBehaviourComponent(Component):
             raise BearECSException(f'A {type(value)} used as an owning_entity for item')
 
     def use_item(self):
-        raise NotImplementedError('ItemBehaviourComponent.use_item should be overridden')
+        if self.single_use:
+            self.is_destroying = True
 
     def on_event(self, event):
         if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:
@@ -1017,6 +1080,8 @@ class ItemBehaviourComponent(Component):
             except AttributeError:
                 self.owning_entity = EntityTracker().entities[self._future_owner]
                 self.use_item()
+        elif event.event_type == 'tick' and self.is_destroying:
+            self.owner.destructor.destroy()
 
     def __repr__(self):
         d = loads(super().__repr__())
@@ -1031,12 +1096,12 @@ class HealingItemBehaviourComponent(ItemBehaviourComponent):
     """
     Heals owning_entity when used
     """
-    # TODO: destroy bandage when used
     def __init__(self, *args, healing=2, **kwargs):
         super().__init__(*args, **kwargs)
         self.healing = healing
 
     def use_item(self):
+        super().use_item()
         self.dispatcher.add_event(BearEvent('brut_heal',
                                            (self.owning_entity.id,
                                             self.healing)))
@@ -1060,6 +1125,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
         self.spawned_items = spawned_items
 
     def use_item(self):
+        super().use_item()
         direction = self.owning_entity.position.direction
         # This component just passes the direction and Z, and expects projectile
         # creation code in entity factory to take care of speeds

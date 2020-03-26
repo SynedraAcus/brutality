@@ -10,10 +10,10 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
-from components import *
 from background import generate_tiled, tile_randomly, generate_bg,\
     ghetto_transition, dept_transition
-
+from components import *
+from widgets import ParticleWidget
 
 class EntityFactory:
     """
@@ -313,6 +313,25 @@ class EntityFactory:
         e.add_component(DestructorComponent(self.dispatcher))
         return e
 
+    def _create_particle_explosion(self, entity_id, size=(10, 10),
+                                   character='*', char_count=10, char_speed=5,
+                                   color='red', lifetime=1, **kwargs):
+        e = Entity(entity_id)
+        w = ParticleWidget(size=size, character=character, color=color,
+                           char_count=char_count, char_speed=char_speed,
+                           z_level=50)
+        e.add_component(WidgetComponent(self.dispatcher, w))
+        e.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        e.add_component(DestructorComponent(self.dispatcher))
+        e.add_component(DecayComponent(self.dispatcher,
+                                       destroy_condition='timeout',
+                                       lifetime=lifetime))
+        return e
+
+################################################################################
+# BARRIERS AND DECORATIONS WITH INTERNAL LOGIC
+################################################################################
+
     def _create_dept_range_table(self, entity_id, **kwargs):
         """
         Doesn't have CollisionComponent to permit shooting
@@ -361,6 +380,101 @@ class EntityFactory:
         e.add_component(PositionComponent(self.dispatcher)),
         e.add_component(DestructorComponent(self.dispatcher))
         return e
+
+    def _create_flame(self, entity_id, **kwargs):
+        """
+        A flame on the ground
+        :param entity_id:
+        :return:
+        """
+        entity = Entity(id=entity_id)
+        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('flame_1'),
+                                                  self.atlas.get_element('flame_2')),
+                                                 3),
+                                       emit_ecs=True)
+        entity.add_component(WidgetComponent(self.dispatcher, widget))
+        entity.add_component(PositionComponent(self.dispatcher))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=5.0))
+        entity.add_component(HazardCollisionComponent(self.dispatcher,
+                                                      depth=2,
+                                                      passable=True))
+        return entity
+
+    def _create_target(self, entity_id, **kwargs):
+        """
+        A target
+        :return:
+        """
+        target_entity = Entity(id=entity_id)
+        widget = SwitchingWidget(images_dict={
+                        'intact': self.atlas.get_element('target_intact'),
+                        'slight': self.atlas.get_element('target_1'),
+                        'severe': self.atlas.get_element('target_2'),
+                        'destroyed': self.atlas.get_element('target_destroyed')},
+                                initial_image='intact')
+        target_entity.add_component(SwitchWidgetComponent(self.dispatcher,
+                                                          widget))
+        target_entity.add_component(VisualDamageHealthComponent(
+                            self.dispatcher,
+                            widgets_dict={1: 'destroyed',
+                             2: 'severe',
+                             3: 'slight',
+                             4: 'intact'},
+                            hitpoints=4))
+        target_entity.add_component(PositionComponent(self.dispatcher))
+        target_entity.add_component(DestructorComponent(self.dispatcher))
+        target_entity.add_component(CollisionComponent(self.dispatcher,
+                                           face_position=(0, 2),
+                                           face_size=(7, 8),
+                                           z_shift=(1, -1),
+                                           depth=4))
+        return target_entity
+
+    def _create_invis(self, entity_id, size=(0, 0), **kwargs):
+        """
+        Create an impassable background object
+        :param x: xpos
+        :param y: ypos
+        :param size: size tuple
+        :return:
+        """
+        bg_entity = Entity(id=entity_id)
+        chars = [[' ' for x in range(size[0])] for y in range(size[1])]
+        colors = copy_shape(chars, 'gray')
+        widget = Widget(chars, colors)
+        bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
+                                                owner=bg_entity))
+        bg_entity.add_component(PositionComponent(self.dispatcher))
+        bg_entity.add_component(DestructorComponent(self.dispatcher))
+        return bg_entity
+
+    def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
+        """
+        A muzzle flash for a pistol
+        :param entity_id:
+        :param direction:
+        :param kwargs:
+        :return:
+        """
+        muzzle = Entity(id=entity_id)
+        if direction == 'r':
+            widget = Widget(*self.atlas.get_element('shot_r'))
+        else:
+            widget = Widget(*self.atlas.get_element('shot_l'))
+        muzzle.add_component(WidgetComponent(self.dispatcher, widget))
+        muzzle.add_component(DestructorComponent(self.dispatcher))
+        muzzle.add_component(PositionComponent(self.dispatcher))
+        muzzle.add_component(DecayComponent(self.dispatcher,
+                                            destroy_condition='timeout',
+                                            lifetime=0.1))
+        return muzzle
+
+################################################################################
+# CHARACTERS AND HANDS
+################################################################################
     
     def _create_cop(self, entity_id, **kwargs):
         cop_entity = Entity(id=entity_id)
@@ -553,6 +667,20 @@ class EntityFactory:
                                                       right_item=launcher.id))
         return punk
 
+    def _create_hand(self, entity_id, hand_type=None, direction='r', **kwargs):
+        entity = Entity(entity_id)
+        chars, colors = self.atlas.get_element(f'{hand_type}_{direction}')
+        entity.add_component(WidgetComponent(self.dispatcher,
+                                             Widget(chars, colors)))
+        entity.add_component(AttachedPositionComponent(self.dispatcher,
+                                                       affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False))
+        return entity
+
     def _create_cop_jump(self, entity_id, direction='r', **kwargs):
         e = Entity(id=entity_id)
         widget=Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
@@ -566,44 +694,9 @@ class EntityFactory:
         e.add_component(DestructorComponent(self.dispatcher))
         return e
 
-    def _create_invis(self, entity_id, size=(0, 0), **kwargs):
-        """
-        Create an impassable background object
-        :param x: xpos
-        :param y: ypos
-        :param size: size tuple
-        :return:
-        """
-        bg_entity = Entity(id=entity_id)
-        chars = [[' ' for x in range(size[0])] for y in range(size[1])]
-        colors = copy_shape(chars, 'gray')
-        widget = Widget(chars, colors)
-        bg_entity.add_component(WidgetComponent(self.dispatcher, widget,
-                                                owner=bg_entity))
-        bg_entity.add_component(PositionComponent(self.dispatcher))
-        bg_entity.add_component(DestructorComponent(self.dispatcher))
-        return bg_entity
-
-    def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
-        """
-        A muzzle flash for a pistol
-        :param entity_id:
-        :param direction:
-        :param kwargs:
-        :return:
-        """
-        muzzle = Entity(id=entity_id)
-        if direction == 'r':
-            widget = Widget(*self.atlas.get_element('shot_r'))
-        else:
-            widget = Widget(*self.atlas.get_element('shot_l'))
-        muzzle.add_component(WidgetComponent(self.dispatcher, widget))
-        muzzle.add_component(DestructorComponent(self.dispatcher))
-        muzzle.add_component(PositionComponent(self.dispatcher))
-        muzzle.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=0.1))
-        return muzzle
+################################################################################
+# PROJECTILES
+################################################################################
 
     def _create_bullet(self, entity_id, direction='r', z_level=10, **kwargs):
         """
@@ -694,72 +787,11 @@ class EntityFactory:
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
-    def _create_flame(self, entity_id, **kwargs):
-        """
-        A flame on the ground
-        :param entity_id:
-        :return:
-        """
-        entity = Entity(id=entity_id)
-        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('flame_1'),
-                                                  self.atlas.get_element('flame_2')),
-                                                 3),
-                                       emit_ecs=True)
-        entity.add_component(WidgetComponent(self.dispatcher, widget))
-        entity.add_component(PositionComponent(self.dispatcher))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(DecayComponent(self.dispatcher,
-                                            destroy_condition='timeout',
-                                            lifetime=5.0))
-        entity.add_component(HazardCollisionComponent(self.dispatcher,
-                                                      depth=2,
-                                                      passable=True))
-        return entity
-
-    def _create_target(self, entity_id, **kwargs):
-        """
-        A target
-        :return:
-        """
-        target_entity = Entity(id=entity_id)
-        widget = SwitchingWidget(images_dict={
-                        'intact': self.atlas.get_element('target_intact'),
-                        'slight': self.atlas.get_element('target_1'),
-                        'severe': self.atlas.get_element('target_2'),
-                        'destroyed': self.atlas.get_element('target_destroyed')},
-                                initial_image='intact')
-        target_entity.add_component(SwitchWidgetComponent(self.dispatcher,
-                                                          widget))
-        target_entity.add_component(VisualDamageHealthComponent(
-                            self.dispatcher,
-                            widgets_dict={1: 'destroyed',
-                             2: 'severe',
-                             3: 'slight',
-                             4: 'intact'},
-                            hitpoints=4))
-        target_entity.add_component(PositionComponent(self.dispatcher))
-        target_entity.add_component(DestructorComponent(self.dispatcher))
-        target_entity.add_component(CollisionComponent(self.dispatcher,
-                                           face_position=(0, 2),
-                                           face_size=(7, 8),
-                                           z_shift=(1, -1),
-                                           depth=4))
-        return target_entity
-
     # TODO: some common method for spawning single-use attack animations.
-    def _create_hand(self, entity_id, hand_type=None, direction='r', **kwargs):
-        entity = Entity(entity_id)
-        chars, colors = self.atlas.get_element(f'{hand_type}_{direction}')
-        entity.add_component(WidgetComponent(self.dispatcher,
-                                             Widget(chars, colors)))
-        entity.add_component(AttachedPositionComponent(self.dispatcher,
-                                                       affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
-        entity.add_component(HidingComponent(self.dispatcher,
-                                             hide_condition='timeout',
-                                             lifetime=0.25,
-                                             is_working=False))
-        return entity
+
+################################################################################
+# ITEMS
+################################################################################
 
     def _create_pistol(self, entity_id, owning_entity=None, **kwargs):
         entity = Entity(entity_id)
@@ -875,11 +907,21 @@ class EntityFactory:
                                              is_working=False,
                                              should_hide=False))
         entity.add_component(HealingItemBehaviourComponent(self.dispatcher,
+                                                    single_use=True,
                                                     owning_entity=owning_entity,
                                                     item_name='Bandage',
                                                     item_description='A piece of sterile bandage.\nIt isn\'t much, but still \na lot better than nothing.'))
         entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
-        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(ParticleDestructorComponent(self.dispatcher,
+                                                        spawned_item='particle_explosion',
+                                                        relative_pos=(-5, -5),
+                                                        size=(10, 10),
+                                                        character=',',
+                                                        char_count=8,
+                                                        char_speed=10,
+                                                        color='#4D3D26',
+                                                        lifetime=0.3))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
 
 #TODO: general character creation method
