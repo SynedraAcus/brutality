@@ -43,7 +43,7 @@ atlas = Multiatlas((Atlas(XpLoader(path.join(path_base, 'test_atlas.xp')),
                     Atlas(XpLoader(path.join(path_base, 'department.xp')),
                           path.join(path_base, 'department.json')),
                     Atlas(XpLoader(path.join(path_base, 'scientists.xp')),
-                          path.join('scientists.json'))))
+                          path.join(path_base, 'scientists.json'))))
 
 # Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]
