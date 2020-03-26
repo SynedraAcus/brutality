@@ -354,6 +354,8 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
                                   self.player_entity.widget.size):
                 next_level = self.level_sequence[self.current_level]
                 self.level_manager.set_level(next_level)
+                # TODO: a delay between levels to let sound play out
+                return BearEvent('play_sound', 'drive')
 
     def disable(self):
         """
