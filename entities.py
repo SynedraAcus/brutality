@@ -10,10 +10,11 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
-from background import generate_tiled, tile_randomly, generate_bg,\
-    ghetto_transition, dept_transition
+from background import tile_randomly, generate_bg, ghetto_transition,\
+    dept_transition
 from components import *
 from widgets import ParticleWidget
+
 
 class EntityFactory:
     """
@@ -33,6 +34,7 @@ class EntityFactory:
         self.atlas = atlas
         self.layout = layout
         self.counts = {}
+        # TODO: move decoration and barried data to TSV or something
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box',
                             'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse',
@@ -221,25 +223,8 @@ class EntityFactory:
                                              lifetime=lifetime))
         return message
 
-    def _create_message_spawner(self, entity_id, xsize=10, ysize=10,
-                                entity_filter = lambda x: True, **kwargs):
-        spawner = Entity(id = entity_id)
-        chars = [[' ' for x in range(xsize)] for y in range(ysize)]
-        colors = copy_shape(chars, '000')
-        widget = Widget(chars, colors)
-        spawner.add_component(WidgetComponent(self.dispatcher, widget))
-        spawner.add_component(PositionComponent(self.dispatcher))
-        spawner.add_component(DestructorComponent(self.dispatcher))
-        spawner.add_component(SpawnerComponent(self.dispatcher, factory=self))
-        spawner.add_component(SpawnerCollisionComponent(self.dispatcher,
-                                                        entity_filter=entity_filter,
-                                                        spawned_item='message',
-                                                        spawn_kwargs=kwargs))
-        return spawner
-
     def _create_ghetto_bg(self, entity_id, size=(50, 20), **kwargs):
         wall = Entity(id=entity_id)
-        # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
@@ -250,7 +235,6 @@ class EntityFactory:
 
     def _create_dept_bg(self, entity_id, size=(50, 20), **kwargs):
         wall = Entity(id=entity_id)
-        # widget = Widget(*generate_tiled(self.atlas, 'brick_tile', size))
         w = generate_bg(self.atlas, dept_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
@@ -306,7 +290,7 @@ class EntityFactory:
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher))
         e.add_component(CollisionComponent(self.dispatcher,
-                                           face_position = self.face_positions[entity_type],
+                                           face_position=self.face_positions[entity_type],
                                            face_size=self.face_sizes[entity_type],
                                            z_shift=(1, -1),
                                            depth=self.depths[entity_type]))
@@ -786,8 +770,6 @@ class EntityFactory:
         entity.add_component(GrenadeCollisionComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return entity
-
-    # TODO: some common method for spawning single-use attack animations.
 
 ################################################################################
 # ITEMS

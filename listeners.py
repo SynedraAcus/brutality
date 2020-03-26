@@ -16,6 +16,7 @@ from bear_hug.widgets import Widget, Listener, MenuWidget
 
 from widgets import TypingLabelWidget
 
+
 class ScrollListener(Listener, metaclass=Singleton):
     """
     A listener that keeps ScrollableECSLayout focused on an entity.

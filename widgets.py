@@ -191,3 +191,6 @@ class ParticleWidget(Widget):
         # Just in case nothing else was visible on this tick
         return BearEvent('ecs_update')
 
+# TODO: Better customization for ParticleWidget
+# Multiple characters, multiple colors, movement other than explosion from the
+# center, etc

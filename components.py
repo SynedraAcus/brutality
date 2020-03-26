@@ -7,8 +7,6 @@ from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     SwitchWidgetComponent, Entity, EntityTracker, CollisionComponent,\
     DestructorComponent
-from bear_hug.ecs_widgets import ScrollableECSLayout, ECSLayout
-from bear_hug.widgets import SwitchingWidget
 
 
 class WalkerComponent(PositionComponent):
@@ -33,7 +31,8 @@ class WalkerComponent(PositionComponent):
         
     def walk(self, move):
         """
-        Move the owner, switching widgets for step animation and setting direction
+        Move the owner, switching widgets for step animation and setting
+        direction
 
         If this is undesirable (ie character was pushed or something), use
         regular ``position_component.move()``, which is not overridden.
@@ -63,6 +62,7 @@ class WalkerComponent(PositionComponent):
         Jump in currently set direction
         :return:
         """
+        # TODO: Call correct jump image
         # Jump direction is set to 1 while raising and to -1 while falling
         # Zero when not in jump state
         if self.jump_direction:
@@ -104,11 +104,11 @@ class WalkerComponent(PositionComponent):
                 and event.event_value[0] == self.owner.id \
                 and self.jump_direction:
             should_fall = False
-            # TODO: Change jump logic to preserve Z-level
+            # TODO: Fix bugs in jump
             if event.event_value[1]:
-                # This exception covers some weird bug when after changing level mid-jump
-                # it attempts to process ecs_collision event with an already
-                # nonexistent exit highlight entity, and crashes with KeyError
+                # This exception covers some weird bug when after changing level
+                # mid-jump it attempts to process ecs_collision event with an
+                # already destroyed highlight entity, and crashes with KeyError
                 try:
                     other = EntityTracker().entities[event.event_value[1]]
                     if other.collision.passable:
@@ -117,8 +117,6 @@ class WalkerComponent(PositionComponent):
                         should_fall = True
                 except KeyError:
                     should_fall = True
-            # else:
-            #     should_fall = True
             if should_fall:
                 self.vx = 0
                 if self.jump_direction == 1:
@@ -131,12 +129,12 @@ class WalkerComponent(PositionComponent):
     def __repr__(self):
         d = loads(super().__repr__())
         d.update({'direction': self.direction,
-                   'initial_phase': self.phase,
-                   'jump_vx': self.jump_vx,
-                   'jump_vy': self.jump_vy,
-                   'jump_direction': self.jump_direction,
-                   'jump_timer': self.jump_timer,
-                   'jump_duration': self.jump_duration})
+                  'initial_phase': self.phase,
+                  'jump_vx': self.jump_vx,
+                  'jump_vy': self.jump_vy,
+                  'jump_direction': self.jump_direction,
+                  'jump_timer': self.jump_timer,
+                  'jump_duration': self.jump_duration})
         return dumps(d)
 
 
@@ -150,14 +148,15 @@ class AttachedPositionComponent(PositionComponent):
     """
     def __init__(self, *args, tracked_entity=None, **kwargs):
         super().__init__(*args, **kwargs)
-        # Could be None, in which case it behaves like a regular PositionComponent
+        # Could be None, in which case it acts like a regular PositionComponent
         self.tracked_entity = tracked_entity
         self.dispatcher.register_listener(self, 'ecs_move')
 
     def on_event(self, event):
         if event.event_type == 'ecs_move' and self.tracked_entity and \
                 event.event_value[0] == self.tracked_entity:
-            if not hasattr(self.owner, 'hiding') or self.owner.hiding.is_working:
+            if not hasattr(self.owner, 'hiding')\
+                    or self.owner.hiding.is_working:
                 rel_move = EntityTracker().entities[self.tracked_entity].\
                                     position.last_move
                 self.relative_move(*rel_move)
@@ -173,7 +172,7 @@ class GravityPositionComponent(PositionComponent):
     """
     A PositionComponent that maintains a constant downward acceleration.
 
-    accepts `acceleration` (in characters per second squared) as a kwarg.
+    :param acceleration: A number. Acceleration in chars per second squared.
     Defaults to 10.0
     """
     def __init__(self, *args, acceleration=10.0, have_waited=0, **kwargs):
@@ -202,7 +201,7 @@ class ProjectileCollisionComponent(CollisionComponent):
     """
     A collision component that damages whatever its owner is collided into
     """
-    
+    # TODO: sound or something upon collision
     def __init__(self, *args, damage=1, **kwargs):
         super().__init__(*args, **kwargs)
         self.damage = damage
@@ -260,36 +259,11 @@ class HazardCollisionComponent(CollisionComponent):
 
     def __repr__(self):
         d = loads(super().__repr__())
-        d['damage'] = self.damage
-        d['damage_cooldown'] = self.damage_cooldown
-        d['have_waited'] = self.have_waited
-        d['on_cooldown'] = self.on_cooldown
-
-#
-# class SpawnerCollisionComponent(CollisionComponent):
-#     """
-#     Spawns something when a correct entity collides into it
-#
-#     Expects the owner to have SpawnComponent, PositionComponent and WidgetComponent
-#     """
-#     def __init__(self, *args, entity_filter=lambda x: True,
-#                  spawned_item='message', spawn_kwargs={'text': 'Spawned text'},
-#                  **kwargs):
-#         super().__init__(*args, **kwargs)
-#         if not hasattr(entity_filter, '__call__'):
-#             raise BearECSException('entity_filter should be callable')
-#         self.entity_filter = entity_filter
-#         self.spawned_item = spawned_item
-#         self.spawn_kwargs = spawn_kwargs
-#
-#     def collided_by(self, entity):
-#         if self.entity_filter(entity):
-#             # If collided into by a correct entity
-#             self.owner.spawner.spawn(self.spawned_item,
-#                                      (round(self.owner.widget.width/2),
-#                                       round(self.owner.widget.height/2)),
-#                                      **self.spawn_kwargs)
-#             self.owner.destructor.destroy()
+        d.update({'damage': self.damage,
+                  'damage_cooldown': self.damage_cooldown,
+                  'have_waited': self.have_waited,
+                  'on_cooldown': self.on_cooldown})
+        return dumps(d)
 
 
 class GrenadeCollisionComponent(CollisionComponent):
@@ -303,7 +277,7 @@ class GrenadeCollisionComponent(CollisionComponent):
     """
     def collided_into(self, entity):
         if entity is None:
-            # If vy is negative (ie on the rise), it's possible that the bottle
+            # If vy is negative (ie on the rise), it's possible that the grenade
             # collided into screen top. In that case, just bounce off it
             if self.owner.position.vy < 0:
                 self.owner.position.vy = 0
@@ -341,8 +315,9 @@ class GrenadeComponent(Component):
 
     def __repr__(self):
         d = loads(super().__repr__())
-        {}.update({'spawned_item': self.spawned_item,
+        d.update({'spawned_item': self.spawned_item,
                    'target_y': self.target_y})
+        return dumps(d)
 
     
 class HealthComponent(Component):
@@ -417,9 +392,9 @@ class CharacterHealthComponent(HealthComponent):
             self.owner.destructor.destroy()
 
     def __repr__(self):
-        return dumps({'class': self.__class__.__name__,
-                      'hitpoints': self.hitpoints,
-                      'corpse': self.corpse_type})
+        d = loads(super().__repr__())
+        d['corpse'] = self.corpse_type
+        return dumps(d)
 
 
 class VisualDamageHealthComponent(HealthComponent):
@@ -473,6 +448,8 @@ class SpawnerComponent(Component):
         self.factory.create_entity(item, (self.owner.position.x + relative_pos[0],
                                           self.owner.position.y + relative_pos[1]),
                                    **kwargs)
+    # No __repr__ because its only kwarg is the factory instance that cannot
+    # be stored between runs.
 
 
 class FactionComponent(Component):
@@ -548,17 +525,6 @@ class InputComponent(Component):
                     self.owner.hands.pick_up(hand='right')
                     self.current_action_delay = self.action_delay
                 elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
-                    # TODO: Call correct jump image
-                    # Current placeholder solution just teleports the cop
-                    # immediately and spawns a separate jumping animation entity
-                    # if self.owner.position.direction == 'r':
-                    #     self.owner.spawner.spawn('cop_jump', (2, -5),
-                    #                              direction='r')
-                    #     self.next_move[0] += 30
-                    # else:
-                    #     self.next_move[0] -= 30
-                    #     self.owner.spawner.spawn('cop_jump', (-8, -5),
-                    #                              direction='l')
                     self.owner.position.jump()
                     self.current_action_delay = self.action_delay
             # These actions are available whether or not the player is dead
@@ -1059,7 +1025,7 @@ class ItemBehaviourComponent(Component):
             # when the item is first used. If the entity is still not created by
             # then, no attempt to catch the resulting KeyError is made.
             #
-            # Trying to set entity outright via EntityTracker() causes a bug
+            # Trying to set entity outright via EntityTracker() causes a bug:
             # empty component-less entity being used upon loading. It's easier
             # to postpone everything than try to figure out this weird bug,
             # probably related to the exact order in which entities are
@@ -1118,8 +1084,8 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     owner's widget to be SwitchWidgetComponent. Expects the method responsible
     for the creation of spawned object to accept ``direction`` kwarg
     """
-    def __init__(self, *args, spawned_items={'bullet':{'r': (0, 0),
-                                                       'l': (0, 0)}},
+    def __init__(self, *args, spawned_items={'bullet': {'r': (0, 0),
+                                                        'l': (0, 0)}},
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.spawned_items = spawned_items

@@ -3,7 +3,6 @@
 from argparse import ArgumentParser
 from os import path
 import sys
-import json
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
@@ -53,8 +52,11 @@ layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 50))
 dispatcher.register_listener(layout, 'all')
 factory = EntityFactory(atlas, dispatcher, layout)
 
+################################################################################
 # Game-specific event types
 # Expected values shown for each type
+################################################################################
+
 # Combat system
 dispatcher.register_event_type('brut_damage') # EntityID, value (int)
 dispatcher.register_event_type('brut_heal') # EntityID, value (int)
@@ -85,8 +87,7 @@ t.add_widget(Widget(*atlas.get_element('hud_bg')),
 # TODO: remove cop_1 and create variable for player char ID
 # The current system in bunch of places relies on player's entity ID always
 # being cop_1. This may not be correct and normally should be stored as a
-# variable. But this is probably not gonna be important until saves save stuff
-# besides entities
+# variable. But this is probably not gonna be important until later
 hp_bar = HitpointBar(target_entity='cop_1')
 dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
 left_item_window = ItemWindow('cop_1', 'left', atlas)
@@ -210,9 +211,13 @@ loop.run()
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
 
-#TODO: draw appropriate item descriptions
+#TODO: write appropriate item descriptions
 # Not really pressing, but it's better to avoid stupid jokes in item
 # descriptions. The general tone should be *somewhat* serious.
 
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
+
+# TODO: generate level switch widgets procedurally within map generator
+
+# TODO: talkative characters

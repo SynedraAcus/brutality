@@ -185,7 +185,7 @@ def choose_next(transitions):
             return element
 
 
-def generate_bg(atlas, transition_dict, width, height=20):
+def generate_bg(atlas, transition_dict, width):
     """
     Randomly assemble the background.
 
