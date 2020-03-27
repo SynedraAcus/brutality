@@ -610,7 +610,9 @@ class MeleeControllerComponent(Component):
                     self.action_cooldown = self.walk_delay
                 else:
                     # Change direction
-                    # self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
+                    # TODO: switch sounds when the punk AI is switching state
+                    # from idle to combat. Obviously not doable until AI has states
+                    self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
                 if abs(dx) <= 15 and abs(dy) <= 10:
                     # and change behaviours accordingly

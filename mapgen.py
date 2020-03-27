@@ -67,6 +67,7 @@ class LevelManager(metaclass=Singleton):
         filter_method = self.should_remove if not destroy_player else lambda x: True
         for entity in EntityTracker().filter_entities(filter_method):
             entity.destructor.destroy()
+        self.dispatcher.add_event(BearEvent('set_bg_sound', None))
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
         # Disable level switch to make sure it doesn't trigger mid-level change
@@ -83,7 +84,8 @@ class LevelManager(metaclass=Singleton):
         :return:
         """
         # if current level is set, destroy it
-        self.destroy_current_level()
+        if self.level_switch.current_level:
+            self.destroy_current_level()
         getattr(self, self.methods[level_id])()
         # set player position to whatever it should be
         player = EntityTracker().entities[self.player_entity]
@@ -99,15 +101,16 @@ class LevelManager(metaclass=Singleton):
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('bandage', (15, 40))
         self.factory.create_entity('pistol', (20, 40))
-        self.factory.create_entity('bottle_punk', (50, 30))
-        self.factory.create_entity('nunchaku_punk', (150, 30))
+        self.factory.create_entity('bottle_punk', (320, 10))
+        self.factory.create_entity('nunchaku_punk', (350, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('level_switch', (100, 30))
+        self.factory.create_entity('level_switch', (400, 30))
         # Set level switch coordinates
-        self.level_switch.switch_pos = (100, 30)
+        self.level_switch.switch_pos = (400, 30)
         self.level_switch.switch_size = (15, 4)
 
     def _department(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
         self.factory.create_entity('level_switch', (415, 33))
         self.level_switch.switch_pos = (415, 33)
         self.level_switch.switch_size = (15, 4)
