@@ -103,14 +103,10 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (100, 30))
-        # Set level switch coordinates
-        self.level_switch.switch_pos = (100, 30)
-        self.level_switch.switch_size = (15, 4)
 
     def _department(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
         self.factory.create_entity('level_switch', (415, 33))
-        self.level_switch.switch_pos = (415, 33)
-        self.level_switch.switch_size = (15, 4)
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))

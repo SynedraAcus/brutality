@@ -208,7 +208,6 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
-        return entity.id
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
@@ -228,7 +227,7 @@ class EntityFactory:
         w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher,affect_z=True))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -363,6 +362,10 @@ class EntityFactory:
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher)),
         e.add_component(DestructorComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher, depth=4,
+                                           z_shift=(1, -1),
+                                           face_position=(0, 3),
+                                           face_size=(12, 1), passable=True))
         return e
 
     def _create_flame(self, entity_id, **kwargs):

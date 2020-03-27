@@ -153,7 +153,8 @@ level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
                                    level_sequence={
                                        'ghetto_test': 'department',
                                        'department': 'ghetto_tutorial'})
-dispatcher.register_listener(level_switch, 'ecs_move')
+dispatcher.register_listener(level_switch, ('ecs_move', 'ecs_collision',
+                                            'tick', 'service'))
 levelgen.level_switch = level_switch
 
 # Saving and loading
