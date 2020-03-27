@@ -366,7 +366,7 @@ class DestructorHealthComponent(HealthComponent):
     """
     Destroys entity upon reaching zero HP
     """
-    def process_hitpoint_update(self):
+    def process_hitpoint_update(self, value):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
             self.owner.destructor.destroy()
 
@@ -379,16 +379,26 @@ class CharacterHealthComponent(HealthComponent):
     Expects owner to have SpawnerComponent, HandInterfaceComponent and
     DestructorComponent
     """
-    def __init__(self, *args, corpse=None, **kwargs):
+    def __init__(self, *args, corpse=None,
+                 hit_sound=None, death_sound=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.corpse_type = corpse
+        self.hit_sound = hit_sound
+        self.death_sound = death_sound
+        self.last_hp = self.hitpoints
 
     def process_hitpoint_update(self):
+        if 0 < self.hitpoints < self.last_hp and self.hit_sound:
+            self.last_hp = self.hitpoints
+            self.dispatcher.add_event(BearEvent('play_sound', self.hit_sound))
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
                                      relative_pos=(0, self.owner.widget.height - 9))
             self.owner.hands.drop('right')
             self.owner.hands.drop('left')
+            if self.death_sound:
+                self.dispatcher.add_event(BearEvent('play_sound',
+                                                    self.death_sound))
             self.owner.destructor.destroy()
 
     def __repr__(self):

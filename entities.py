@@ -609,7 +609,9 @@ class EntityFactory:
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='bottle_punk_corpse',
-                                                    hitpoints=5))
+                                                    hitpoints=5,
+                                                    hit_sound='punk_hit',
+                                                    death_sound='punk_death'))
         punk.add_component(BottleControllerComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
