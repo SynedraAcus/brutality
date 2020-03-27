@@ -610,6 +610,7 @@ class MeleeControllerComponent(Component):
                     self.action_cooldown = self.walk_delay
                 else:
                     # Change direction
+                    # self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
                     self.owner.position.turn(dx < 0 and 'r' or 'l')
                 if abs(dx) <= 15 and abs(dy) <= 10:
                     # and change behaviours accordingly
@@ -1004,10 +1005,12 @@ class ItemBehaviourComponent(Component):
                  single_use = False,
                  item_name = 'PLACEHOLDER',
                  item_description = 'Someone failed to write\nan item description',
+                 use_sound = None,
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
         self.item_name = item_name
         self.single_use = single_use
+        self.use_sound = use_sound
         self.is_destroying = False
         d = item_description.split('\n')
         if len(d) > 5 or any(len(x)>28 for x in d):
@@ -1049,6 +1052,9 @@ class ItemBehaviourComponent(Component):
     def use_item(self):
         if self.single_use:
             self.is_destroying = True
+        if self.use_sound:
+            # TODO: set use_sound for pistol instead of calling directly
+            self.dispatcher.add_event(BearEvent('play_sound', self.use_sound))
 
     def on_event(self, event):
         if event.event_type == 'brut_use_item' and event.event_value == self.owner.id:

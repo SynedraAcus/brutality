@@ -492,7 +492,8 @@ class EntityFactory:
                                                   faction='police'))
         cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
                                                           corpse='cop_corpse',
-                                                          hitpoints=10))
+                                                          hitpoints=10,
+                                                          death_sounds=('cop_death', )))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
@@ -897,6 +898,7 @@ class EntityFactory:
                                              should_hide=False))
         entity.add_component(HealingItemBehaviourComponent(self.dispatcher,
                                                     single_use=True,
+                                                    use_sound='bandage',
                                                     owning_entity=owning_entity,
                                                     item_name='Bandage',
                                                     item_description='A piece of sterile bandage.\nIt isn\'t much, but still \na lot better than nothing.'))

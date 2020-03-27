@@ -123,15 +123,18 @@ logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['ecs_collision', 'set_bg_sound', 'brut_heal'])
 
 if not args.disable_sound:
-    from bear_hug.sound import SoundListener
     sound_files = {'step': 'step.wav',
                    'shot': 'shot.wav',
                    'punch': 'punch.wav',
                    'drive': 'drive.wav',
                    'supercop_bg': 'supercop.wav',
+                   'ghetto_walk_bg': 'ghetto_walk.wav',
                    'punk_bg': 'punk_bg.wav',
                    'punk_hit': 'punk_hey.wav',
-                   'punk_death': 'punk_ho.wav'}
+                   'punk_death': 'punk_ho.wav',
+                   'cop_death': 'cop_death.wav',
+                   'bandage': 'bondage.wav'}
+    from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:
         sounds[file] = path.join(path_base, 'sounds', sound_files[file])
