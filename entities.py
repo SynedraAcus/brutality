@@ -551,8 +551,9 @@ class EntityFactory:
         nunchaku.add_component(CharacterHealthComponent(self.dispatcher,
                                                         corpse='nunchaku_punk_corpse',
                                                         hitpoints=5,
-                                                        hit_sound='punk_hit',
-                                                        death_sound='punk_death'
+                                                        hit_sounds=('punk_hit',
+                                                                    'punk_death'),
+                                                        death_sounds=('punk_death', )
                                                         ))
         nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
         nunchaku.add_component(FactionComponent(self.dispatcher,
@@ -613,8 +614,9 @@ class EntityFactory:
         punk.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='bottle_punk_corpse',
                                                     hitpoints=5,
-                                                    hit_sound='punk_hit',
-                                                    death_sound='punk_death'))
+                                                    hit_sounds=('punk_hit',
+                                                                'punk_death'),
+                                                    death_sounds=('punk_death', )))
         punk.add_component(BottleControllerComponent(self.dispatcher))
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))

@@ -92,7 +92,7 @@ class LevelManager(metaclass=Singleton):
         self.level_switch.enable()
 
     def _ghetto_test(self):
-        self.dispatcher.add_event(BearEvent('play_sound', 'punk_death'))
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the

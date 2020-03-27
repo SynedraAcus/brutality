@@ -130,8 +130,8 @@ if not args.disable_sound:
                    'drive': 'drive.wav',
                    'supercop_bg': 'supercop.wav',
                    'punk_bg': 'punk_bg.wav',
-                   'punk_hit': 'punk_hit.wav',
-                   'punk_death': 'punk_death.wav'}
+                   'punk_hit': 'punk_hey.wav',
+                   'punk_death': 'punk_ho.wav'}
     sounds = {}
     for file in sound_files:
         sounds[file] = path.join(path_base, 'sounds', sound_files[file])

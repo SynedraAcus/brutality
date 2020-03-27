@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from json import dumps, loads
 from math import sqrt
-from random import randint
+from random import randint, choice
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
@@ -380,25 +380,26 @@ class CharacterHealthComponent(HealthComponent):
     DestructorComponent
     """
     def __init__(self, *args, corpse=None,
-                 hit_sound=None, death_sound=None, **kwargs):
+                 hit_sounds=None, death_sounds=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.corpse_type = corpse
-        self.hit_sound = hit_sound
-        self.death_sound = death_sound
+        self.hit_sounds = hit_sounds
+        self.death_sounds = death_sounds
         self.last_hp = self.hitpoints
 
     def process_hitpoint_update(self):
-        if 0 < self.hitpoints < self.last_hp and self.hit_sound:
+        if 0 < self.hitpoints < self.last_hp and self.hit_sounds:
             self.last_hp = self.hitpoints
-            self.dispatcher.add_event(BearEvent('play_sound', self.hit_sound))
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                choice(self.hit_sounds)))
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
                                      relative_pos=(0, self.owner.widget.height - 9))
             self.owner.hands.drop('right')
             self.owner.hands.drop('left')
-            if self.death_sound:
+            if self.death_sounds:
                 self.dispatcher.add_event(BearEvent('play_sound',
-                                                    self.death_sound))
+                                                    choice(self.death_sounds)))
             self.owner.destructor.destroy()
 
     def __repr__(self):
