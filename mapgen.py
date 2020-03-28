@@ -111,7 +111,7 @@ class LevelManager(metaclass=Singleton):
 
     def _department(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
-        self.factory.create_entity('level_switch', (415, 33))
+        self.factory.create_entity('level_switch', (415, 20), size=(85, 30))
         self.level_switch.switch_pos = (415, 33)
         self.level_switch.switch_size = (15, 4)
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
