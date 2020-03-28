@@ -156,7 +156,8 @@ level_switch = LevelSwitchListener('cop_1', level_manager=levelgen,
                                    level_sequence={
                                        'ghetto_test': 'department',
                                        'department': 'ghetto_tutorial'})
-dispatcher.register_listener(level_switch, 'ecs_move')
+dispatcher.register_listener(level_switch, ('ecs_move', 'ecs_collision',
+                                            'tick', 'service'))
 levelgen.level_switch = level_switch
 
 # Saving and loading
@@ -222,7 +223,5 @@ loop.run()
 
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
-
-# TODO: generate level switch widgets procedurally within map generator
 
 # TODO: talkative characters

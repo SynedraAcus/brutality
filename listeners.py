@@ -323,8 +323,7 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
 
     Currently only able to switch them in a fixed sequence.
     """
-    def __init__(self, player_id, switch_pos = None, switch_size = None,
-                 current_level=None,
+    def __init__(self, player_id,  current_level=None,
                  level_manager=None, level_sequence={}, **kwargs):
         # TODO: next_level dict for current levels
         # This will permit multiple exits per level
@@ -338,9 +337,8 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
             if x not in self.level_manager.methods:
                 raise ValueError(f'Invalid level {x} supplied to LevelSwitchListener')
         self.level_sequence = level_sequence
-        self.switch_pos = switch_pos
-        self.switch_size = switch_size
         self.enabled = True
+        self.is_changing = False
 
     def on_event(self, event):
         if not self.enabled:
@@ -349,13 +347,17 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
                 event.event_value[0] == self.player_id:
             if not self.player_entity:
                 self.player_entity = EntityTracker().entities[self.player_id]
-            if rectangles_collide(self.switch_pos, self.switch_size,
-                                  self.player_entity.position.pos,
-                                  self.player_entity.widget.size):
-                next_level = self.level_sequence[self.current_level]
-                self.level_manager.set_level(next_level)
-                # TODO: a delay between levels to let sound play out
+        # TODO: a delay between levels to let sound play out
+        # maybe show something? Like an image? Lots of work to draw, though
+        # Maybe some text re: objectives
+        elif event.event_type == 'ecs_collision' and event.event_value[0] == self.player_id:
+            if 'level_switch' in event.event_value[1]:
+                self.is_changing = True
                 return BearEvent('play_sound', 'drive')
+        elif event.event_type == 'tick' and self.is_changing:
+            self.is_changing = False
+            next_level = self.level_sequence[self.current_level]
+            self.level_manager.set_level(next_level)
 
     def disable(self):
         """

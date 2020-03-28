@@ -201,7 +201,6 @@ class ProjectileCollisionComponent(CollisionComponent):
     """
     A collision component that damages whatever its owner is collided into
     """
-    # TODO: sound or something upon collision
     def __init__(self, *args, damage=1, **kwargs):
         super().__init__(*args, **kwargs)
         self.damage = damage
@@ -859,9 +858,6 @@ class HandInterfaceComponent(Component):
         # Offsets of items relative to the hand, ie the position of the
         # outer tip of the hand. For left-facing items, *right edge* of the item
         # should be at this position
-        # TODO: let items define their offsets
-        # Some items should not be grabbed by their topmost char and look stupid
-        # when they are (eg nunchaku)
         self.item_offsets = item_offsets
         self.left_item = left_item
         self.right_item = right_item
@@ -886,8 +882,10 @@ class HandInterfaceComponent(Component):
         item.widget.switch_to_image(self.owner.position.direction)
         item.widget.z_level = self.owner.widget.z_level + 1
         item.hiding.show()
-        item_x = hand_x + self.item_offsets[hand_label][0]
-        item_y = hand_y + self.item_offsets[hand_label][1]
+        item_x = hand_x + self.item_offsets[hand_label][0] \
+                        + item.item_behaviour.grab_offset[0]
+        item_y = hand_y + self.item_offsets[hand_label][1] \
+                        + item.item_behaviour.grab_offset[1]
         if self.owner.position.direction == 'l':
             item_x -= item.widget.width
         item.position.move(item_x, item_y)
@@ -1005,6 +1003,7 @@ class ItemBehaviourComponent(Component):
 
     def __init__(self, *args, owning_entity=None,
                  single_use = False,
+                 grab_offset = (0, 0),
                  item_name = 'PLACEHOLDER',
                  item_description = 'Someone failed to write\nan item description',
                  use_sound = None,
@@ -1014,6 +1013,7 @@ class ItemBehaviourComponent(Component):
         self.single_use = single_use
         self.use_sound = use_sound
         self.is_destroying = False
+        self.grab_offset = grab_offset
         d = item_description.split('\n')
         if len(d) > 5 or any(len(x)>28 for x in d):
             raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
@@ -1074,6 +1074,7 @@ class ItemBehaviourComponent(Component):
             d['owning_entity'] = self.owning_entity.id
         except AttributeError:
             d['owning_entity'] = self._future_owner
+        d['grab_offset'] = self.grab_offset
         return dumps(d)
 
 

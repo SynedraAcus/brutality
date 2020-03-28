@@ -13,7 +13,7 @@ from bear_hug.resources import Atlas, XpLoader
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
-from widgets import ParticleWidget
+from widgets import ParticleWidget, LevelSwitchWidget
 
 
 class EntityFactory:
@@ -208,7 +208,6 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
-        return entity.id
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
@@ -228,7 +227,7 @@ class EntityFactory:
         w = generate_bg(self.atlas, ghetto_transition, size[0])
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
-        wall.add_component(PositionComponent(self.dispatcher,affect_z=True))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -353,16 +352,22 @@ class EntityFactory:
         barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
 
-    def _create_level_switch(self, entity_id, **kwargs):
+    def _create_level_switch(self, entity_id, size=(25, 5), **kwargs):
         e = Entity(entity_id)
-        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
-                                                  self.atlas.get_element('level_switch_2'),
-                                                  self.atlas.get_element('level_switch_3')),
-                                                 2),
-                                       emit_ecs=True)
+        # widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
+        #                                           self.atlas.get_element('level_switch_2'),
+        #                                           self.atlas.get_element('level_switch_3')),
+        #                                          2),
+        #                                emit_ecs=True)
+        widget = LevelSwitchWidget(size=size)
         e.add_component(WidgetComponent(self.dispatcher, widget))
-        e.add_component(PositionComponent(self.dispatcher)),
+        e.add_component(PositionComponent(self.dispatcher))
         e.add_component(DestructorComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher, depth=size[1],
+                                           z_shift=(1, -1),
+                                           face_position=(0, size[1]),
+                                           face_size=(size[0] - size[1] - 1, 1),
+                                           passable=True))
         return e
 
     def _create_flame(self, entity_id, **kwargs):
@@ -590,8 +595,8 @@ class EntityFactory:
                                                             'back_r': (0, 4)},
                                                         item_offsets={
                                                             'forward_l': (0, 0),
-                                                            'forward_r': (8, 0),
-                                                            'back_l': (0, -2),
+                                                            'forward_r': (8, 1),
+                                                            'back_l': (0, -1),
                                                             'back_r': (4, 0)},
                                                         right_item=weapon.id,
                                                         left_item=fist.id))
@@ -845,6 +850,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (8, -1),
                                                              'l': (-1, -2)}},
+                                    grab_offset=(0, -1),
                                     item_name='Nunchaku',
                                     item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
         entity.add_component(HidingComponent(self.dispatcher,
