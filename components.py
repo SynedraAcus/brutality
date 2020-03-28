@@ -855,9 +855,6 @@ class HandInterfaceComponent(Component):
         # Offsets of items relative to the hand, ie the position of the
         # outer tip of the hand. For left-facing items, *right edge* of the item
         # should be at this position
-        # TODO: let items define their offsets
-        # Some items should not be grabbed by their topmost char and look stupid
-        # when they are (eg nunchaku)
         self.item_offsets = item_offsets
         self.left_item = left_item
         self.right_item = right_item
