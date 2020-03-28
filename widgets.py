@@ -8,7 +8,8 @@ from random import choice, uniform
 from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException, \
     generate_box, BearLayoutException
 from bear_hug.event import BearEvent
-from bear_hug.widgets import Widget, Label, Layout
+from bear_hug.widgets import Animation, Widget, Label, Layout,\
+    SimpleAnimationWidget
 from bear_hug.bear_hug import BearTerminal
 
 
@@ -194,3 +195,56 @@ class ParticleWidget(Widget):
 # TODO: Better customization for ParticleWidget
 # Multiple characters, multiple colors, movement other than explosion from the
 # center, etc
+
+
+class LevelSwitchWidget(SimpleAnimationWidget):
+    """
+    A blinking level switch of required size
+
+    Note: size is actually the rectangle around the switch, not only its visible
+    part. For example, this (with invisible part represented by dots) has the
+    size of (7, 4)
+
+    ...////
+    ..////.
+    .////..
+    ////...
+
+    Although the actual blinking parallelogram is 4 x 4.
+
+    Width should always be no less than height, otherwise no parallelogram could
+    possibly fit inside. If they are equal, resulting parallelogram will have
+    width of exactly 1 char.
+    """
+    def __init__(self, size=(10, 5)):
+        # pregenerate chars
+        if size[1] > size[0]:
+            raise ValueError('Width of LevelSwitchWidget should be at least as high as its height.')
+        chars = []
+        offset = size[1] - 1
+        running_offset = offset
+        for _ in range(size[1]):
+            chars.append([' '] * running_offset
+                         + ['>'] * (size[0] - offset)
+                         + [' '] * (offset - running_offset))
+            running_offset -= 1
+        colors = copy_shape(chars, 'white')
+        colors2 = copy_shape(chars, '#D900D9')
+        colors3 = copy_shape(chars, '#D900D9')
+        color_list = ('#400040', '#8C008C', '#D900D9')
+        offset = 0
+        for y in range(len(colors)):
+            for x in range(len(colors[0])):
+                # print((x + offset) % 3, end=',')
+                colors[y][x] = color_list[(x + offset) % 3]
+                colors2[y][x] = color_list[(x + 1 + offset) % 3]
+                colors3[y][x] = color_list[(x + 2 + offset) % 3]
+            # print('\n')
+            offset += 1
+            if offset == 3:
+                offset = 0
+        super().__init__(Animation([(chars, colors3),
+                                    (chars, colors2),
+                                    (chars, colors)],
+                                   2))
+

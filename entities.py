@@ -13,7 +13,7 @@ from bear_hug.resources import Atlas, XpLoader
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
-from widgets import ParticleWidget
+from widgets import ParticleWidget, LevelSwitchWidget
 
 
 class EntityFactory:
@@ -352,20 +352,22 @@ class EntityFactory:
         barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
 
-    def _create_level_switch(self, entity_id, **kwargs):
+    def _create_level_switch(self, entity_id, size=(25, 5), **kwargs):
         e = Entity(entity_id)
-        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
-                                                  self.atlas.get_element('level_switch_2'),
-                                                  self.atlas.get_element('level_switch_3')),
-                                                 2),
-                                       emit_ecs=True)
+        # widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
+        #                                           self.atlas.get_element('level_switch_2'),
+        #                                           self.atlas.get_element('level_switch_3')),
+        #                                          2),
+        #                                emit_ecs=True)
+        widget = LevelSwitchWidget(size=size)
         e.add_component(WidgetComponent(self.dispatcher, widget))
-        e.add_component(PositionComponent(self.dispatcher)),
+        e.add_component(PositionComponent(self.dispatcher))
         e.add_component(DestructorComponent(self.dispatcher))
-        e.add_component(CollisionComponent(self.dispatcher, depth=4,
+        e.add_component(CollisionComponent(self.dispatcher, depth=size[1],
                                            z_shift=(1, -1),
-                                           face_position=(0, 3),
-                                           face_size=(12, 1), passable=True))
+                                           face_position=(0, size[1]),
+                                           face_size=(size[0] - size[1] - 1, 1),
+                                           passable=True))
         return e
 
     def _create_flame(self, entity_id, **kwargs):

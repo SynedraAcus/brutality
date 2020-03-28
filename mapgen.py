@@ -99,14 +99,15 @@ class LevelManager(metaclass=Singleton):
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('bandage', (15, 40))
         self.factory.create_entity('pistol', (20, 40))
-        self.factory.create_entity('bottle_punk', (50, 30))
-        self.factory.create_entity('nunchaku_punk', (150, 30))
+        # self.factory.create_entity('bottle_punk', (50, 30))
+        # self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('level_switch', (100, 30))
+        self.factory.create_entity('level_switch', (50, 30))
 
     def _department(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
-        self.factory.create_entity('level_switch', (415, 33))
+        self.factory.create_entity('level_switch', (415, 20),
+                                   size=(85, 30))
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -152,6 +153,14 @@ class LevelManager(metaclass=Singleton):
                             size=(30, 8),
                             kwargs={
                                 'text': 'We got a damn punk infestation\ndown the street.\n\nGo do something about it',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(380, 20),
+                            size=(30, 8),
+                            kwargs={
+                                'text': 'Walk into the purple stuff to exit level',
                                 'destroy_condition': 'timeout',
                                 'lifetime': 5,
                                 'vy': -2}))
