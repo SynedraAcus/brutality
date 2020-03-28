@@ -594,8 +594,8 @@ class EntityFactory:
                                                             'back_r': (0, 4)},
                                                         item_offsets={
                                                             'forward_l': (0, 0),
-                                                            'forward_r': (8, 0),
-                                                            'back_l': (0, -2),
+                                                            'forward_r': (8, 1),
+                                                            'back_l': (0, -1),
                                                             'back_r': (4, 0)},
                                                         right_item=weapon.id,
                                                         left_item=fist.id))
@@ -849,6 +849,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (8, -1),
                                                              'l': (-1, -2)}},
+                                    grab_offset=(0, -1),
                                     item_name='Nunchaku',
                                     item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
         entity.add_component(HidingComponent(self.dispatcher,

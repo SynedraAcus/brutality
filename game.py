@@ -221,6 +221,4 @@ loop.run()
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
 
-# TODO: generate level switch widgets procedurally within map generator
-
 # TODO: talkative characters
