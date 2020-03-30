@@ -169,7 +169,7 @@ class AgressorCombatState(AIState):
             self.current_closest = current_closest
 
 
-class NunchakuAgressorCombatState(AIState):
+class NunchakuAgressorCombatState(AgressorCombatState):
     """
     When there is an enemy in nunchaku range, tries to whack them with right
     item
@@ -187,7 +187,7 @@ class NunchakuAgressorCombatState(AIState):
             # If in melee range, attack with right hand
             self.owner.hands.use_hand('right')
             # TODO: let items define their use delays
-            return 0.5
+            return 1.5
         else:
             i = randint(0, abs(dx) + abs(dy))
             if i <= abs(dx):
@@ -197,7 +197,7 @@ class NunchakuAgressorCombatState(AIState):
             return 0.2
 
 
-class BottleThrowerCombatState(AIState):
+class BottleAgressorCombatState(AgressorCombatState):
     """
     Switches to a peaceful state when there is nobody to fight
 
@@ -212,11 +212,17 @@ class BottleThrowerCombatState(AIState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if abs(dx) <= 15 and abs(dy) <= 10:
-            # If in melee range, attack with right hand
+        if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
             self.owner.hands.use_hand('right')
-            # TODO: let items define their use delays
+            return 1
+        elif abs(dx) < 10 and abs(dy) < 5:
+            # Try melee if caught in close quarters
+            self.owner.hands.use_hand('left')
             return 0.5
+        elif abs(dx) < 35:
+            # Run away if 5 < dx < 30, whatever dy
+            self.owner.position.walk((dx < 0 and -1 or 1, 0))
+            return 0.2
         else:
             i = randint(0, abs(dx) + abs(dy))
             if i <= abs(dx):

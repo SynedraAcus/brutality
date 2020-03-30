@@ -10,7 +10,8 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
-from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState
+from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
+    BottleAgressorCombatState
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
@@ -633,7 +634,16 @@ class EntityFactory:
                                                     hit_sounds=('punk_hit',
                                                                 'punk_death'),
                                                     death_sounds=('punk_death', )))
-        punk.add_component(BottleControllerComponent(self.dispatcher))
+        # punk.add_component(BottleControllerComponent(self.dispatcher))
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': AgressorPeacefulState(self.dispatcher,
+                                                       combat_state='attack',
+                                                       perception_distance=50),
+                                 'attack': BottleAgressorCombatState(self.dispatcher,
+                                                     peaceful_state='wait',
+                                                     perception_distance=50)},
+                         current_state='wait',
+                         owner=punk)
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
         f_l = self._create_hand(f'{entity_id}_hand_fl',
