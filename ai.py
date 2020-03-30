@@ -54,7 +54,6 @@ class AIComponent(Component):
             # First check whether one should switch state
             next_state = self.states[self.current_state].switch_state()
             if next_state:
-                print(next_state)
                 if next_state not in self.states:
                     raise ValueError(f'AIComponent attempted to switch to unknown state {next_state}')
                 self.current_state = next_state
@@ -132,6 +131,8 @@ class AgressorPeacefulState(AIState):
                                              self.perception_distance)
         if current_closest:
             # Set combat music
+            # TODO: some fadeout between this and previous bg
+            # Maybe a general thing with bg sound switches?
             self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
             return self.combat_state
 
@@ -139,11 +140,12 @@ class AgressorPeacefulState(AIState):
         return self.check_delay
 
 
-class MeleeAgressorCombatState(AIState):
+class AgressorCombatState(AIState):
     """
-    Switches to AgressorPeacefulState when there is nobody to fight
+    A base class for agressor combat states.
 
-    When there is, it tries to whack them with right item
+    Switches to a peaceful state when there is nobody to fight, but expects
+    child classes to define ``take_action``
     """
     def __init__(self, *args, peaceful_state=None,
                  perception_distance=150, **kwargs):
@@ -155,6 +157,7 @@ class MeleeAgressorCombatState(AIState):
     def switch_state(self):
         """
         Similar to AgressorPeacefulState, except the other way around
+
         :return:
         """
         current_closest = find_closest_enemy(self.owner,
@@ -165,6 +168,41 @@ class MeleeAgressorCombatState(AIState):
             # Store enemy entity for future reference
             self.current_closest = current_closest
 
+
+class NunchakuAgressorCombatState(AIState):
+    """
+    When there is an enemy in nunchaku range, tries to whack them with right
+    item
+    """
+    def take_action(self):
+        # On every tick except the first after it got switched in,
+        # self.current_closest is freshly populated by switch.state.
+        # This check makes sure it's not trying to attack None on the 1st tick
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        if abs(dx) <= 15 and abs(dy) <= 10:
+            # If in melee range, attack with right hand
+            self.owner.hands.use_hand('right')
+            # TODO: let items define their use delays
+            return 0.5
+        else:
+            i = randint(0, abs(dx) + abs(dy))
+            if i <= abs(dx):
+                self.owner.position.walk((dx < 0 and 1 or -1, 0))
+            else:
+                self.owner.position.walk((0, dy < 0 and 1 or -1))
+            return 0.2
+
+
+class BottleThrowerCombatState(AIState):
+    """
+    Switches to a peaceful state when there is nobody to fight
+
+    When there is, it tries to either throw bottle from the right hand or
+    """
     def take_action(self):
         # On every tick except the first after it got switched in,
         # self.current_closest is freshly populated by switch.state.
