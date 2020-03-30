@@ -230,3 +230,9 @@ class BottleAgressorCombatState(AgressorCombatState):
             else:
                 self.owner.position.walk((0, dy < 0 and 1 or -1))
             return 0.2
+
+# TODO: a more reasonable navigation logic for NPCs
+# Currently they get stuck around the obstacles and tend to start turning around
+# every few steps when on the edge of perception distance. It is probably gonna
+# look much better if they pick a direction, walk it for a few tens of steps,
+# then reconsider. Pretty trivial, but bound to look better

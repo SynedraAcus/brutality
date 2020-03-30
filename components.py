@@ -564,145 +564,6 @@ class InputComponent(Component):
         return r
 
 
-# class MeleeControllerComponent(Component):
-#     """
-#     Looks for objects with factions different from its own, moves towards them,
-#     and when in range, punches them with whatever is in his right hand.
-#
-#     Assumes that the owner has SpawnerComponent and WalkerComponent
-#     """
-#     def __init__(self, *args,
-#                  action_delay=0.5,
-#                  walk_delay=0.2,
-#                  perception_distance=150,
-#                  action_cooldown=0, **kwargs):
-#         super().__init__(*args, name='controller', **kwargs)
-#         self.dispatcher.register_listener(self, 'tick')
-#         self.action_delay = action_delay
-#         self.walk_delay = walk_delay
-#         self.action_cooldown = action_cooldown
-#         self.perception_distance = perception_distance
-#
-#     def on_event(self, event):
-#         if event.event_type == 'tick':
-#             # If on cooldown, be cooling down. Else, try and act
-#             if self.action_cooldown > 0:
-#                 self.action_cooldown -= event.event_value
-#             if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
-#                 enemies = list(EntityTracker().filter_entities(
-#                     lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
-#                 current_closest = None
-#                 min_dist = None
-#                 for enemy in enemies:
-#                     dx = self.owner.position.x - enemy.position.x
-#                     dy = self.owner.position.y - enemy.position.y
-#                     dist = sqrt(dx**2 + dy**2)
-#                     if (not min_dist or min_dist > dist) and dist < self.perception_distance:
-#                         current_closest = enemy
-#                 if not current_closest:
-#                     return
-#                 # Probably easier to recalculate for the selected enemy rather
-#                 # than bother caching, creating the dict and all that
-#                 dx = self.owner.position.x - current_closest.position.x
-#                 dy = self.owner.position.y - current_closest.position.y
-#                 if sqrt(dx ** 2 + dy ** 2) > self.perception_distance:
-#                     self.action_cooldown = self.walk_delay
-#                 else:
-#                     # Change direction
-#                     # from idle to combat. Obviously not doable until AI has states
-#                     self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
-#                     self.owner.position.turn(dx < 0 and 'r' or 'l')
-#                 if abs(dx) <= 15 and abs(dy) <= 10:
-#                     # and change behaviours accordingly
-#                     self.owner.hands.use_hand('right')
-#                     self.action_cooldown = self.action_delay
-#                 else:
-#                     i = randint(0, abs(dx) + abs(dy))
-#                     if i <= abs(dx):
-#                         self.owner.position.walk((dx < 0 and 1 or -1, 0))
-#                     else:
-#                         self.owner.position.walk((0, dy < 0 and 1 or -1))
-#                     self.action_cooldown = self.walk_delay
-#
-#     def __repr__(self):
-#         return dumps({'class': self.__class__.__name__,
-#                       'action_delay': self.action_delay,
-#                       'walk_delay': self.walk_delay,
-#                       'action_cooldown': self.action_cooldown,
-#                       'perception_distance': self.perception_distance})
-                
-
-# class BottleControllerComponent(Component):
-#     """
-#     A controller for the bottle-throwing punk.
-#
-#     Looks for entities with a faction different from its own and closes in until
-#     dy < 5 and 35 < dx < 40. When this condition is reached, uses an item in
-#     right hand (which is expected to be a bottle). If, at any moment, an enemy
-#     is closer than that, runs away instead
-#     """
-#
-#     def __init__(self, *args, action_delay=1.5, walk_delay=0.2,
-#                  perception_distance=150,
-#                  action_cooldown=0, **kwargs):
-#         super().__init__(*args, name='controller', **kwargs)
-#         self.dispatcher.register_listener(self, 'tick')
-#         self.action_delay = action_delay
-#         self.walk_delay = walk_delay
-#         self.action_cooldown = action_cooldown
-#         self.perception_distance = perception_distance
-#
-#     def on_event(self, event):
-#         if event.event_type == 'tick':
-#             if self.action_cooldown > 0:
-#                 self.action_cooldown -= event.event_value
-#             if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
-#                 enemies = list(EntityTracker().filter_entities(
-#                     lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
-#                 current_closest = None
-#                 min_dist = None
-#                 for enemy in enemies:
-#                     dx = self.owner.position.x - enemy.position.x
-#                     dy = self.owner.position.y - enemy.position.y
-#                     dist = sqrt(dx**2 + dy**2)
-#                     if (not min_dist or min_dist > dist) and dist < self.perception_distance:
-#                         current_closest = enemy
-#                 if not current_closest:
-#                     return
-#                 dx = self.owner.position.x - current_closest.position.x
-#                 dy = self.owner.position.y - current_closest.position.y
-#                 if sqrt(dx**2 + dy**2) > self.perception_distance:
-#                     self.action_cooldown = self.walk_delay
-#                 else:
-#                     # Change direction
-#                     self.owner.position.turn(dx < 0 and 'r' or 'l')
-#                 if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
-#                     self.owner.hands.use_hand('right')
-#                     self.action_cooldown = self.action_delay
-#                 elif abs(dx) < 10 and abs(dy) < 5:
-#                     # Try melee if caught in close quarters
-#                     self.owner.hands.use_hand('left')
-#                     self.action_cooldown = self.action_delay
-#                 elif abs(dx) < 35:
-#                     # Run away if 5 < dx < 30, whatever dy
-#                     self.owner.position.walk((dx < 0 and -1 or 1, 0))
-#                     self.action_cooldown = self.walk_delay
-#                 else:
-#                     i = randint(0, abs(dx) + abs(dy))
-#                     if i <= abs(dx):
-#                         self.owner.position.walk((dx < 0 and 1 or -1, 0))
-#                     else:
-#                         self.owner.position.walk((0, dy < 0 and 1 or -1))
-#                     self.action_cooldown = self.walk_delay
-#
-#     def __repr__(self):
-#         return dumps({'class': self.__class__.__name__,
-#                       'action_delay': self.action_delay,
-#                       'walk_delay': self.walk_delay,
-#                       'action_cooldown': self.action_cooldown,
-#                       'perception_distance': self.perception_distance})
-
-
 class HidingComponent(Component):
     """
     Hides the widget for a given entity on the condition, but does not
@@ -1008,11 +869,11 @@ class ItemBehaviourComponent(Component):
                  use_sound = None,
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
-        self.item_name = item_name
         self.single_use = single_use
         self.use_sound = use_sound
         self.is_destroying = False
         self.grab_offset = grab_offset
+        self.item_name = item_name
         d = item_description.split('\n')
         if len(d) > 5 or any(len(x)>28 for x in d):
             raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
