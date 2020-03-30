@@ -204,6 +204,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_wall_inner', (395, 20))
 
     def _ghetto_tutorial(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the

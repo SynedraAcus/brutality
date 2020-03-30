@@ -141,7 +141,6 @@ if not args.disable_sound:
     jukebox = SoundListener(sounds=sounds)
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
-    dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
 
 # Message spawner for tutorial messages
 spawner = SpawningListener('cop_1', factory=factory)

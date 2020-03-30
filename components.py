@@ -397,6 +397,9 @@ class CharacterHealthComponent(HealthComponent):
             self.owner.hands.drop('right')
             self.owner.hands.drop('left')
             if self.death_sounds:
+                if self.owner.id == 'cop_1':
+                    # TODO: disable bg sound on player death outside of CharacterHealthComponent
+                    self.dispatcher.add_event(BearEvent('set_bg_sound', None))
                 self.dispatcher.add_event(BearEvent('play_sound',
                                                     choice(self.death_sounds)))
             self.owner.destructor.destroy()
