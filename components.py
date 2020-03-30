@@ -49,7 +49,7 @@ class WalkerComponent(PositionComponent):
         elif move[0] < 0:
             self.direction = 'l'
         # If move[0] == 0, the direction stays whatever it was, move is vertical
-        # TODO: Support more than two phases of movement
+        # TODO: Supp more than two phases of movement
         if self.phase == '1':
             self.phase = '2'
         else:
@@ -564,73 +564,72 @@ class InputComponent(Component):
         return r
 
 
-class MeleeControllerComponent(Component):
-    """
-    Looks for objects with factions different from its own, moves towards them,
-    and when in range, punches them with whatever is in his right hand.
-    
-    Assumes that the owner has SpawnerComponent and WalkerComponent
-    """
-    def __init__(self, *args,
-                 action_delay=0.5,
-                 walk_delay=0.2,
-                 perception_distance=150,
-                 action_cooldown=0, **kwargs):
-        super().__init__(*args, name='controller', **kwargs)
-        self.dispatcher.register_listener(self, 'tick')
-        self.action_delay = action_delay
-        self.walk_delay = walk_delay
-        self.action_cooldown = action_cooldown
-        self.perception_distance = perception_distance
-        
-    def on_event(self, event):
-        if event.event_type == 'tick':
-            # If on cooldown, be cooling down. Else, try and act
-            if self.action_cooldown > 0:
-                self.action_cooldown -= event.event_value
-            if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
-                enemies = list(EntityTracker().filter_entities(
-                    lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
-                current_closest = None
-                min_dist = None
-                for enemy in enemies:
-                    dx = self.owner.position.x - enemy.position.x
-                    dy = self.owner.position.y - enemy.position.y
-                    dist = sqrt(dx**2 + dy**2)
-                    if (not min_dist or min_dist > dist) and dist < self.perception_distance:
-                        current_closest = enemy
-                if not current_closest:
-                    return
-                # Probably easier to recalculate for the selected enemy rather
-                # than bother caching, creating the dict and all that
-                dx = self.owner.position.x - current_closest.position.x
-                dy = self.owner.position.y - current_closest.position.y
-                if sqrt(dx ** 2 + dy ** 2) > self.perception_distance:
-                    self.action_cooldown = self.walk_delay
-                else:
-                    # Change direction
-                    # TODO: switch sounds when the punk AI is switching state
-                    # from idle to combat. Obviously not doable until AI has states
-                    self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
-                    self.owner.position.turn(dx < 0 and 'r' or 'l')
-                if abs(dx) <= 15 and abs(dy) <= 10:
-                    # and change behaviours accordingly
-                    self.owner.hands.use_hand('right')
-                    self.action_cooldown = self.action_delay
-                else:
-                    i = randint(0, abs(dx) + abs(dy))
-                    if i <= abs(dx):
-                        self.owner.position.walk((dx < 0 and 1 or -1, 0))
-                    else:
-                        self.owner.position.walk((0, dy < 0 and 1 or -1))
-                    self.action_cooldown = self.walk_delay
-                    
-    def __repr__(self):
-        return dumps({'class': self.__class__.__name__,
-                      'action_delay': self.action_delay,
-                      'walk_delay': self.walk_delay,
-                      'action_cooldown': self.action_cooldown,
-                      'perception_distance': self.perception_distance})
+# class MeleeControllerComponent(Component):
+#     """
+#     Looks for objects with factions different from its own, moves towards them,
+#     and when in range, punches them with whatever is in his right hand.
+#
+#     Assumes that the owner has SpawnerComponent and WalkerComponent
+#     """
+#     def __init__(self, *args,
+#                  action_delay=0.5,
+#                  walk_delay=0.2,
+#                  perception_distance=150,
+#                  action_cooldown=0, **kwargs):
+#         super().__init__(*args, name='controller', **kwargs)
+#         self.dispatcher.register_listener(self, 'tick')
+#         self.action_delay = action_delay
+#         self.walk_delay = walk_delay
+#         self.action_cooldown = action_cooldown
+#         self.perception_distance = perception_distance
+#
+#     def on_event(self, event):
+#         if event.event_type == 'tick':
+#             # If on cooldown, be cooling down. Else, try and act
+#             if self.action_cooldown > 0:
+#                 self.action_cooldown -= event.event_value
+#             if self.action_cooldown <= 0 and self.owner.health.hitpoints > 0:
+#                 enemies = list(EntityTracker().filter_entities(
+#                     lambda x: hasattr(x, 'faction') and x.faction.faction == 'police'))
+#                 current_closest = None
+#                 min_dist = None
+#                 for enemy in enemies:
+#                     dx = self.owner.position.x - enemy.position.x
+#                     dy = self.owner.position.y - enemy.position.y
+#                     dist = sqrt(dx**2 + dy**2)
+#                     if (not min_dist or min_dist > dist) and dist < self.perception_distance:
+#                         current_closest = enemy
+#                 if not current_closest:
+#                     return
+#                 # Probably easier to recalculate for the selected enemy rather
+#                 # than bother caching, creating the dict and all that
+#                 dx = self.owner.position.x - current_closest.position.x
+#                 dy = self.owner.position.y - current_closest.position.y
+#                 if sqrt(dx ** 2 + dy ** 2) > self.perception_distance:
+#                     self.action_cooldown = self.walk_delay
+#                 else:
+#                     # Change direction
+#                     # from idle to combat. Obviously not doable until AI has states
+#                     self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
+#                     self.owner.position.turn(dx < 0 and 'r' or 'l')
+#                 if abs(dx) <= 15 and abs(dy) <= 10:
+#                     # and change behaviours accordingly
+#                     self.owner.hands.use_hand('right')
+#                     self.action_cooldown = self.action_delay
+#                 else:
+#                     i = randint(0, abs(dx) + abs(dy))
+#                     if i <= abs(dx):
+#                         self.owner.position.walk((dx < 0 and 1 or -1, 0))
+#                     else:
+#                         self.owner.position.walk((0, dy < 0 and 1 or -1))
+#                     self.action_cooldown = self.walk_delay
+#
+#     def __repr__(self):
+#         return dumps({'class': self.__class__.__name__,
+#                       'action_delay': self.action_delay,
+#                       'walk_delay': self.walk_delay,
+#                       'action_cooldown': self.action_cooldown,
+#                       'perception_distance': self.perception_distance})
                 
 
 class BottleControllerComponent(Component):

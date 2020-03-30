@@ -10,6 +10,7 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
+from ai import AIComponent, AgressorPeacefulState, MeleeAgressorCombatState
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
@@ -561,7 +562,17 @@ class EntityFactory:
                                                                     'punk_death'),
                                                         death_sounds=('punk_death', )
                                                         ))
-        nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
+        # nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': AgressorPeacefulState(self.dispatcher,
+                                                               combat_state='attack',
+                                                               perception_distance=50),
+                                 'attack': MeleeAgressorCombatState(self.dispatcher,
+                                                                    peaceful_state='wait',
+                                                                    perception_distance=50)},
+                         current_state='wait',
+                         owner=nunchaku)
+        nunchaku.add_component(ai)
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
         weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
