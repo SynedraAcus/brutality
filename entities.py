@@ -11,7 +11,8 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 from bear_hug.resources import Atlas, XpLoader
 
 from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
-    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState
+    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState,\
+    CivilianTalkState
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
@@ -213,9 +214,10 @@ class EntityFactory:
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
+                        color='white',
                         **kwargs):
         message = Entity(id=entity_id)
-        widget = Label(text, z_level=200)
+        widget = Label(text, z_level=200, color=color)
         message.add_component(WidgetComponent(self.dispatcher, widget))
         message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy,
                                                 affect_z=False))
@@ -756,12 +758,30 @@ class EntityFactory:
                                                            runaway_state='run',
                                                            enemy_factions=('punks',),
                                                            enemy_perception_distance=50,
+                                                           player_interaction_state='talk',
                                                            pc_id='cop_1'),
                                  'run': CivilianRunawayState(self.dispatcher,
                                                              pc_id='cop_1',
                                                              peaceful_state='wait',
                                                              enemy_perception_distance=50,
-                                                             enemy_factions=('punks', ))},
+                                                             enemy_factions=('punks', )),
+                                 'talk': CivilianTalkState(self.dispatcher,
+                                                           pc_id='cop_1',
+                                                           peaceful_state='wait',
+                                                           runaway_state='run',
+                                                           enemy_perception_distance=50,
+                                                           enemy_factions=('punks',),
+                                                           monologue=('I am a test scientist NPC',
+                                                                      'I exist to slowly deliver\nthis monologue',
+                                                                      'which is written\nfor the test purposes.',
+                                                                      'I can also shut up if\nthe player is too far',
+                                                                      'and continue when he returns.',
+                                                                      'I can also run away\nif I see an enemy',
+                                                                      'Calming down when they\nare too far.',
+                                                                      'Or dead.',
+                                                                      'I can also be killed.',
+                                                                      'But please don\'t do that'),
+                                                           phrase_pause=1.3)},
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)

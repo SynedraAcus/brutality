@@ -2,7 +2,7 @@
 AI components
 """
 from math import sqrt
-from random import randint
+from random import choice, randint
 
 from bear_hug.ecs import Component, EntityTracker
 from bear_hug.event import BearEvent
@@ -280,7 +280,6 @@ class CivilianWaitState(CivilianAIState):
                                              self.enemy_perception_distance,
                                              self.enemy_factions)
         if current_closest:
-            print('Leaving wait state')
             return self.runaway_state
         # If not, look if pc_id is within radius
         pc = EntityTracker().entities[self.pc_id]
@@ -313,7 +312,6 @@ class CivilianRunawayState(CivilianAIState):
         if current_closest:
             self.current_closest = current_closest
         else:
-            print('Leaving runaway state')
             return self.peaceful_state
 
     def take_action(self):
@@ -330,7 +328,68 @@ class CivilianRunawayState(CivilianAIState):
         return 0.2
 
 
+class CivilianTalkState(CivilianAIState):
+    """
+    While the player is within range, delivers his monologue.
 
+    Switches to runaway_state if enemy is near or to wait state if the player
+    is too far (or upon exhausting the monologue)
+
+    :param monologue: iterable of strs. A series of phrases that this char delivers
+
+    :param phrase_pause: float. A delay between phrases, in seconds
+    """
+    def __init__(self, *args, monologue=('Line one', 'Line two'),
+                 phrase_pause=1.2,
+                 peaceful_state=None,
+                 runaway_state=None,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.peaceful_state = peaceful_state
+        self.runaway_state = runaway_state
+        for line in monologue:
+            if not isinstance(line, str):
+                raise ValueError(f'monologue for a CivilianTalkState should be an iterable of strs')
+        self.monologue = monologue
+        # Index of the next phrase to be said
+        self.next_phrase = 0
+        self.phrase_pause = phrase_pause
+
+    def switch_state(self):
+
+        # See if there is someone to run away from
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if current_closest:
+            return self.runaway_state
+        if self.next_phrase >= len(self.monologue):
+            return self.peaceful_state
+        # If not, look if pc_id is within radius
+        pc = EntityTracker().entities[self.pc_id]
+        dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
+                    (self.owner.position.y - pc.position.y) ** 2)
+        # Wait if he is not
+        if dist > self.player_perception_distance:
+            return self.peaceful_state
+
+    def take_action(self):
+        # Could've switched into talk state after already exhausting the monologue
+        if self.next_phrase >= len(self.monologue):
+            return 0
+        # Center on the first line
+        x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0]) - self.owner.widget.width) / 2)
+        self.owner.spawner.spawn('message', (-x_offset, 0),
+                                 text=self.monologue[self.next_phrase],
+                                 vy=-3,
+                                 vx=randint(-1, 1),
+                                 color='gray',
+                                 destroy_condition='timeout',
+                                 lifetime=5.0)
+        # Could have waited a lot during combat or waiting, but it still
+        # should not spawn all phrases at once
+        self.next_phrase += 1
+        return self.phrase_pause
 
 # TODO: a more reasonable navigation logic for NPCs
 # Currently they get stuck around the obstacles and tend to start turning around
