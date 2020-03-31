@@ -296,10 +296,12 @@ class GrenadeComponent(Component):
     explode upon hitting the ground.
     """
 
-    def __init__(self, *args, spawned_item='flame', target_y=None, **kwargs):
+    def __init__(self, *args, spawned_item='flame', target_y=None,
+                 explosion_sound=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.spawned_item = spawned_item
         self.target_y = target_y
+        self.explosion_sound = explosion_sound
         self.dispatcher.register_listener(self, 'ecs_move')
 
     def on_event(self, event):
@@ -307,6 +309,12 @@ class GrenadeComponent(Component):
             if not self.target_y:
                 self.target_y = self.owner.position.y + randint(2, 12)
             if self.owner.position.y >= self.target_y:
+                if self.explosion_sound:
+                    self.dispatcher.add_event(BearEvent('play_sound',
+                                                        self.explosion_sound))
+                    # TODO: play flame sound somewhere within the flame itself
+                    self.dispatcher.add_event(BearEvent('play_sound',
+                                                        'molotov_fire'))
                 self.owner.spawner.spawn(self.spawned_item,
                                          (round(self.owner.widget.width/2),
                                           round(self.owner.widget.height/2)))
@@ -419,9 +427,10 @@ class VisualDamageHealthComponent(HealthComponent):
     a dict key, but less than the next one (in increasing order).
     If HP reaches zero and object has a Destructor component, it is destroyed
     """
-    def __init__(self, *args, widgets_dict={}, **kwargs):
+    def __init__(self, *args, widgets_dict={}, hit_sounds=(), **kwargs):
         super().__init__(*args, **kwargs)
         self.widgets_dict = OrderedDict()
+        self.hit_sounds = hit_sounds
         for x in sorted(widgets_dict.keys()):
             # Int conversion useful when loading from JSON, where dict keys get
             # converted to str due to some weird bug. Does nothing during
@@ -429,6 +438,9 @@ class VisualDamageHealthComponent(HealthComponent):
             self.widgets_dict[int(x)] = widgets_dict[x]
         
     def process_hitpoint_update(self):
+        if self.hit_sounds:
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                choice(self.hit_sounds)))
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
             self.owner.destructor.destroy()
         for x in self.widgets_dict:

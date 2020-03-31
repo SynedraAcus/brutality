@@ -408,6 +408,7 @@ class EntityFactory:
                                                           widget))
         target_entity.add_component(VisualDamageHealthComponent(
                             self.dispatcher,
+                            hit_sounds=('target_hit', ),
                             widgets_dict={1: 'destroyed',
                              2: 'severe',
                              3: 'slight',
@@ -498,6 +499,7 @@ class EntityFactory:
         cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
                                                           corpse='cop_corpse',
                                                           hitpoints=10,
+                                                          hit_sounds=('cop_hit', ),
                                                           death_sounds=('cop_death', )))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
@@ -779,6 +781,7 @@ class EntityFactory:
                                                affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(GrenadeComponent(self.dispatcher,
+                                              explosion_sound='molotov_break',
                                               spawned_item='flame'))
         entity.add_component(GrenadeCollisionComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
@@ -877,6 +880,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'bottle': {'r': (2, -2),
                                                               'l': (-4, -2)}},
+                                    use_sound='molotov_throw',
                                     item_name='Molotov',
                                     item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction".'))
         entity.add_component(HidingComponent(self.dispatcher,

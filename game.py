@@ -126,14 +126,19 @@ if not args.disable_sound:
     sound_files = {'step': 'step.wav',
                    'shot': 'shot.wav',
                    'punch': 'punch.wav',
+                   'molotov_break': 'molotov_brake.wav',
+                   'molotov_fire': 'molotov_fire.wav',
+                   'molotov_throw': 'molotov_throw.wav',
                    'drive': 'drive.wav',
                    'supercop_bg': 'supercop.wav',
                    'ghetto_walk_bg': 'ghetto_walk.wav',
                    'punk_bg': 'punk_bg.wav',
                    'punk_hit': 'punk_hey.wav',
                    'punk_death': 'punk_ho.wav',
+                   'cop_hit': 'cop_dmg.wav',
                    'cop_death': 'cop_death.wav',
-                   'bandage': 'bondage.wav'}
+                   'bandage': 'bondage.wav',
+                   'target_hit': 'target.wav'}
     from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:

@@ -100,9 +100,10 @@ class LevelManager(metaclass=Singleton):
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('bandage', (15, 40))
-        self.factory.create_entity('pistol', (20, 40))
-        self.factory.create_entity('bottle_punk', (320, 10))
-        self.factory.create_entity('nunchaku_punk', (350, 30))
+        self.factory.create_entity('bottle_launcher', (20, 40))
+        self.factory.create_entity('target', (50, 30))
+        # self.factory.create_entity('bottle_punk', (30, 10))
+        # self.factory.create_entity('nunchaku_punk', (350, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (400, 30))
         # Set level switch coordinates
