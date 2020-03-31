@@ -520,12 +520,10 @@ class InputComponent(Component):
                 # These actions are only available to a non-dead player char
                 if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
                     # left-handed attack
-                    self.current_action_delay = self.action_delay
-                    self.owner.hands.use_hand('left')
+                    self.current_action_delay = self.owner.hands.use_hand('left')
                 elif event.event_value == 'TK_E' and self.current_action_delay <= 0:
                     # Right-handed attack
-                    self.current_action_delay = self.action_delay
-                    self.owner.hands.use_hand('right')
+                    self.current_action_delay = self.owner.hands.use_hand('right')
                 elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
                     # Left-handed pickup
                     self.owner.hands.pick_up(hand='left')
@@ -728,6 +726,14 @@ class HandInterfaceComponent(Component):
                                     'l': 'forward_l'}}
 
     def use_hand(self, hand='right'):
+        """
+        use the item in hand
+
+        Draws the hand and the item where they belong. Returns the item cooldown
+        (in seconds)
+        :param hand:
+        :return:
+        """
         hand_label = self.which_hand[hand][self.owner.position.direction]
         # Have to call the HidingComponent and WidgetComponent directly
         hand_entity = EntityTracker().entities[self.hand_entities[hand_label]]
@@ -750,6 +756,7 @@ class HandInterfaceComponent(Component):
             item_x -= item.widget.width
         item.position.move(item_x, item_y)
         self.dispatcher.add_event(BearEvent('brut_use_item', item_id))
+        return item.item_behaviour.use_delay
 
     def pick_up(self, hand='right'):
         """
@@ -867,6 +874,7 @@ class ItemBehaviourComponent(Component):
                  item_name = 'PLACEHOLDER',
                  item_description = 'Someone failed to write\nan item description',
                  use_sound = None,
+                 use_delay = 0.1,
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
         self.single_use = single_use
@@ -874,6 +882,7 @@ class ItemBehaviourComponent(Component):
         self.is_destroying = False
         self.grab_offset = grab_offset
         self.item_name = item_name
+        self.use_delay = use_delay
         d = item_description.split('\n')
         if len(d) > 5 or any(len(x)>28 for x in d):
             raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
@@ -915,7 +924,6 @@ class ItemBehaviourComponent(Component):
         if self.single_use:
             self.is_destroying = True
         if self.use_sound:
-            # TODO: set use_sound for pistol instead of calling directly
             self.dispatcher.add_event(BearEvent('play_sound', self.use_sound))
 
     def on_event(self, event):
@@ -980,8 +988,6 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
                                      self.spawned_items[item][direction],
                                      direction=direction,
                                      z_level=self.owning_entity.widget.z_level)
-        if 'pistol' in self.owner.id:
-            self.dispatcher.add_event(BearEvent('play_sound', 'shot'))
 
     def __repr__(self):
         d = loads(super().__repr__())

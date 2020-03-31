@@ -185,9 +185,7 @@ class NunchakuAgressorCombatState(AgressorCombatState):
         self.owner.position.turn(dx < 0 and 'r' or 'l')
         if abs(dx) <= 15 and abs(dy) <= 10:
             # If in melee range, attack with right hand
-            self.owner.hands.use_hand('right')
-            # TODO: let items define their use delays
-            return 1.5
+            return self.owner.hands.use_hand('right')
         else:
             i = randint(0, abs(dx) + abs(dy))
             if i <= abs(dx):
@@ -202,6 +200,7 @@ class BottleAgressorCombatState(AgressorCombatState):
     Switches to a peaceful state when there is nobody to fight
 
     When there is, it tries to either throw bottle from the right hand or
+    fight in melee with left hand (presumably a fist)
     """
     def take_action(self):
         # On every tick except the first after it got switched in,
@@ -213,12 +212,9 @@ class BottleAgressorCombatState(AgressorCombatState):
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
         if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
-            self.owner.hands.use_hand('right')
-            return 1
+            return self.owner.hands.use_hand('right')
         elif abs(dx) < 10 and abs(dy) < 5:
-            # Try melee if caught in close quarters
-            self.owner.hands.use_hand('left')
-            return 0.5
+            return self.owner.hands.use_hand('left')
         elif abs(dx) < 35:
             # Run away if 5 < dx < 30, whatever dy
             self.owner.position.walk((dx < 0 and -1 or 1, 0))

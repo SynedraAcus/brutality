@@ -101,7 +101,8 @@ class LevelManager(metaclass=Singleton):
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('bandage', (15, 40))
         self.factory.create_entity('pistol', (20, 40))
-        self.factory.create_entity('bottle_punk', (50, 10))
+        self.factory.create_entity('nunchaku', (30, 40))
+        self.factory.create_entity('nunchaku_punk', (50, 10))
         # self.factory.create_entity('nunchaku_punk', (50, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('level_switch', (400, 30))
