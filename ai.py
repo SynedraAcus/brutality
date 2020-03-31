@@ -97,9 +97,22 @@ class AIState:
 # Agressor types: attack everyone with a different faction
 ################################################################################
 
-def find_closest_enemy(entity, perception_distance):
-    enemies = list(EntityTracker().filter_entities(
-        lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction))
+def find_closest_enemy(entity, perception_distance, enemy_factions=None):
+    """
+    Finds closest enemy for leaving peaceful states or attack targeting.
+    :param entity: Entity. who is looking
+
+    :param perception_distance: Int. how far do they see
+
+    :param enemy_factions: None or an iterable of str. If not None, taken as a list of enemy factions. If None, any different faction is treated as an enemy.
+    :return:
+    """
+    if enemy_factions:
+        enemies = list(EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions))
+    else:
+        enemies = list(EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction))
     current_closest = None
     min_dist = None
     for enemy in enemies:
@@ -109,7 +122,8 @@ def find_closest_enemy(entity, perception_distance):
         if (not min_dist or min_dist > dist) \
                 and dist < perception_distance:
             current_closest = enemy
-        return current_closest
+    return current_closest
+
 
 
 class AgressorPeacefulState(AIState):
@@ -226,6 +240,97 @@ class BottleAgressorCombatState(AgressorCombatState):
             else:
                 self.owner.position.walk((0, dy < 0 and 1 or -1))
             return 0.2
+
+
+################################################################################
+# Civilian: a peaceful NPC who just stands there, maybe delivering some
+# monologue
+################################################################################
+
+
+class CivilianAIState(AIState):
+    """
+    A base class for civilians: remembers who he should talk to and who he
+    should run from.
+    """
+    def __init__(self, *args, pc_id, enemy_factions=None,
+                 player_perception_distance=20,
+                 enemy_perception_distance=50,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pc_id = pc_id
+        self.enemy_factions = enemy_factions
+        self.player_perception_distance = player_perception_distance
+        self.enemy_perception_distance = enemy_perception_distance
+
+
+class CivilianWaitState(CivilianAIState):
+    """
+    Waits either for enemy to run from, or for the PC to talk to
+    """
+    def __init__(self, *args, runaway_state=None,
+                 player_interaction_state=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.runaway_state = runaway_state
+        self.player_interaction_state = player_interaction_state
+
+    def switch_state(self):
+        # See if there is someone to run away from
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if current_closest:
+            print('Leaving wait state')
+            return self.runaway_state
+        # If not, look if pc_id is within radius
+        pc = EntityTracker().entities[self.pc_id]
+        dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
+                    (self.owner.position.y - pc.position.y) ** 2)
+        if dist <= self.player_perception_distance:
+            return self.player_interaction_state
+
+    def take_action(self):
+        return 0.2
+
+
+class CivilianRunawayState(CivilianAIState):
+    """
+    Runs away from the enemy.
+
+    This state does not switch directly to player interaction. It can only be
+    left if there are no enemies, switching to wait state. Otherwise, NPCs could
+    randomly start talking in the middle of the battle.
+    """
+    def __init__(self, *args, peaceful_state=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.peaceful_state = peaceful_state
+        self.current_closest = None
+
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if current_closest:
+            self.current_closest = current_closest
+        else:
+            print('Leaving runaway state')
+            return self.peaceful_state
+
+    def take_action(self):
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx > 0 and 'r' or 'l')
+        i = randint(0, abs(dx) + abs(dy))
+        if i <= abs(dx):
+            self.owner.position.walk((dx < 0 and -1 or 1, 0))
+        else:
+            self.owner.position.walk((0, dy < 0 and -1 or 1))
+        return 0.2
+
+
+
 
 # TODO: a more reasonable navigation logic for NPCs
 # Currently they get stuck around the obstacles and tend to start turning around
