@@ -2,7 +2,7 @@
 AI components
 """
 from math import sqrt
-from random import choice, randint
+from random import choice, randint, random
 
 from bear_hug.ecs import Component, EntityTracker
 from bear_hug.event import BearEvent
@@ -125,6 +125,12 @@ def find_closest_enemy(entity, perception_distance, enemy_factions=None):
     return current_closest
 
 
+def choose_direction(dx, dy, dy_preference):
+    dx_prob = abs(dx) / (abs(dx) + abs(dy)) - dy_preference
+    dy_prob = abs(dy) / (abs(dx) + abs(dy)) - dy_preference
+    return (-dx // abs(dx) if random() < dx_prob and dx_prob > 0 else 0,
+            -dy // abs(dy) if 0 < dy_prob < 1 - random() else 0)
+
 
 class AgressorPeacefulState(AIState):
     """
@@ -160,13 +166,31 @@ class AgressorCombatState(AIState):
 
     Switches to a peaceful state when there is nobody to fight, but expects
     child classes to define ``take_action``
+
+    :param peaceful_state: str. State to switch to when there is nobody to fight
+
+    :param perception_distance: int. how far does he see, in chars
+
+    :param melee_range: 2-tuple of ints Minimum and maximum dx at which melee is
+    attempted. Wnen ``abs(dx)<melee_range[0]``, tries to walk away
+
+    :param dy_preference: float in range (0; 1). Whether to change dx, dy or
+    both is determined randomly based on their ratio. This number is added to
+    the probability of dx change, since most combat items attack horizontally
     """
     def __init__(self, *args, peaceful_state=None,
-                 perception_distance=150, **kwargs):
+                 perception_distance=150, melee_range=(10, 15),
+                 dy_preference = 0.15,
+                 **kwargs):
         super().__init__(*args, **kwargs)
         self.peaceful_state = peaceful_state
         self.perception_distance = perception_distance
         self.current_closest = None
+        self.melee_range = melee_range
+        self.dy_preference = 0.15
+        self.walk_direction = (0, 0)
+        self.steps_left = 0
+        self.dispatcher.register_listener(self, 'ecs_collision')
 
     def switch_state(self):
         """
@@ -182,12 +206,18 @@ class AgressorCombatState(AIState):
             # Store enemy entity for future reference
             self.current_closest = current_closest
 
+    def on_event(self, event):
+        if event.event_type == 'ecs_collision' and event.event_value[0] == self.owner.id:
+            self.walk_direction = (randint(-1, 1), randint(-1, 1))
+            self.steps_left = randint(4, 7)
+
 
 class NunchakuAgressorCombatState(AgressorCombatState):
     """
     When there is an enemy in nunchaku range, tries to whack them with right
     item
     """
+
     def take_action(self):
         # On every tick except the first after it got switched in,
         # self.current_closest is freshly populated by switch.state.
@@ -197,16 +227,21 @@ class NunchakuAgressorCombatState(AgressorCombatState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if abs(dx) <= 15 and abs(dy) <= 10:
+        if self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 3:
             # If in melee range, attack with right hand
             return self.owner.hands.use_hand('right')
         else:
-            i = randint(0, abs(dx) + abs(dy))
-            if i <= abs(dx):
-                self.owner.position.walk((dx < 0 and 1 or -1, 0))
+            # Correction for the range necessary to use nunchaku
+            dx -= self.melee_range[0] * dx//abs(dx) if dx != 0 else 0
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
             else:
-                self.owner.position.walk((0, dy < 0 and 1 or -1))
-            return 0.2
+                # Recosidering direction
+                self.steps_left = min(abs(dx)+1, abs(dy)+1, randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy, self.dy_preference)
+                return 0
 
 
 class BottleAgressorCombatState(AgressorCombatState):
@@ -225,21 +260,27 @@ class BottleAgressorCombatState(AgressorCombatState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 35 <= abs(dx) <= 40 and abs(dy) <= 5:
+        if 35 <= abs(dx) <= 40 and abs(dy) <= 3:
             return self.owner.hands.use_hand('right')
-        elif abs(dx) < 10 and abs(dy) < 5:
+        elif self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 3:
             return self.owner.hands.use_hand('left')
-        elif abs(dx) < 35:
-            # Run away if 5 < dx < 30, whatever dy
-            self.owner.position.walk((dx < 0 and -1 or 1, 0))
-            return 0.2
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        if self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(
+                dy) <= 1:
+            # If in melee range, attack with right hand
+            return self.owner.hands.use_hand('right')
         else:
-            i = randint(0, abs(dx) + abs(dy))
-            if i <= abs(dx):
-                self.owner.position.walk((dx < 0 and 1 or -1, 0))
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
             else:
-                self.owner.position.walk((0, dy < 0 and 1 or -1))
-            return 0.2
+                # Recosidering direction
+                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
+                                      randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy,
+                                                       self.dy_preference)
+                return 0
 
 
 ################################################################################

@@ -223,5 +223,3 @@ loop.run()
 
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
-
-# TODO: talkative characters

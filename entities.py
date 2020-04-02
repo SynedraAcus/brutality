@@ -571,7 +571,8 @@ class EntityFactory:
                                                                perception_distance=50),
                                  'attack': NunchakuAgressorCombatState(self.dispatcher,
                                                                        peaceful_state='wait',
-                                                                       perception_distance=50)},
+                                                                       perception_distance=50,
+                                                                       melee_range=(15, 20))},
                          current_state='wait',
                          owner=nunchaku)
         nunchaku.add_component(ai)
@@ -643,6 +644,7 @@ class EntityFactory:
                                                        perception_distance=50),
                                  'attack': BottleAgressorCombatState(self.dispatcher,
                                                      peaceful_state='wait',
+                                                     melee_range=(0, 7),
                                                      perception_distance=50)},
                          current_state='wait',
                          owner=punk)
