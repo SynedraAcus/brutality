@@ -10,6 +10,9 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 from bear_hug.resources import Atlas, XpLoader
 
+from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
+    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState,\
+    CivilianTalkState
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
@@ -211,9 +214,10 @@ class EntityFactory:
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
+                        color='white',
                         **kwargs):
         message = Entity(id=entity_id)
-        widget = Label(text, z_level=200)
+        widget = Label(text, z_level=200, color=color)
         message.add_component(WidgetComponent(self.dispatcher, widget))
         message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy,
                                                 affect_z=False))
@@ -563,7 +567,17 @@ class EntityFactory:
                                                                     'punk_death'),
                                                         death_sounds=('punk_death', )
                                                         ))
-        nunchaku.add_component(MeleeControllerComponent(self.dispatcher))
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': AgressorPeacefulState(self.dispatcher,
+                                                               combat_state='attack',
+                                                               perception_distance=50),
+                                 'attack': NunchakuAgressorCombatState(self.dispatcher,
+                                                                       peaceful_state='wait',
+                                                                       perception_distance=50,
+                                                                       melee_range=(15, 20))},
+                         current_state='wait',
+                         owner=nunchaku)
+        nunchaku.add_component(ai)
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
         weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
@@ -625,7 +639,17 @@ class EntityFactory:
                                                     hit_sounds=('punk_hit',
                                                                 'punk_death'),
                                                     death_sounds=('punk_death', )))
-        punk.add_component(BottleControllerComponent(self.dispatcher))
+        # punk.add_component(BottleControllerComponent(self.dispatcher))
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': AgressorPeacefulState(self.dispatcher,
+                                                       combat_state='attack',
+                                                       perception_distance=50),
+                                 'attack': BottleAgressorCombatState(self.dispatcher,
+                                                     peaceful_state='wait',
+                                                     melee_range=(0, 7),
+                                                     perception_distance=50)},
+                         current_state='wait',
+                         owner=punk)
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
         f_l = self._create_hand(f'{entity_id}_hand_fl',
@@ -665,6 +689,107 @@ class EntityFactory:
                                                       left_item=fist.id,
                                                       right_item=launcher.id))
         return punk
+
+    def _create_female_scientist(self, entity_id, **kwargs):
+        scientist = Entity(id=entity_id)
+        widget = SwitchingWidget(
+            images_dict={'r_1': self.atlas.get_element('scientist_f2_r_1'),
+                         'r_2': self.atlas.get_element('scientist_f2_r_2'),
+                         'l_1': self.atlas.get_element('scientist_f2_l_1'),
+                         'l_2': self.atlas.get_element('scientist_f2_l_2'),
+                         },
+            initial_image='r_1')
+        scientist.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        scientist.add_component(WalkerComponent(self.dispatcher))
+        scientist.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                    depth=1))
+        scientist.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        scientist.add_component(DestructorComponent(self.dispatcher))
+        scientist.add_component(FactionComponent(self.dispatcher,
+                                                 faction='scientists'))
+        # TODO: give scientists their own hit and death sounds
+        scientist.add_component(CharacterHealthComponent(self.dispatcher,
+                                                    corpse='scientist_f2_corpse',
+                                                    hitpoints=5,
+                                                    hit_sounds=('punk_hit',
+                                                                'punk_death'),
+                                                    death_sounds=(
+                                                    'punk_death',)))
+        # Creating hand entities
+        f_l = self._create_hand(f'{entity_id}_hand_fl',
+                                'scientist_hand_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr',
+                                'scientist_hand_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl',
+                                'scientist_hand_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br',
+                                'scientist_hand_back',
+                                direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        scientist.add_component(HandInterfaceComponent(self.dispatcher,
+                                                       hand_entities={
+                                                            'forward_l': f_l.id,
+                                                            'forward_r': f_r.id,
+                                                            'back_l': b_l.id,
+                                                            'back_r': b_r.id},
+                                                       hands_offsets={
+                                                            'forward_l': (
+                                                            -2, 5),
+                                                            'forward_r': (0, 5),
+                                                            'back_l': (-3, 4),
+                                                            'back_r': (3, 4)},
+                                                       item_offsets={
+                                                            'forward_l': (0, 0),
+                                                            'forward_r': (7, 0),
+                                                            'back_l': (0, 0),
+                                                            'back_r': (4, 0)},
+                                                       left_item=left_fist.id,
+                                                       right_item=right_fist.id))
+        # AI
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': CivilianWaitState(self.dispatcher,
+                                                           runaway_state='run',
+                                                           enemy_factions=('punks',),
+                                                           enemy_perception_distance=50,
+                                                           player_interaction_state='talk',
+                                                           pc_id='cop_1'),
+                                 'run': CivilianRunawayState(self.dispatcher,
+                                                             pc_id='cop_1',
+                                                             peaceful_state='wait',
+                                                             enemy_perception_distance=50,
+                                                             enemy_factions=('punks', )),
+                                 'talk': CivilianTalkState(self.dispatcher,
+                                                           pc_id='cop_1',
+                                                           peaceful_state='wait',
+                                                           runaway_state='run',
+                                                           enemy_perception_distance=50,
+                                                           enemy_factions=('punks',),
+                                                           monologue=('I am a test scientist NPC',
+                                                                      'I exist to slowly deliver\nthis monologue',
+                                                                      'which is written\nfor the test purposes.',
+                                                                      'I can also shut up if\nthe player is too far',
+                                                                      'and continue when he returns.',
+                                                                      'I can also run away\nif I see an enemy',
+                                                                      'Calming down when they\nare too far.',
+                                                                      'Or dead.',
+                                                                      'I can also be killed.',
+                                                                      'But please don\'t do that'),
+                                                           phrase_pause=1.3)},
+                         current_state='wait',
+                         owner=scientist)
+        scientist.add_component(ai)
+        return scientist
 
     def _create_hand(self, entity_id, hand_type=None, direction='r', **kwargs):
         entity = Entity(entity_id)
@@ -804,6 +929,8 @@ class EntityFactory:
                                                          'l': (-2, 0)},
                                                'muzzle_flash': {'r': (5, -1),
                                                                'l': (-2, -1)}},
+                                use_sound='shot',
+                                use_delay = 0.5,
                                 item_name='Service pistol',
                                 item_description='Reliable, if somewhat\nunderpowered, police sidearm\nCited as a main reason for\na bring-your-own-gun policy.'))
         entity.add_component(HidingComponent(self.dispatcher,
@@ -829,6 +956,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (-3, -2),
                                                              'l': (2, -2)}},
+                                    use_delay=0.35,
                                     item_name='Fist',
                                     item_description='Your own hand in punch mode.\nIt is not gonna break down\nany walls, but at least it\'s\nalways with you.'))
         entity.add_component(HidingComponent(self.dispatcher,
@@ -854,6 +982,7 @@ class EntityFactory:
                                     spawned_items={'punch': {'r': (8, -1),
                                                              'l': (-1, -2)}},
                                     grab_offset=(0, -1),
+                                    use_delay=0.6,
                                     item_name='Nunchaku',
                                     item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
         entity.add_component(HidingComponent(self.dispatcher,
@@ -882,6 +1011,7 @@ class EntityFactory:
                                                               'l': (-4, -2)}},
                                     use_sound='molotov_throw',
                                     item_name='Molotov',
+                                    use_delay=1,
                                     item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction".'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
