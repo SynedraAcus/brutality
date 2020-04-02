@@ -377,6 +377,11 @@ class CivilianTalkState(CivilianAIState):
         # Could've switched into talk state after already exhausting the monologue
         if self.next_phrase >= len(self.monologue):
             return 0
+        pc = EntityTracker().entities[self.pc_id]
+        if self.owner.position.x >= pc.position.x:
+            self.owner.position.turn('l')
+        else:
+            self.owner.position.turn('r')
         # Center on the first line
         x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0]) - self.owner.widget.width) / 2)
         self.owner.spawner.spawn('message', (-x_offset, 0),
