@@ -241,7 +241,6 @@ class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
                 self.owner.destructor.destroy()
 
 
-
 class HazardCollisionComponent(CollisionComponent):
     """
     A collision component that damages whoever collides into it.
@@ -525,6 +524,12 @@ class PowerInteractionComponent(Component):
                 self.take_action()
                 self.have_waited -= self.action_cooldown
 
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d.update({'powered': self.powered,
+                  'action_cooldown': self.action_cooldown})
+        return dumps(d)
+
 
 class SpikePowerInteractionComponent(PowerInteractionComponent):
     """
@@ -585,6 +590,11 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                                      vx=80 * dx_factor * dx_sign,
                                      vy=80 * dy_factor * dy_sign,
                                      **kwargs)
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['range'] = self.range
+        return dumps(d)
 
 
 class SpawnerComponent(Component):
@@ -987,7 +997,7 @@ class HandInterfaceComponent(Component):
                 self.dispatcher.add_event(BearEvent('brut_pick_up',
                                                     (self.owner.id,
                                                      'right',
-                                                     self.right)))
+                                                     self.right_item)))
             elif event.event_value == self.left_item:
                 self.left_item = f'fist_{self.owner.id}_left'
                 self.dispatcher.add_event(BearEvent('brut_pick_up',

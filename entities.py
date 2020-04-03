@@ -1181,7 +1181,7 @@ class EntityFactory:
                                                             use_delay=0.5,
                                                             single_use=True,
                                                             item_name='Disassembled spike',
-                                                            item_description='A spike. Could be installed\nas a quick fortification\n or to power nearby machines'))
+                                                            item_description='A spike. Could be installed\nas a fortification (you\nneed at least two spikes to\ncreate a spark wall) or\nto power nearby machines.'))
         entity.add_component(DestructorComponent(self.dispatcher))
         return entity
 
