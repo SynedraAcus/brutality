@@ -556,8 +556,6 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                     if dist <= self.range and machine.id != self.owner.id:
                         self.targets[machine.id] = machine.position.pos
                         self.target_names.append(machine.id)
-                        print(machine)
-                print(self.targets)
             else:
                 dx = self.owner.position.x - entity.position.x
                 dy = self.owner.position.y - entity.position.y
@@ -985,11 +983,11 @@ class HandInterfaceComponent(Component):
     def on_event(self, event):
         if event.event_type == 'ecs_destroy':
             if event.event_value == self.right_item:
-                self.left_item = f'fist_{self.owner.id}_right'
+                self.right_item = f'fist_{self.owner.id}_right'
                 self.dispatcher.add_event(BearEvent('brut_pick_up',
                                                     (self.owner.id,
                                                      'right',
-                                                     self.left_item)))
+                                                     self.right)))
             elif event.event_value == self.left_item:
                 self.left_item = f'fist_{self.owner.id}_left'
                 self.dispatcher.add_event(BearEvent('brut_pick_up',
