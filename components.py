@@ -544,14 +544,27 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
         r = super().on_event(event)
         if event.event_type == 'ecs_add':
             entity = EntityTracker().entities[event.event_value[0]]
-            if not hasattr(entity, 'powered') or entity == self.owner:
+            if not hasattr(entity, 'powered') or entity.id in self.target_names:
                 return
-            dx = self.owner.position.x - entity.position.x
-            dy = self.owner.position.y - entity.position.y
-            dist = sqrt(dx ** 2 + dy ** 2)
-            if dist <= self.range:
-                self.targets[entity.id] = entity.position.pos
-                self.target_names.append(entity.id)
+            if event.event_value[0] == self.owner.id:
+                # On deployment, look for nearby machines
+                powered = EntityTracker().filter_entities(lambda x: hasattr(x, 'powered'))
+                for machine in powered:
+                    dx = self.owner.position.x - machine.position.x
+                    dy = self.owner.position.y - machine.position.y
+                    dist = sqrt(dx ** 2 + dy ** 2)
+                    if dist <= self.range and machine.id != self.owner.id:
+                        self.targets[machine.id] = machine.position.pos
+                        self.target_names.append(machine.id)
+                        print(machine)
+                print(self.targets)
+            else:
+                dx = self.owner.position.x - entity.position.x
+                dy = self.owner.position.y - entity.position.y
+                dist = sqrt(dx ** 2 + dy ** 2)
+                if dist <= self.range:
+                    self.targets[entity.id] = entity.position.pos
+                    self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
             if event.event_value in self.targets:
                 self.target_names.remove(event.event_value)

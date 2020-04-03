@@ -477,7 +477,6 @@ class EntityFactory:
                                                            range=40,
                                                            powered=False))
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
-        print(repr(spike))
         return spike
 
 ################################################################################
