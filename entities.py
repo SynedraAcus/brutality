@@ -875,6 +875,32 @@ class EntityFactory:
                                            lifetime=0.1))
         return punch
 
+    def _create_spark(self, entity_id, z_level=10, direction='r', **kwargs):
+        """
+        A spark for science weapons and tools
+        :param entity_id:
+        :param z_level:
+        :param kwargs:
+        :return:
+        """
+        spark = Entity(id=entity_id)
+        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('spark_1'),
+                                                  self.atlas.get_element('spark_2')),
+                                                 6),
+                                       z_level=z_level)
+        spark.add_component(WidgetComponent(self.dispatcher, widget))
+        if direction == 'r':
+            vx = 80
+        else:
+            vx = -80
+        spark.add_component(PositionComponent(self.dispatcher, vx=vx,
+                                              affect_z=False))
+        spark.add_component(PowerProjectileCollisionComponent(self.dispatcher,
+                                                              damage=3,
+                                                              depth=3))
+        spark.add_component(DestructorComponent(self.dispatcher))
+        return spark
+
     def _create_bottle(self, entity_id, direction='r', z_level=10, **kwargs):
         """
         A rotating flying bottle
@@ -981,7 +1007,8 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (8, -1),
                                                              'l': (-1, -2)}},
-                                    grab_offset=(0, -1),
+                                    grab_offset={'r': (0, -1),
+                                                 'l': (0, -1)},
                                     use_delay=0.6,
                                     item_name='Nunchaku',
                                     item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
@@ -1053,6 +1080,33 @@ class EntityFactory:
                                                         color='#4D3D26',
                                                         lifetime=0.3))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return entity
+
+    def _create_emitter(self, entity_id, owning_entity=None, **kwargs):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(images_dict={
+                                    'r': self.atlas.get_element('emitter_r'),
+                                    'l': self.atlas.get_element('emitter_l')},
+                                 initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False,
+                                             should_hide=False))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_items={
+                                                                'spark': {'r': (9, 1),
+                                                                          'l': (-1, 1)}},
+                                                            grab_offset={'r': (-3, -2),
+                                                                         'l': (3, -2)},
+                                                            use_delay=0.5,
+                                                            item_name='Spark emitter',
+                                                            item_description='Power source and a weapon\nThis tool can activate items\nby shooting at them, or\ndeactivate enemies (also by\nshooting at them).'))
         return entity
 
 #TODO: general character creation method

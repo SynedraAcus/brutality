@@ -229,5 +229,34 @@
     "y": 29,
     "xsize": 5,
     "ysize": 19
+  },
+  {
+    "name": "emitter_l",
+    "x": 86,
+    "y": 28,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
+    "name": "emitter_r",
+    "x": 85,
+    "y": 34,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
+    "name": "spark_1",
+    "x": 89,
+    "y": 21,
+    "xsize": 1,
+    "ysize": 1
+  },
+  {
+    "name": "spark_2",
+    "x": 91,
+    "y": 21,
+    "xsize": 1,
+    "ysize": 1
   }
+
 ]

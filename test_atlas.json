@@ -49,6 +49,13 @@
     "ysize": 9
   },
   {
+    "name": "emitter_icon",
+    "x": 6,
+    "y": 94,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
     "name": "cop_r_1",
     "x": 40,
     "y": 1,

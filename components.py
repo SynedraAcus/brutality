@@ -220,6 +220,27 @@ class ProjectileCollisionComponent(CollisionComponent):
         return dumps(d)
 
 
+class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
+    """
+    A collision projectile for a power spark.
+
+    Acts like a regular ProjectileCollisionComponent unless its target has
+    PowerInteractionComponent, in which case it is powered
+    """
+    def collided_into(self, other):
+        if not other:
+            self.owner.destructor.destroy()
+        else:
+            entity = EntityTracker().entities[other]
+            if hasattr(entity, 'collision') and not entity.collision.passable:
+                if hasattr(entity, 'powered'):
+                    entity.power.powered = True
+                else:
+                    self.dispatcher.add_event(BearEvent('brut_damage',
+                                                        (other, self.damage)))
+
+
+
 class HazardCollisionComponent(CollisionComponent):
     """
     A collision component that damages whoever collides into it.
@@ -451,6 +472,41 @@ class VisualDamageHealthComponent(HealthComponent):
         d = loads(super().__repr__())
         d['widgets_dict'] = self.widgets_dict
         return dumps(d)
+
+
+class PowerInteractionComponent(Component):
+    """
+    Responsible for the interaction with energy projectiles.
+
+    The idea is that while these projectiles are harmful for the characters
+    (which turns eg pairs of spikes into reliable defensive tools), other
+    objects can react to them differently: spikes are ignoring them, healing
+    ray emitters are powered by them, etc. This is the component responsible
+    for those behaviours
+    """
+    def __init__(self, *args, powered=False, action_cooldown=0.1, **kwargs):
+        super().__init__(*args, name='powered', **kwargs)
+        self.powered = powered
+        self.action_cooldown = action_cooldown
+        self.have_waited = 0
+
+    def get_power(self):
+        if not self.powered:
+            # Should charge after being powered even if it had collected some
+            # charge before
+            self.have_waited = 0
+        self.powered = True
+
+    def take_action(self, *args, **kwargs):
+        raise NotImplementedError('Power interaction behaviours should be overridden')
+
+    def on_event(self, event):
+        if self.powered and event.event_type == 'tick':
+            self.have_waited += event.event_value
+            while self.have_waited >= self.action_cooldown:
+                self.take_action()
+                self.have_waited -= self.action_cooldown
+
 
 
 class SpawnerComponent(Component):
@@ -764,9 +820,9 @@ class HandInterfaceComponent(Component):
         item.widget.z_level = self.owner.widget.z_level + 1
         item.hiding.show()
         item_x = hand_x + self.item_offsets[hand_label][0] \
-                        + item.item_behaviour.grab_offset[0]
+                        + item.item_behaviour.grab_offset[self.owner.position.direction][0]
         item_y = hand_y + self.item_offsets[hand_label][1] \
-                        + item.item_behaviour.grab_offset[1]
+                        + item.item_behaviour.grab_offset[self.owner.position.direction][1]
         if self.owner.position.direction == 'l':
             item_x -= item.widget.width
         item.position.move(item_x, item_y)
@@ -885,7 +941,8 @@ class ItemBehaviourComponent(Component):
 
     def __init__(self, *args, owning_entity=None,
                  single_use = False,
-                 grab_offset = (0, 0),
+                 grab_offset = {'r': (0, 0),
+                                'l': (0, 0)},
                  item_name = 'PLACEHOLDER',
                  item_description = 'Someone failed to write\nan item description',
                  use_sound = None,

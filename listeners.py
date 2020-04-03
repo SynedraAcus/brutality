@@ -481,7 +481,7 @@ class ItemDescriptionListener(Listener):
                                          left.item_behaviour.item_description,
                                          right.item_behaviour.item_name,
                                          right.item_behaviour.item_description)
-            chars = [[' ' for _ in range(28)] for _ in range(22)]
+            chars = [[' ' for _ in range(28)] for _ in range(23)]
             colors = copy_shape(chars, '#000000')
             self.widget = TypingLabelWidget(chars, colors,
                                             chars_per_second=40,
