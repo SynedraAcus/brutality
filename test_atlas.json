@@ -56,6 +56,13 @@
     "ysize": 9
   },
   {
+    "name": "spikebox_icon",
+    "x": 21,
+    "y": 94,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
     "name": "cop_r_1",
     "x": 40,
     "y": 1,

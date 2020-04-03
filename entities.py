@@ -468,13 +468,16 @@ class EntityFactory:
         spike.add_component(DestructorComponent(self.dispatcher))
         spike.add_component(CollisionComponent(self.dispatcher,
                                                depth=1))
-        spike.add_component(DestructorHealthComponent(self.dispatcher,
-                                                      hitpoints=8))
+        spike.add_component(SpawnerDestructorHealthComponent(self.dispatcher,
+                                               hitpoints=8,
+                                               spawned_item='spikebox',
+                                               relative_pos=(0, 14)))
         spike.add_component(SpikePowerInteractionComponent(self.dispatcher,
                                                            action_cooldown=0.1,
                                                            range=40,
                                                            powered=False))
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        print(repr(spike))
         return spike
 
 ################################################################################
@@ -1155,6 +1158,32 @@ class EntityFactory:
                                                             use_delay=0.5,
                                                             item_name='Spark emitter',
                                                             item_description='Power source and a weapon\nThis tool can activate items\nby shooting at them, or\ndeactivate enemies (also by\nshooting at them).'))
+        return entity
+
+    def _create_spikebox(self, entity_id, owning_entity=None, **kwargs):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(images_dict={
+                    'r': self.atlas.get_element('spikebox_r'),
+                    'l': self.atlas.get_element('spikebox_l')},
+                                 initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False,
+                                             should_hide=False))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                                            owning_entity=owning_entity,
+                                                            spawned_items={'spike': {'r': (0, -5),
+                                                                                     'l': (0, 0)}},
+                                                            use_delay=0.5,
+                                                            single_use=True,
+                                                            item_name='Disassembled spike',
+                                                            item_description='A spike. Could be installed\nas a quick fortification\n or to power nearby machines'))
+        entity.add_component(DestructorComponent(self.dispatcher))
         return entity
 
 #TODO: general character creation method

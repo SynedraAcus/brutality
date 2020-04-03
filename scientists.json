@@ -245,6 +245,20 @@
     "ysize": 5
   },
   {
+    "name": "spikebox_r",
+    "x": 85,
+    "y": 40,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
+    "name": "spikebox_l",
+    "x": 85,
+    "y": 40,
+    "xsize": 9,
+    "ysize": 5
+  },
+  {
     "name": "spark_1",
     "x": 89,
     "y": 21,

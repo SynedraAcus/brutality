@@ -120,7 +120,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['set_bg_sound', 'play_sound'])
+dispatcher.register_listener(logger, ['set_bg_sound', 'play_sound', 'ecs_collision'])
 
 if not args.disable_sound:
     sound_files = {'step': 'step.wav',

@@ -100,6 +100,8 @@ class LevelManager(metaclass=Singleton):
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('emitter', (15, 40))
+        self.factory.create_entity('spikebox', (25, 40))
+        self.factory.create_entity('bandage', (35, 40))
         self.factory.create_entity('spike', (60, 10))
         self.factory.create_entity('spike', (60, 30))
         self.factory.create_entity('spike', (100, 10))

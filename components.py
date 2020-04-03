@@ -234,7 +234,7 @@ class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
             entity = EntityTracker().entities[other]
             if hasattr(entity, 'collision') and not entity.collision.passable:
                 if hasattr(entity, 'powered'):
-                    entity.powered.powered = True
+                    entity.powered.get_power()
                 else:
                     self.dispatcher.add_event(BearEvent('brut_damage',
                                                         (other, self.damage)))
@@ -400,6 +400,22 @@ class DestructorHealthComponent(HealthComponent):
             self.owner.destructor.destroy()
 
 
+class SpawnerDestructorHealthComponent(HealthComponent):
+    """
+    Destroys entity upon reaching zero HP and spawns an item
+    """
+    def __init__(self, *args, spawned_item='pistol', relative_pos=(0, 0),
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.spawned_item = spawned_item
+        self.relative_pos = relative_pos
+
+    def process_hitpoint_update(self):
+        if self.hitpoints == 0:
+            self.owner.spawner.spawn(self.spawned_item, self.relative_pos)
+            self.owner.destructor.destroy()
+
+
 class CharacterHealthComponent(HealthComponent):
     """
     Health component for characters (both playable and NPCs). Upon death,
@@ -497,7 +513,7 @@ class PowerInteractionComponent(Component):
             # Should charge after being powered even if it had collected some
             # charge before
             self.have_waited = 0
-        self.powered = True
+            self.powered = True
 
     def take_action(self, *args, **kwargs):
         raise NotImplementedError('Power interaction behaviours should be overridden')
@@ -555,8 +571,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
             # TODO: fix diagonal aiming for spikes
             self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + x_offset,
                                                     7 + 2*dy_sign + y_offset),
-                                     vx=10 * dx_factor * dx_sign,
-                                     vy=10 * dy_factor * dy_sign,
+                                     vx=80 * dx_factor * dx_sign,
+                                     vy=80 * dy_factor * dy_sign,
                                      **kwargs)
 
 
@@ -766,6 +782,9 @@ class ParticleDestructorComponent(DestructorComponent):
 
     Intended for use with single-use items (eg bandages) which need some sort of
     a visual confirmation that it did indeed work.
+
+    Unlike SpawnerDestructorComponent, contains a pile of data related to the
+    particle effects
     """
     def __init__(self, *args, spawned_item, relative_pos = (0, 0),
                  size=(10, 10),
