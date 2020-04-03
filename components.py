@@ -395,7 +395,7 @@ class DestructorHealthComponent(HealthComponent):
     """
     Destroys entity upon reaching zero HP
     """
-    def process_hitpoint_update(self, value):
+    def process_hitpoint_update(self):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
             self.owner.destructor.destroy()
 
@@ -522,7 +522,7 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
         self.range = range
         self.targets = {}
         self.target_names = []
-        self.dispatcher.register_listener(self, 'ecs_add')
+        self.dispatcher.register_listener(self, ('ecs_add', 'ecs_destroy'))
 
     def on_event(self, event):
         r = super().on_event(event)
@@ -536,10 +536,11 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
             if dist <= self.range:
                 self.targets[entity.id] = entity.position.pos
                 self.target_names.append(entity.id)
-        if event.event_type == 'ecs_remove':
-            if event.event_value[0] in self.targets:
-                self.target_names.remove(event.event_value[0])
-                del self.targets[event.event_value[0]]
+        elif event.event_type == 'ecs_destroy':
+            print(event.event_value)
+            if event.event_value in self.targets:
+                self.target_names.remove(event.event_value)
+                del self.targets[event.event_value]
 
     def take_action(self, *args, **kwargs):
         if self.targets:
@@ -555,8 +556,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                   10 * dy_factor * dy_sign)
             self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + randint(-1, 1),
                                                     7 + 2*dy_sign + randint(-1, 1)),
-                                     vx=10 * dx_factor * dx_sign,
-                                     vy=10 * dy_factor * dy_sign,
+                                     vx=80 * dx_factor * dx_sign,
+                                     vy=80 * dy_factor * dy_sign,
                                      **kwargs)
 
 

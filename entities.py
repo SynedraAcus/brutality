@@ -468,8 +468,10 @@ class EntityFactory:
         spike.add_component(DestructorComponent(self.dispatcher))
         spike.add_component(CollisionComponent(self.dispatcher,
                                                depth=1))
+        spike.add_component(DestructorHealthComponent(self.dispatcher,
+                                                      hitpoints=8))
         spike.add_component(SpikePowerInteractionComponent(self.dispatcher,
-                                                           action_cooldown=0.5,
+                                                           action_cooldown=0.1,
                                                            range=40,
                                                            powered=False))
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
