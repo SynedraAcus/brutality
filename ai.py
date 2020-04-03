@@ -323,7 +323,11 @@ class CivilianWaitState(CivilianAIState):
         if current_closest:
             return self.runaway_state
         # If not, look if pc_id is within radius
-        pc = EntityTracker().entities[self.pc_id]
+        try:
+            pc = EntityTracker().entities[self.pc_id]
+        except KeyError:
+            # Do not break if PC is dead
+            return
         dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
                     (self.owner.position.y - pc.position.y) ** 2)
         if dist <= self.player_perception_distance:
