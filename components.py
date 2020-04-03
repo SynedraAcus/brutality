@@ -234,10 +234,11 @@ class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
             entity = EntityTracker().entities[other]
             if hasattr(entity, 'collision') and not entity.collision.passable:
                 if hasattr(entity, 'powered'):
-                    entity.power.powered = True
+                    entity.powered.powered = True
                 else:
                     self.dispatcher.add_event(BearEvent('brut_damage',
                                                         (other, self.damage)))
+                self.owner.destructor.destroy()
 
 
 
@@ -489,6 +490,7 @@ class PowerInteractionComponent(Component):
         self.powered = powered
         self.action_cooldown = action_cooldown
         self.have_waited = 0
+        self.dispatcher.register_listener(self, 'tick')
 
     def get_power(self):
         if not self.powered:
@@ -507,6 +509,55 @@ class PowerInteractionComponent(Component):
                 self.take_action()
                 self.have_waited -= self.action_cooldown
 
+
+class SpikePowerInteractionComponent(PowerInteractionComponent):
+    """
+    Power interaction component for spikes.
+
+    They spam sparks towards any entities with PowerInteractionComponent
+    within range
+    """
+    def __init__(self, *args, range=40, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.range = range
+        self.targets = {}
+        self.target_names = []
+        self.dispatcher.register_listener(self, 'ecs_add')
+
+    def on_event(self, event):
+        r = super().on_event(event)
+        if event.event_type == 'ecs_add':
+            entity = EntityTracker().entities[event.event_value[0]]
+            if not hasattr(entity, 'powered') or entity == self.owner:
+                return
+            dx = self.owner.position.x - entity.position.x
+            dy = self.owner.position.y - entity.position.y
+            dist = sqrt(dx ** 2 + dy ** 2)
+            if dist <= self.range:
+                self.targets[entity.id] = entity.position.pos
+                self.target_names.append(entity.id)
+        if event.event_type == 'ecs_remove':
+            if event.event_value[0] in self.targets:
+                self.target_names.remove(event.event_value[0])
+                del self.targets[event.event_value[0]]
+
+    def take_action(self, *args, **kwargs):
+        if self.targets:
+            target = self.targets[choice(self.target_names)]
+            dx = target[0] - self.owner.position.x
+            dy = target[1] - self.owner.position.y
+            dx_factor = abs(dx/dy) if dy != 0 else 1
+            dy_factor = abs(dy/dx) if dx != 0 else 1
+            dx_sign = abs(dx)//dx if dx != 0 else 0
+            dy_sign = abs(dy)//dy if dy != 0 else 0
+            print(dx, dy,
+                  10 * dx_factor * dx_sign,
+                  10 * dy_factor * dy_sign)
+            self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + randint(-1, 1),
+                                                    7 + 2*dy_sign + randint(-1, 1)),
+                                     vx=10 * dx_factor * dx_sign,
+                                     vy=10 * dy_factor * dy_sign,
+                                     **kwargs)
 
 
 class SpawnerComponent(Component):

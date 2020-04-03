@@ -351,7 +351,7 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
         # maybe show something? Like an image? Lots of work to draw, though
         # Maybe some text re: objectives
         elif event.event_type == 'ecs_collision' and event.event_value[0] == self.player_id:
-            if 'level_switch' in event.event_value[1]:
+            if event.event_value[1] and 'level_switch' in event.event_value[1]:
                 self.is_changing = True
                 return BearEvent('play_sound', 'drive')
         elif event.event_type == 'tick' and self.is_changing:

@@ -49,8 +49,7 @@ class EntityFactory:
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
                          'dept_chair_2', 'dept_table_boss',
                          'science_table_1', 'science_table_2',
-                         'science_device_1', 'science_device_2',
-                         'science_spike'}
+                         'science_device_1', 'science_device_2'}
         self.face_positions = {'broken_car': (0, 3),
                                'barricade_1': (0, 2),
                                'barricade_2': (0, 3),
@@ -67,8 +66,7 @@ class EntityFactory:
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
                                'science_device_1': (0, 3),
-                               'science_device_2': (0, 2),
-                               'science_spike': (0, 0)}
+                               'science_device_2': (0, 2)}
         self.face_sizes = {'broken_car': (33, 11),
                            'barricade_1': (7, 14),
                            'barricade_2': (9, 11),
@@ -85,8 +83,7 @@ class EntityFactory:
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
                            'science_device_1': (6, 17),
-                           'science_device_2': (8, 13),
-                           'science_spike': (0, 0)}
+                           'science_device_2': (8, 13)}
         self.depths = {'broken_car': 4,
                        'barricade_1': 5,
                        'barricade_2': 5,
@@ -103,8 +100,7 @@ class EntityFactory:
                        'science_table_1': 7,
                        'science_table_2': 2,
                        'science_device_1': 3,
-                       'science_device_2': 3,
-                       'science_spike': 0}
+                       'science_device_2': 3}
         self.shadow_positions = {'broken_car': (0, 7),
                                  'barricade_1': (1, 9),
                                  'barricade_2': (0, 6),
@@ -121,8 +117,7 @@ class EntityFactory:
                                  'science_table_1': (0, 11),
                                  'science_table_2': (0, 13),
                                  'science_device_1': (1, 16),
-                                 'science_device_2': (0, 12),
-                                 'science_spike': (0, 19)}
+                                 'science_device_2': (0, 12)}
         self.shadow_sizes = {'broken_car': (38, 7),
                              'barricade_1': (11, 7),
                              'barricade_2': (14, 8),
@@ -140,8 +135,7 @@ class EntityFactory:
                              'science_table_1': (15, 8),
                              'science_table_2': (29, 2),
                              'science_device_1': (5, 4),
-                             'science_device_2': (10, 3),
-                             'science_spike': (3, 1)}
+                             'science_device_2': (10, 3)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -465,6 +459,21 @@ class EntityFactory:
                                             destroy_condition='timeout',
                                             lifetime=0.1))
         return muzzle
+
+    def _create_spike(self, entity_id, **kwargs):
+        spike = Entity(id=entity_id)
+        spike.add_component(WidgetComponent(self.dispatcher,
+                                            Widget(*self.atlas.get_element('science_spike'))))
+        spike.add_component(PositionComponent(self.dispatcher))
+        spike.add_component(DestructorComponent(self.dispatcher))
+        spike.add_component(CollisionComponent(self.dispatcher,
+                                               depth=1))
+        spike.add_component(SpikePowerInteractionComponent(self.dispatcher,
+                                                           action_cooldown=0.5,
+                                                           range=40,
+                                                           powered=False))
+        spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return spike
 
 ################################################################################
 # CHARACTERS AND HANDS
@@ -875,13 +884,14 @@ class EntityFactory:
                                            lifetime=0.1))
         return punch
 
-    def _create_spark(self, entity_id, z_level=10, direction='r', **kwargs):
+    def _create_spark(self, entity_id, z_level=10, direction=None,
+                      vx=25, vy=25, **kwargs):
         """
         A spark for science weapons and tools
-        :param entity_id:
-        :param z_level:
-        :param kwargs:
-        :return:
+
+        For the spark direction accepts either `vx` and `vy` which are directly
+        transferred to the entity or `direction` (either 'r' or 'l')  which
+        overrides vx and vy to (80, 0) and (-80, 0) respectively
         """
         spark = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element('spark_1'),
@@ -889,15 +899,51 @@ class EntityFactory:
                                                  6),
                                        z_level=z_level)
         spark.add_component(WidgetComponent(self.dispatcher, widget))
-        if direction == 'r':
-            vx = 80
-        else:
-            vx = -80
-        spark.add_component(PositionComponent(self.dispatcher, vx=vx,
+        if direction:
+            if direction == 'r':
+                vx = 80
+                vy = 0
+            else:
+                vx = -80
+                vy = 0
+        spark.add_component(PositionComponent(self.dispatcher,
+                                              vx=vx, vy =vy,
                                               affect_z=False))
         spark.add_component(PowerProjectileCollisionComponent(self.dispatcher,
                                                               damage=3,
                                                               depth=3))
+        spark.add_component(DestructorComponent(self.dispatcher))
+        return spark
+
+    def _create_tall_spark(self, entity_id, z_level=10, direction=None,
+                      vx=25, vy=25, **kwargs):
+        """
+        Analogous to the spark, but has 12 empty spaces below the spark to
+        enable proper collisions during non-horizontal movement
+        """
+        spark = Entity(id=entity_id)
+        ch1, col1 = self.atlas.get_element('spark_1')
+        ch1 += 11*[[' ']]
+        col1 += 11 * [['#000000']]
+        ch2, col2 = self.atlas.get_element('spark_2')
+        ch2 += 11*[[' ']]
+        col2 += 11* [['#000000']]
+        widget = SimpleAnimationWidget(Animation(((ch1, col1),
+                                                  (ch2, col2)),
+                                                 6))
+        spark.add_component(WidgetComponent(self.dispatcher, widget))
+        if direction:
+            if direction == 'r':
+                vx = 80
+                vy = 0
+            else:
+                vx = -80
+                vy = 0
+        spark.add_component(PositionComponent(self.dispatcher,
+                                              vx=vx, vy=vy))
+        spark.add_component(PowerProjectileCollisionComponent(self.dispatcher,
+                                                              damage=3,
+                                                              depth=1))
         spark.add_component(DestructorComponent(self.dispatcher))
         return spark
 
