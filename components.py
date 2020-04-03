@@ -537,7 +537,6 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                 self.targets[entity.id] = entity.position.pos
                 self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
-            print(event.event_value)
             if event.event_value in self.targets:
                 self.target_names.remove(event.event_value)
                 del self.targets[event.event_value]
@@ -545,19 +544,19 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
     def take_action(self, *args, **kwargs):
         if self.targets:
             target = self.targets[choice(self.target_names)]
-            dx = target[0] - self.owner.position.x
-            dy = target[1] - self.owner.position.y
-            dx_factor = abs(dx/dy) if dy != 0 else 1
-            dy_factor = abs(dy/dx) if dx != 0 else 1
+            x_offset = randint(-1, 1)
+            y_offset = randint(-1, 1)
+            dx = target[0] - (self.owner.position.x + x_offset)
+            dy = target[1] - (self.owner.position.y + y_offset)
+            dx_factor = abs(dx/(dy+dx)) if dy != 0 else 1
+            dy_factor = abs(dy/(dx+dy)) if dx != 0 else 1
             dx_sign = abs(dx)//dx if dx != 0 else 0
             dy_sign = abs(dy)//dy if dy != 0 else 0
-            print(dx, dy,
-                  10 * dx_factor * dx_sign,
-                  10 * dy_factor * dy_sign)
-            self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + randint(-1, 1),
-                                                    7 + 2*dy_sign + randint(-1, 1)),
-                                     vx=80 * dx_factor * dx_sign,
-                                     vy=80 * dy_factor * dy_sign,
+            # TODO: fix diagonal aiming for spikes
+            self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + x_offset,
+                                                    7 + 2*dy_sign + y_offset),
+                                     vx=10 * dx_factor * dx_sign,
+                                     vy=10 * dy_factor * dy_sign,
                                      **kwargs)
 
 
