@@ -1147,6 +1147,7 @@ class EntityFactory:
                                              should_hide=False))
         entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                                             owning_entity=owning_entity,
                                                             spawned_items={

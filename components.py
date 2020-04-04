@@ -572,7 +572,6 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
             if event.event_value in self.targets:
                 self.target_names.remove(event.event_value)
                 del self.targets[event.event_value]
-                print (self.owner.id, event.event_value, self.target_names)
 
     def take_action(self, *args, **kwargs):
         if self.targets:

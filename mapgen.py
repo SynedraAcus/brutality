@@ -66,7 +66,10 @@ class LevelManager(metaclass=Singleton):
         # Remove every entity except self.player_entity
         filter_method = self.should_remove if not destroy_player else lambda x: True
         for entity in EntityTracker().filter_entities(filter_method):
-            entity.destructor.destroy()
+            try:
+                entity.destructor.destroy()
+            except AttributeError:
+                print(entity)
         self.dispatcher.add_event(BearEvent('set_bg_sound', None))
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
