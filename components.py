@@ -558,37 +558,38 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                     dx = self.owner.position.x - machine.position.x
                     dy = self.owner.position.y - machine.position.y
                     dist = sqrt(dx ** 2 + dy ** 2)
-                    if dist <= self.range and machine.id != self.owner.id:
+                    if dist <= self.range and machine.id != self.owner.id and machine.id not in self.target_names:
                         self.targets[machine.id] = machine.position.pos
                         self.target_names.append(machine.id)
             else:
                 dx = self.owner.position.x - entity.position.x
                 dy = self.owner.position.y - entity.position.y
                 dist = sqrt(dx ** 2 + dy ** 2)
-                if dist <= self.range:
+                if dist <= self.range and entity.id not in self.target_names:
                     self.targets[entity.id] = entity.position.pos
                     self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
             if event.event_value in self.targets:
                 self.target_names.remove(event.event_value)
                 del self.targets[event.event_value]
+                print (self.owner.id, event.event_value, self.target_names)
 
     def take_action(self, *args, **kwargs):
         if self.targets:
             target = self.targets[choice(self.target_names)]
-            x_offset = randint(-1, 1)
-            y_offset = randint(-1, 1)
-            dx = target[0] - (self.owner.position.x + x_offset)
-            dy = target[1] - (self.owner.position.y + y_offset)
-            dx_factor = abs(dx/(dy+dx)) if dy != 0 else 1
-            dy_factor = abs(dy/(dx+dy)) if dx != 0 else 1
+            dx = target[0] - (self.owner.position.x)
+            dy = target[1] - (self.owner.position.y)
+            # Trivially proven from:
+            # 1) V**2 = vx**2 + vy ** 2
+            # 2) vx/vy = dx/dy
             dx_sign = abs(dx)//dx if dx != 0 else 0
             dy_sign = abs(dy)//dy if dy != 0 else 0
-            # TODO: fix diagonal aiming for spikes
-            self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign + x_offset,
-                                                    7 + 2*dy_sign + y_offset),
-                                     vx=80 * dx_factor * dx_sign,
-                                     vy=80 * dy_factor * dy_sign,
+            vy = sqrt(1600 / (1 + dx**2/dy**2)) if dy != 0 else 0
+            vx = sqrt(1600 / (1 + dy**2/dx**2)) if dx !=0 else 0
+            self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign,
+                                                    7 + 2*dy_sign),
+                                     vx=vx * dx_sign,
+                                     vy=vy * dy_sign,
                                      **kwargs)
 
     def __repr__(self):
