@@ -703,7 +703,9 @@ class EntityFactory:
                                                       right_item=launcher.id))
         return punk
 
-    def _create_female_scientist(self, entity_id, **kwargs):
+    def _create_female_scientist(self, entity_id,
+                                 monologue=('Line one\nline two', ),
+                                 **kwargs):
         scientist = Entity(id=entity_id)
         widget = SwitchingWidget(
             images_dict={'r_1': self.atlas.get_element('scientist_f2_r_1'),
@@ -724,8 +726,7 @@ class EntityFactory:
         scientist.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='scientist_f2_corpse',
                                                     hitpoints=5,
-                                                    hit_sounds=('punk_hit',
-                                                                'punk_death'),
+                                                    hit_sounds=('male_dmg', ),
                                                     death_sounds=(
                                                     'punk_death',)))
         # Creating hand entities
@@ -788,17 +789,10 @@ class EntityFactory:
                                                            runaway_state='run',
                                                            enemy_perception_distance=50,
                                                            enemy_factions=('punks',),
-                                                           monologue=('I am a test scientist NPC',
-                                                                      'I exist to slowly deliver\nthis monologue',
-                                                                      'which is written\nfor the test purposes.',
-                                                                      'I can also shut up if\nthe player is too far',
-                                                                      'and continue when he returns.',
-                                                                      'I can also run away\nif I see an enemy',
-                                                                      'Calming down when they\nare too far.',
-                                                                      'Or dead.',
-                                                                      'I can also be killed.',
-                                                                      'But please don\'t do that'),
-                                                           phrase_pause=1.3)},
+                                                           phrase_sounds=('male_phrase_1',
+                                                                          'male_phrase_2'),
+                                                           monologue=monologue,
+                                                           phrase_pause=1.5)},
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)
@@ -1156,6 +1150,7 @@ class EntityFactory:
                                                             grab_offset={'r': (-3, -2),
                                                                          'l': (3, -2)},
                                                             use_delay=0.5,
+                                                            use_sound='spark',
                                                             item_name='Spark emitter',
                                                             item_description='Power source and a weapon\nThis tool can activate items\nby shooting at them, or\ndeactivate enemies (also by\nshooting at them).'))
         return entity

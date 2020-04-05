@@ -66,10 +66,7 @@ class LevelManager(metaclass=Singleton):
         # Remove every entity except self.player_entity
         filter_method = self.should_remove if not destroy_player else lambda x: True
         for entity in EntityTracker().filter_entities(filter_method):
-            try:
                 entity.destructor.destroy()
-            except AttributeError:
-                print(entity)
         self.dispatcher.add_event(BearEvent('set_bg_sound', None))
         # Remove any un-triggered spawns
         self.spawner.remove_spawns()
@@ -109,9 +106,18 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('spike', (80, 30))
         self.factory.create_entity('spike', (120, 10))
         self.factory.create_entity('spike', (100, 30))
-        #TODO: make monologue an arg of scientist creation method
-        self.factory.create_entity('female_scientist', (20, 15))
-        # self.factory.create_entity('target', (50, 30))
+        self.factory.create_entity('female_scientist', (20, 15),
+                                   monologue=('I am a test scientist NPC',
+                                              'I exist to slowly deliver\nthis monologue',
+                                              'which is written\nfor the test purposes.',
+                                              'I can also shut up if\nthe player is too far',
+                                              'and continue when he returns.',
+                                              'I can also run away\nif I see an enemy',
+                                              'Calming down when they\nare too far.',
+                                              'Or dead.',
+                                              'I can also be killed.',
+                                              'But please don\'t do that'))
+        self.factory.create_entity('target', (50, 30))
         # self.factory.create_entity('bottle_punk', (100, 10))
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))

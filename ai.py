@@ -386,6 +386,7 @@ class CivilianTalkState(CivilianAIState):
     """
     def __init__(self, *args, monologue=('Line one', 'Line two'),
                  phrase_pause=1.2,
+                 phrase_sounds=None,
                  peaceful_state=None,
                  runaway_state=None,
                  **kwargs):
@@ -396,6 +397,7 @@ class CivilianTalkState(CivilianAIState):
             if not isinstance(line, str):
                 raise ValueError(f'monologue for a CivilianTalkState should be an iterable of strs')
         self.monologue = monologue
+        self.phrase_sounds = phrase_sounds
         # Index of the next phrase to be said
         self.next_phrase = 0
         self.phrase_pause = phrase_pause
@@ -429,6 +431,9 @@ class CivilianTalkState(CivilianAIState):
             self.owner.position.turn('r')
         # Center on the first line
         x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0]) - self.owner.widget.width) / 2)
+        if self.phrase_sounds:
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                choice(self.phrase_sounds)))
         self.owner.spawner.spawn('message', (-x_offset, 0),
                                  text=self.monologue[self.next_phrase],
                                  vy=-3,

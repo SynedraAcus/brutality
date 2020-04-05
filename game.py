@@ -121,24 +121,29 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['set_bg_sound', 'play_sound', 'ecs_collision'])
-
+sound_files = {'step': 'step.wav',
+               'shot': 'shot.wav',
+               'punch': 'punch.wav',
+               'spark': 'spark.wav',
+               'molotov_break': 'molotov_brake.wav',
+               'molotov_fire': 'molotov_fire.wav',
+               'molotov_throw': 'molotov_throw.wav',
+               'drive': 'drive.wav',
+               'supercop_bg': 'supercop.wav',
+               'ghetto_walk_bg': 'ghetto_walk.wav',
+               'punk_bg': 'punk_bg.wav',
+               'punk_hit': 'punk_hey.wav',
+               'punk_death': 'punk_ho.wav',
+               'cop_hit': 'cop_dmg.wav',
+               'cop_death': 'cop_death.wav',
+               'male_dmg': 'male_dmg.wav',
+               'male_phrase_1': 'male_phrase_1.wav',
+               'male_phrase_2': 'male_phrase_2.wav',
+               'bandage': 'bondage.wav',
+               'target_hit': 'target.wav',
+               'item_drop': 'item_drop.wav',
+               'item_grab': 'item_grab.wav'}
 if not args.disable_sound:
-    sound_files = {'step': 'step.wav',
-                   'shot': 'shot.wav',
-                   'punch': 'punch.wav',
-                   'molotov_break': 'molotov_brake.wav',
-                   'molotov_fire': 'molotov_fire.wav',
-                   'molotov_throw': 'molotov_throw.wav',
-                   'drive': 'drive.wav',
-                   'supercop_bg': 'supercop.wav',
-                   'ghetto_walk_bg': 'ghetto_walk.wav',
-                   'punk_bg': 'punk_bg.wav',
-                   'punk_hit': 'punk_hey.wav',
-                   'punk_death': 'punk_ho.wav',
-                   'cop_hit': 'cop_dmg.wav',
-                   'cop_death': 'cop_death.wav',
-                   'bandage': 'bondage.wav',
-                   'target_hit': 'target.wav'}
     from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:

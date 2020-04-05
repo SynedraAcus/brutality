@@ -590,6 +590,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                                      vx=vx * dx_sign,
                                      vy=vy * dy_sign,
                                      **kwargs)
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                'spark'))
 
     def __repr__(self):
         d = loads(super().__repr__())
@@ -961,6 +963,8 @@ class HandInterfaceComponent(Component):
             # Pick up that item
             other_item.item_behaviour.owning_entity = self.owner
             other_item.hiding.hide()
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                'item_grab'))
             if hand == 'right':
                 self.right_item = other_item.id
             elif hand == 'left':
@@ -989,6 +993,7 @@ class HandInterfaceComponent(Component):
                                - item.widget.height + randint(-3, 3))
             item.widget.z_level = item.position.y + item.widget.height
             item.hiding.unhide()
+            self.dispatcher.add_event(BearEvent('play_sound', 'item_drop'))
 
     def on_event(self, event):
         if event.event_type == 'ecs_destroy':
