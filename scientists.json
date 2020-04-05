@@ -217,9 +217,16 @@
     "ysize": 20
   },
   {
-    "name": "science_device_2",
+    "name": "science_prop_unpowered",
     "x": 74,
     "y": 29,
+    "xsize": 10,
+    "ysize": 15
+  },
+  {
+    "name": "science_prop_powered",
+    "x": 74,
+    "y": 45,
     "xsize": 10,
     "ysize": 15
   },

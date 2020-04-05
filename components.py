@@ -531,6 +531,23 @@ class PowerInteractionComponent(Component):
         return dumps(d)
 
 
+class SciencePropPowerInteractionComponent(PowerInteractionComponent):
+    """
+    A prop that does nothing useful. It just switches its widget between powered
+    and unpowered state.
+
+    Expects the owner's WidgetComponent to be a SwitchWidgetComponent
+    """
+    def get_power(self):
+        super().get_power()
+        self.owner.widget.switch_to_image('powered')
+
+    def take_action(self):
+        print('taking action')
+        self.powered = False
+        self.owner.widget.switch_to_image('unpowered')
+
+
 class SpikePowerInteractionComponent(PowerInteractionComponent):
     """
     Power interaction component for spikes.

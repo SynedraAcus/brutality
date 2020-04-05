@@ -49,7 +49,7 @@ class EntityFactory:
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
                          'dept_chair_2', 'dept_table_boss',
                          'science_table_1', 'science_table_2',
-                         'science_device_1', 'science_device_2'}
+                         'science_device_1'}
         self.face_positions = {'broken_car': (0, 3),
                                'barricade_1': (0, 2),
                                'barricade_2': (0, 3),
@@ -65,8 +65,7 @@ class EntityFactory:
                                'dept_table_boss': (0, 14),
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
-                               'science_device_1': (0, 3),
-                               'science_device_2': (0, 2)}
+                               'science_device_1': (0, 3)}
         self.face_sizes = {'broken_car': (33, 11),
                            'barricade_1': (7, 14),
                            'barricade_2': (9, 11),
@@ -82,8 +81,7 @@ class EntityFactory:
                            'dept_table_boss': (24, 10),
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
-                           'science_device_1': (6, 17),
-                           'science_device_2': (8, 13)}
+                           'science_device_1': (6, 17)}
         self.depths = {'broken_car': 4,
                        'barricade_1': 5,
                        'barricade_2': 5,
@@ -99,8 +97,8 @@ class EntityFactory:
                        'dept_table_boss': 6,
                        'science_table_1': 7,
                        'science_table_2': 2,
-                       'science_device_1': 3,
-                       'science_device_2': 3}
+                       'science_device_1': 3}
+        #TODO: do I even use shadows? Should be deprecated, but better check
         self.shadow_positions = {'broken_car': (0, 7),
                                  'barricade_1': (1, 9),
                                  'barricade_2': (0, 6),
@@ -116,8 +114,7 @@ class EntityFactory:
                                  'dept_table_boss': (0, 19),
                                  'science_table_1': (0, 11),
                                  'science_table_2': (0, 13),
-                                 'science_device_1': (1, 16),
-                                 'science_device_2': (0, 12)}
+                                 'science_device_1': (1, 16)}
         self.shadow_sizes = {'broken_car': (38, 7),
                              'barricade_1': (11, 7),
                              'barricade_2': (14, 8),
@@ -134,8 +131,7 @@ class EntityFactory:
                              'dept_table_boss': (30, 7),
                              'science_table_1': (15, 8),
                              'science_table_2': (29, 2),
-                             'science_device_1': (5, 4),
-                             'science_device_2': (10, 3)}
+                             'science_device_1': (5, 4)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -479,6 +475,20 @@ class EntityFactory:
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return spike
 
+    def _create_science_prop(self, entity_id, **kwargs):
+        prop = Entity(entity_id)
+        widget = SwitchingWidget(images_dict={'powered': self.atlas.get_element('science_prop_powered'),
+                                              'unpowered': self.atlas.get_element('science_prop_unpowered')},
+                                 initial_image='unpowered')
+        prop.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        prop.add_component(PositionComponent(self.dispatcher))
+        prop.add_component(CollisionComponent(self.dispatcher))
+        prop.add_component(SciencePropPowerInteractionComponent(self.dispatcher,
+                                                                powered=False,
+                                                                action_cooldown=0.2))
+        prop.add_component(DestructorComponent(self.dispatcher))
+        return prop
+
 ################################################################################
 # CHARACTERS AND HANDS
 ################################################################################
@@ -790,7 +800,10 @@ class EntityFactory:
                                                            enemy_perception_distance=50,
                                                            enemy_factions=('punks',),
                                                            phrase_sounds=('male_phrase_1',
-                                                                          'male_phrase_2'),
+                                                                          'male_phrase_2',
+                                                                          'male_phrase_3',
+                                                                          'male_phrase_4',
+                                                                          'male_phrase_5'),
                                                            monologue=monologue,
                                                            phrase_pause=1.5)},
                          current_state='wait',
