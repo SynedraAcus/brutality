@@ -576,14 +576,16 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                     dy = self.owner.position.y - machine.position.y
                     dist = sqrt(dx ** 2 + dy ** 2)
                     if dist <= self.range and machine.id != self.owner.id and machine.id not in self.target_names:
-                        self.targets[machine.id] = machine.position.pos
+                        self.targets[machine.id] = (machine.position.pos[0],
+                                                    machine.position.pos[1] + machine.widget.height)
                         self.target_names.append(machine.id)
             else:
                 dx = self.owner.position.x - entity.position.x
                 dy = self.owner.position.y - entity.position.y
                 dist = sqrt(dx ** 2 + dy ** 2)
                 if dist <= self.range and entity.id not in self.target_names:
-                    self.targets[entity.id] = entity.position.pos
+                    self.targets[entity.id] = (entity.position.pos[0],
+                                               entity.position.pos[1] + entity.widget.height)
                     self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
             if event.event_value in self.targets:
@@ -593,15 +595,15 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
     def take_action(self, *args, **kwargs):
         if self.targets:
             target = self.targets[choice(self.target_names)]
-            dx = target[0] - (self.owner.position.x)
-            dy = target[1] - (self.owner.position.y)
+            dx = target[0] - self.owner.position.x
+            dy = target[1] - self.owner.position.y - self.owner.widget.height
             # Trivially proven from:
             # 1) V**2 = vx**2 + vy ** 2
             # 2) vx/vy = dx/dy
             dx_sign = abs(dx)//dx if dx != 0 else 0
             dy_sign = abs(dy)//dy if dy != 0 else 0
             vy = sqrt(1600 / (1 + dx**2/dy**2)) if dy != 0 else 0
-            vx = sqrt(1600 / (1 + dy**2/dx**2)) if dx !=0 else 0
+            vx = sqrt(1600 / (1 + dy**2/dx**2)) if dx != 0 else 0
             self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign,
                                                     7 + 2*dy_sign),
                                      vx=vx * dx_sign,

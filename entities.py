@@ -463,7 +463,8 @@ class EntityFactory:
         spike.add_component(PositionComponent(self.dispatcher))
         spike.add_component(DestructorComponent(self.dispatcher))
         spike.add_component(CollisionComponent(self.dispatcher,
-                                               depth=1))
+                                               z_shift=(1, -1),
+                                               depth=2))
         spike.add_component(SpawnerDestructorHealthComponent(self.dispatcher,
                                                hitpoints=8,
                                                spawned_item='spikebox',
@@ -482,7 +483,11 @@ class EntityFactory:
                                  initial_image='unpowered')
         prop.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         prop.add_component(PositionComponent(self.dispatcher))
-        prop.add_component(CollisionComponent(self.dispatcher))
+        prop.add_component(CollisionComponent(self.dispatcher,
+                                              depth=2,
+                                              face_position=(0, 2),
+                                              face_size=(8, 13),
+                                              z_shift=(1, -1)))
         prop.add_component(SciencePropPowerInteractionComponent(self.dispatcher,
                                                                 powered=False,
                                                                 action_cooldown=0.2))
