@@ -231,9 +231,16 @@
     "ysize": 15
   },
   {
-    "name": "science_spike",
+    "name": "science_spike_unpowered",
     "x": 68,
     "y": 29,
+    "xsize": 5,
+    "ysize": 19
+  },
+  {
+    "name": "science_spike_powered",
+    "x": 68,
+    "y": 49,
     "xsize": 5,
     "ysize": 19
   },

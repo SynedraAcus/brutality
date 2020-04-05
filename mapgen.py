@@ -102,11 +102,11 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('emitter', (15, 40))
         self.factory.create_entity('spikebox', (25, 40))
         self.factory.create_entity('bandage', (35, 40))
-        self.factory.create_entity('spike', (80, 20))
-        self.factory.create_entity('spike', (95, 18))
-        self.factory.create_entity('spike', (120, 16))
-        self.factory.create_entity('spike', (100, 30))
-        # self.factory.create_entity('science_prop', (120, 20))
+        self.factory.create_entity('spike', (80, 10))
+        self.factory.create_entity('spike', (80, 30))
+        self.factory.create_entity('spike', (120, 10))
+        self.factory.create_entity('spike', (120, 30))
+        self.factory.create_entity('science_prop', (130, 20))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('I am a test scientist NPC',
                                               'I exist to slowly deliver\nthis monologue',

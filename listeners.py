@@ -412,7 +412,7 @@ class MenuListener(Listener):
         self.screen_widget = Widget(screen_chars, screen_colors)
         self.menu_pos = menu_pos
         self.currently_showing = False
-        self.input_delay = 0.1
+        self.input_delay = 0.3
         self.current_delay = 0
 
     def on_event(self, event):

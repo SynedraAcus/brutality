@@ -458,8 +458,10 @@ class EntityFactory:
 
     def _create_spike(self, entity_id, **kwargs):
         spike = Entity(id=entity_id)
-        spike.add_component(WidgetComponent(self.dispatcher,
-                                            Widget(*self.atlas.get_element('science_spike'))))
+        widget = SwitchingWidget(images_dict={'unpowered': self.atlas.get_element('science_spike_unpowered'),
+                                              'powered': self.atlas.get_element('science_spike_powered')},
+                                 initial_image='unpowered')
+        spike.add_component(SwitchWidgetComponent(self.dispatcher, widget))
         spike.add_component(PositionComponent(self.dispatcher))
         spike.add_component(DestructorComponent(self.dispatcher))
         spike.add_component(CollisionComponent(self.dispatcher,
@@ -602,7 +604,7 @@ class EntityFactory:
                                  'attack': NunchakuAgressorCombatState(self.dispatcher,
                                                                        peaceful_state='wait',
                                                                        perception_distance=50,
-                                                                       melee_range=(15, 20))},
+                                                                       melee_range=(12, 15))},
                          current_state='wait',
                          owner=nunchaku)
         nunchaku.add_component(ai)

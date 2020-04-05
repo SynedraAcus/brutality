@@ -562,6 +562,10 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
         self.target_names = []
         self.dispatcher.register_listener(self, ('ecs_add', 'ecs_destroy'))
 
+    def get_power(self):
+        super().get_power()
+        self.owner.widget.switch_to_image('powered')
+
     def on_event(self, event):
         r = super().on_event(event)
         if event.event_type == 'ecs_add':
@@ -577,7 +581,7 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                     dist = sqrt(dx ** 2 + dy ** 2)
                     if dist <= self.range and machine.id != self.owner.id and machine.id not in self.target_names:
                         self.targets[machine.id] = (machine.position.pos[0],
-                                                    machine.position.pos[1] + machine.widget.height)
+                                                    machine.position.pos[1])
                         self.target_names.append(machine.id)
             else:
                 dx = self.owner.position.x - entity.position.x
@@ -585,7 +589,7 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                 dist = sqrt(dx ** 2 + dy ** 2)
                 if dist <= self.range and entity.id not in self.target_names:
                     self.targets[entity.id] = (entity.position.pos[0],
-                                               entity.position.pos[1] + entity.widget.height)
+                                               entity.position.pos[1])
                     self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
             if event.event_value in self.targets:
@@ -596,7 +600,7 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
         if self.targets:
             target = self.targets[choice(self.target_names)]
             dx = target[0] - self.owner.position.x
-            dy = target[1] - self.owner.position.y - self.owner.widget.height
+            dy = target[1] - self.owner.position.y
             # Trivially proven from:
             # 1) V**2 = vx**2 + vy ** 2
             # 2) vx/vy = dx/dy
