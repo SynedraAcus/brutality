@@ -941,7 +941,7 @@ class HandInterfaceComponent(Component):
                                   entity.widget.size,
                                   (self.owner.position.x,
                                    self.owner.position.y + self.owner.widget.height - 5),
-                                  (self.owner.widget.width, 5)):
+                                  (self.owner.widget.width, 5)) and entity.item_behaviour.owning_entity is None:
                 other_item = entity
                 break
         self.drop(hand)
@@ -1084,7 +1084,10 @@ class ItemBehaviourComponent(Component):
             # probably related to the exact order in which entities are
             # deserialized
             self._future_owner = value
-        elif value is not None:
+        elif value is None:
+            self._owning_entity = None
+            self._future_owner = None
+        else:
             # owning_entity can be empty, but not some incorrect type
             raise BearECSException(f'A {type(value)} used as an owning_entity for item')
 

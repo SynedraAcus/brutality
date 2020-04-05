@@ -216,6 +216,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_table_1', (290, 12))
         self.factory.create_entity('dept_table_2', (305, 12))
         self.factory.create_entity('dept_chair_2', (319, 19))
+        #TODO: turn boss table into a proper NPC with speaking sounds
         self.factory.create_entity('dept_table_boss', (350, 7))
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))
