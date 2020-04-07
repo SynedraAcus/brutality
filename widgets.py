@@ -248,3 +248,15 @@ class LevelSwitchWidget(SimpleAnimationWidget):
                                     (chars, colors)],
                                    2))
 
+
+class SignpostWidget(Layout):
+    def __init__(self, chars, colors, *args,
+                 text='12345\n67890', text_color='#ffffff',
+                 **kwargs):
+        super().__init__(chars, colors, *args, **kwargs)
+        l = text.split('\n')
+        if len(l) > 2 or any(len(x) > 10 for x in l):
+            raise ValueError('Signpost accepts at most 2 lines 10 chars each')
+        label = Label(text=text, color=text_color, just='center', width=10)
+        self.add_child(label, (1, 1))
+        self._rebuild_self()

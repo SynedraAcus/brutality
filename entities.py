@@ -16,7 +16,7 @@ from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
-from widgets import ParticleWidget, LevelSwitchWidget
+from widgets import ParticleWidget, LevelSwitchWidget, SignpostWidget
 
 
 class EntityFactory:
@@ -382,6 +382,18 @@ class EntityFactory:
                                            z_shift=(1, -1),
                                            depth=4))
         return target_entity
+
+    def _create_signpost(self, entity_id, text='TEST TEST\nTEST TEST',
+                         text_color='blue'):
+        post = Entity(entity_id)
+        widget = SignpostWidget(*self.atlas.get_element('signpost'),
+                                text=text, text_color=text_color)
+        post.add_component(WidgetComponent(self.dispatcher, widget))
+        post.add_component(PositionComponent(self.dispatcher))
+        post.add_component(CollisionComponent(self.dispatcher,
+                                              depth=1))
+        post.add_component(DestructorComponent(self.dispatcher))
+        return post
 
     def _create_invis(self, entity_id, size=(0, 0), **kwargs):
         """

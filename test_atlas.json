@@ -350,6 +350,13 @@
     "ysize": 9
   },
   {
+    "name": "signpost",
+    "x": 68,
+    "y": 22,
+    "xsize": 12,
+    "ysize": 8
+  },
+  {
     "name": "shot_r",
     "x": 6,
     "y": 10,
