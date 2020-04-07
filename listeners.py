@@ -325,7 +325,8 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     def __init__(self, player_id,  current_level=None,
                  level_manager=None, level_sequence={}, **kwargs):
-        # TODO: next_level dict for current levels
+        # TODO: exit to multiple levels
+        # TODO: next_level dict for current levels?
         # This will permit multiple exits per level
         super().__init__(**kwargs)
         self.player_id = player_id

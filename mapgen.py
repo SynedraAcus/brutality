@@ -163,22 +163,6 @@ class LevelManager(metaclass=Singleton):
                                 'text': 'You can look around with numpad',
                                 'destroy_condition': 'timeout',
                                 'lifetime': 5,
-                                'vy': -2}),
-                  SpawnItem(item='message',
-                            pos=(350, 20),
-                            size=(10, 30),
-                            kwargs={
-                                'text': 'Hey, come here',
-                                'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}),
-                  SpawnItem(item='message',
-                            pos=(350, 20),
-                            size=(30, 8),
-                            kwargs={
-                                'text': 'We got a damn punk infestation\ndown the street.\n\nGo do something about it',
-                                'destroy_condition': 'timeout',
-                                'lifetime': 5,
                                 'vy': -2}))
         self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
@@ -217,8 +201,11 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_table_1', (290, 12))
         self.factory.create_entity('dept_table_2', (305, 12))
         self.factory.create_entity('dept_chair_2', (319, 19))
-        #TODO: turn boss table into a proper NPC with speaking sounds
-        self.factory.create_entity('dept_table_boss', (350, 7))
+        self.factory.create_entity('dept_boss', (350, 7),
+                                   monologue=('Hey, come here',
+                                              'We got a damn punk infestation\ndown the street',
+                                              'Go do something about it',
+                                              'There is probably a reason these assholes\ngot out of their dens',))
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))
 

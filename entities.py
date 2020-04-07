@@ -62,7 +62,7 @@ class EntityFactory:
                                'dept_table_2': (0, 11),
                                'dept_chair_1': (0, 2),
                                'dept_chair_2': (0, 2),
-                               'dept_table_boss': (0, 14),
+                               # 'dept_table_boss': (0, 14),
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
                                'science_device_1': (0, 3)}
@@ -78,7 +78,7 @@ class EntityFactory:
                            'dept_table_2': (11, 8),
                            'dept_chair_1': (5, 10),
                            'dept_chair_2': (5, 10),
-                           'dept_table_boss': (24, 10),
+                           # 'dept_table_boss': (24, 10),
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
                            'science_device_1': (6, 17)}
@@ -98,40 +98,6 @@ class EntityFactory:
                        'science_table_1': 7,
                        'science_table_2': 2,
                        'science_device_1': 3}
-        #TODO: do I even use shadows? Should be deprecated, but better check
-        self.shadow_positions = {'broken_car': (0, 7),
-                                 'barricade_1': (1, 9),
-                                 'barricade_2': (0, 6),
-                                 'barricade_3': (0, 6),
-                                 'dept_locker': (0, 17),
-                                 'dept_fence': (0, 13),
-                                 'dept_bench': (0, 5),
-                                 'dept_wall_inner': (0, 19),
-                                 'dept_table_1': (0, 11),
-                                 'dept_table_2': (0, 12),
-                                 'dept_chair_1': (0, 10),
-                                 'dept_chair_2': (0, 10),
-                                 'dept_table_boss': (0, 19),
-                                 'science_table_1': (0, 11),
-                                 'science_table_2': (0, 13),
-                                 'science_device_1': (1, 16)}
-        self.shadow_sizes = {'broken_car': (38, 7),
-                             'barricade_1': (11, 7),
-                             'barricade_2': (14, 8),
-                             'barricade_3': (13, 8),
-                             'dept_locker': (9, 3),
-                             'dept_fence': (21, 2),
-                             'dept_bench': (19, 2),
-                             'dept_range_table': (13, 19),
-                             'dept_wall_inner': (15, 12),
-                             'dept_table_1': (17, 7),
-                             'dept_table_2': (18, 7),
-                             'dept_chair_1': (7, 3),
-                             'dept_chair_2': (7, 3),
-                             'dept_table_boss': (30, 7),
-                             'science_table_1': (15, 8),
-                             'science_table_2': (29, 2),
-                             'science_device_1': (5, 4)}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
         """
@@ -575,6 +541,61 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent(event_type='brut_focus',
                                             event_value=entity_id))
         return cop_entity
+
+    def _create_dept_boss(self, entity_id, monologue=('Line 1', 'Line 2'), **kwargs):
+        """
+        A monologue NPC boss
+        :param entity_id:
+        :param monologue:
+        :param kwargs:
+        :return:
+        """
+        boss = Entity(entity_id)
+        # Two identical "phases" because WalkerComponent expects the entity to
+        # have two right images and two left images for walking. Although the
+        # boss cannot walk, he doesn't merit a separate subclass of
+        # PositionComponent
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('dept_boss_r'),
+                                              'r_2': self.atlas.get_element('dept_boss_r'),
+                                              'l_1': self.atlas.get_element('dept_boss_l'),
+                                              'l_2': self.atlas.get_element('dept_boss_l')},
+                                 initial_image='r_1')
+        boss.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        boss.add_component(WalkerComponent(self.dispatcher))
+        boss.add_component(CollisionComponent(self.dispatcher, passable=False,
+                                              face_position=(0, 14),
+                                              face_size=(24, 10), depth=10,
+                                              z_shift=(1, -1)))
+        boss.add_component(DestructorComponent(self.dispatcher))
+        boss.add_component(FactionComponent(self.dispatcher, faction='cops'))
+        boss.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': CivilianWaitState(self.dispatcher,
+                                                           enemy_factions=('punks',),
+                                                           enemy_perception_distance=50,
+                                                           player_perception_distance=35,
+                                                           player_interaction_state='talk',
+                                                           runaway_state=None,
+                                                           pc_id='cop_1'),
+                                 'talk': CivilianTalkState(self.dispatcher,
+                                                           pc_id='cop_1',
+                                                           peaceful_state='wait',
+                                                           runaway_state=None,
+                                                           enemy_perception_distance=50,
+                                                           enemy_factions=('punks',),
+                                                           phrase_sounds=('male_phrase_1',
+                                                                          'male_phrase_2',
+                                                                          'male_phrase_3',
+                                                                          'male_phrase_4',
+                                                                          'male_phrase_5'),
+                                                           monologue=monologue,
+                                                           phrase_color='#ffffff',
+                                                           phrase_pause=1.5)},
+                         current_state='wait',
+                         owner=boss)
+        boss.add_component(ai)
+        return boss
+
     
     def _create_nunchaku_punk(self, entity_id, **kwargs):
         nunchaku = Entity(id=entity_id)

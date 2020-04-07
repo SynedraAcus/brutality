@@ -386,6 +386,7 @@ class CivilianTalkState(CivilianAIState):
     """
     def __init__(self, *args, monologue=('Line one', 'Line two'),
                  phrase_pause=1.2,
+                 phrase_color = 'gray',
                  phrase_sounds=None,
                  peaceful_state=None,
                  runaway_state=None,
@@ -398,6 +399,7 @@ class CivilianTalkState(CivilianAIState):
                 raise ValueError(f'monologue for a CivilianTalkState should be an iterable of strs')
         self.monologue = monologue
         self.phrase_sounds = phrase_sounds
+        self.phrase_color = phrase_color
         # Index of the next phrase to be said
         self.next_phrase = 0
         self.phrase_pause = phrase_pause
@@ -438,7 +440,7 @@ class CivilianTalkState(CivilianAIState):
                                  text=self.monologue[self.next_phrase],
                                  vy=-3,
                                  vx=randint(-1, 1),
-                                 color='gray',
+                                 color=self.phrase_color,
                                  destroy_condition='timeout',
                                  lifetime=5.0)
         # Could have waited a lot during combat or waiting, but it still
@@ -446,7 +448,6 @@ class CivilianTalkState(CivilianAIState):
         self.next_phrase += 1
         return self.phrase_pause
 
-# TODO: a more reasonable navigation logic for NPCs
 # Currently they get stuck around the obstacles and tend to start turning around
 # every few steps when on the edge of perception distance. It is probably gonna
 # look much better if they pick a direction, walk it for a few tens of steps,

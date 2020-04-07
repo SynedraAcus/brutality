@@ -91,9 +91,16 @@
     "ysize": 12
   },
   {
-    "name": "dept_table_boss",
+    "name": "dept_boss_l",
     "x": 0,
     "y": 40,
+    "xsize": 30,
+    "ysize": 25
+  },
+  {
+    "name": "dept_boss_r",
+    "x": 0,
+    "y": 65,
     "xsize": 30,
     "ysize": 25
   },

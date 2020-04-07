@@ -333,7 +333,7 @@ class GrenadeComponent(Component):
                 if self.explosion_sound:
                     self.dispatcher.add_event(BearEvent('play_sound',
                                                         self.explosion_sound))
-                    # TODO: play flame sound somewhere within the flame itself
+                    # TODO: remove flame sound if I add other grenades
                     self.dispatcher.add_event(BearEvent('play_sound',
                                                         'molotov_fire'))
                 self.owner.spawner.spawn(self.spawned_item,
@@ -443,7 +443,6 @@ class CharacterHealthComponent(HealthComponent):
             self.owner.hands.drop('left')
             if self.death_sounds:
                 if self.owner.id == 'cop_1':
-                    # TODO: disable bg sound on player death outside of CharacterHealthComponent
                     self.dispatcher.add_event(BearEvent('set_bg_sound', None))
                 self.dispatcher.add_event(BearEvent('play_sound',
                                                     choice(self.death_sounds)))
