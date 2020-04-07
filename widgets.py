@@ -2,6 +2,7 @@
 Various game-specific widgets
 """
 
+from json import dumps
 from math import sqrt
 from random import choice, uniform
 
@@ -260,3 +261,16 @@ class SignpostWidget(Layout):
         label = Label(text=text, color=text_color, just='center', width=10)
         self.add_child(label, (1, 1))
         self._rebuild_self()
+
+    def __repr__(self):
+        # Since this widget doesn't do anything about it being a layout (such as
+        # changing children or whatever), it might as well save as a simple
+        # widget. This code from bear_hug.widgets.Widget is repeated here since
+        # the default layout throws exception on __repr__
+        char_strings = [''.join(x) for x in self.chars]
+        for string in char_strings:
+            string.replace('\"', '\u0022"').replace('\\', '\u005c')
+        d = {'class': self.__class__.__name__,
+             'chars': char_strings,
+             'colors': [','.join(x) for x in self.colors]}
+        return dumps(d)

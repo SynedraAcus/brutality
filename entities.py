@@ -312,14 +312,13 @@ class EntityFactory:
         barrel_entity.add_component(DestructorComponent(self.dispatcher))
         return barrel_entity
 
-    def _create_level_switch(self, entity_id, size=(25, 5), **kwargs):
+    def _create_level_switch(self, entity_id, size=(25, 5),
+                             next_level='ghetto_test',
+                             **kwargs):
         e = Entity(entity_id)
-        # widget = SimpleAnimationWidget(Animation((self.atlas.get_element('level_switch_1'),
-        #                                           self.atlas.get_element('level_switch_2'),
-        #                                           self.atlas.get_element('level_switch_3')),
-        #                                          2),
-        #                                emit_ecs=True)
         widget = LevelSwitchWidget(size=size)
+        e.add_component(LevelSwitchComponent(self.dispatcher,
+                                             next_level=next_level))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         e.add_component(PositionComponent(self.dispatcher))
         e.add_component(DestructorComponent(self.dispatcher))

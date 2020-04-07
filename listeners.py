@@ -325,8 +325,6 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     def __init__(self, player_id,  current_level=None,
                  level_manager=None, level_sequence={}, **kwargs):
-        # TODO: exit to multiple levels
-        # TODO: next_level dict for current levels?
         # This will permit multiple exits per level
         super().__init__(**kwargs)
         self.player_id = player_id
@@ -340,6 +338,7 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
         self.level_sequence = level_sequence
         self.enabled = True
         self.is_changing = False
+        self.next_level = None
 
     def on_event(self, event):
         if not self.enabled:
@@ -354,11 +353,13 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
         elif event.event_type == 'ecs_collision' and event.event_value[0] == self.player_id:
             if event.event_value[1] and 'level_switch' in event.event_value[1]:
                 self.is_changing = True
+                self.next_level = EntityTracker().entities[event.event_value[1]].level_switch.next_level
                 return BearEvent('play_sound', 'drive')
         elif event.event_type == 'tick' and self.is_changing:
             self.is_changing = False
-            next_level = self.level_sequence[self.current_level]
-            self.level_manager.set_level(next_level)
+            # next_level = self.level_sequence[self.current_level]
+            self.level_manager.set_level(self.next_level)
+            self.next_level = None
 
     def disable(self):
         """

@@ -660,7 +660,20 @@ class FactionComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'faction': self.faction})
-        
+
+
+class LevelSwitchComponent(Component):
+    """
+    Stores the level ID for the level switch widgets
+    """
+    # TODO: let LevelSwitchComponent track whether the level was won or lost
+    def __init__(self, *args, next_level='ghetto_test', **kwargs):
+        super().__init__(*args, name='level_switch', **kwargs)
+        self.next_level = next_level
+
+    def __repr__(self):
+        return dumps({'class': self.__class__.__name__,
+                      'next_level': self.next_level})
         
 class InputComponent(Component):
     """

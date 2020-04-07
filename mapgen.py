@@ -99,12 +99,17 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         # The purpose of this invisible collider is to have some space below the
         # screen in case eg corpses are spawned at the very bottom
-        self.factory.create_entity('signpost', (15, 40), text='I AM A\nSIGNPOST')
-        # self.factory.create_entity('emitter', (15, 40))
-        self.factory.create_entity('spikebox', (25, 40))
-        self.factory.create_entity('bandage', (35, 40))
-        self.factory.create_entity('spike', (80, 10))
-        self.factory.create_entity('spike', (80, 30))
+        self.factory.create_entity('signpost', (70, 14), text='To ghetto',
+                                   text_color='orange')
+        self.factory.create_entity('level_switch', (64, 23),
+                                   size=(20, 4),
+                                   next_level='ghetto_tutorial')
+        self.factory.create_entity('signpost', (45, 14), text='To dept',
+                                   text_color='blue')
+        self.factory.create_entity('level_switch', (39, 23),
+                                   size=(20, 4),
+                                   next_level='department')
+        self.factory.create_entity('emitter', (100, 40))
         self.factory.create_entity('spike', (120, 10))
         self.factory.create_entity('spike', (120, 30))
         self.factory.create_entity('science_prop', (130, 20))
@@ -123,16 +128,12 @@ class LevelManager(metaclass=Singleton):
         # self.factory.create_entity('bottle_punk', (100, 10))
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('level_switch', (400, 30))
-        # Set level switch coordinates
-        self.level_switch.switch_pos = (400, 30)
-        self.level_switch.switch_size = (15, 4)
+
 
     def _department(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
-        self.factory.create_entity('level_switch', (415, 20), size=(85, 30))
-        self.level_switch.switch_pos = (415, 33)
-        self.level_switch.switch_size = (15, 4)
+        self.factory.create_entity('level_switch', (415, 20),
+                                   size=(85, 30), next_level='ghetto_tutorial')
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
