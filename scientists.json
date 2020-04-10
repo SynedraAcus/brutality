@@ -245,6 +245,27 @@
     "ysize": 19
   },
   {
+    "name": "science_healer_unpowered",
+    "x": 60,
+    "y": 52,
+    "xsize": 5,
+    "ysize": 15
+  },
+  {
+    "name": "science_healer_powered",
+    "x": 54,
+    "y": 52,
+    "xsize": 5,
+    "ysize": 15
+  },
+  {
+    "name": "science_healing_projectile",
+    "x": 85,
+    "y": 46,
+    "xsize": 5,
+    "ysize": 13
+  },
+  {
     "name": "emitter_l",
     "x": 86,
     "y": 28,

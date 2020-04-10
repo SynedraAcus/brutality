@@ -473,6 +473,23 @@ class EntityFactory:
         prop.add_component(DestructorComponent(self.dispatcher))
         return prop
 
+    def _create_science_healer(self, entity_id, **kwargs):
+        healer = Entity(entity_id)
+        widget = SwitchingWidget(images_dict={'powered': self.atlas.get_element('science_healer_powered'),
+                                              'unpowered': self.atlas.get_element('science_healer_unpowered')},
+                                 initial_image='unpowered')
+        healer.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        healer.add_component(PositionComponent(self.dispatcher))
+        healer.add_component(CollisionComponent(self.dispatcher,
+                                                depth=1,
+                                                z_shift=(1, -1)))
+        healer.add_component(HealerPowerInteractionComponent(self.dispatcher,
+                                                             powered=False,
+                                                             action_cooldown=0.2))
+        healer.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        healer.add_component(DestructorComponent(self.dispatcher))
+        return healer
+
 ################################################################################
 # CHARACTERS AND HANDS
 ################################################################################
@@ -996,6 +1013,20 @@ class EntityFactory:
                                                               depth=1))
         spark.add_component(DestructorComponent(self.dispatcher))
         return spark
+
+    def _create_healing_projectile(self, entity_id, vx=0, vy=0, **kwargs):
+        cross = Entity(entity_id)
+        cross.add_component(WidgetComponent(self.dispatcher,
+                                            Widget(*self.atlas.get_element('science_healing_projectile'))))
+        cross.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy))
+        cross.add_component(HealingProjectileCollisionComponent(self.dispatcher,
+                                                                healing=2,
+                                                                depth=2))
+        cross.add_component((DestructorComponent(self.dispatcher)))
+        cross.add_component(DecayComponent(self.dispatcher,
+                                           destroy_condition='timeout',
+                                           lifetime=2.0))
+        return cross
 
     def _create_bottle(self, entity_id, direction='r', z_level=10, **kwargs):
         """

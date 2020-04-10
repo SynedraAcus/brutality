@@ -110,9 +110,10 @@ class LevelManager(metaclass=Singleton):
                                    size=(20, 4),
                                    next_level='department')
         self.factory.create_entity('emitter', (100, 40))
-        self.factory.create_entity('spike', (120, 10))
-        self.factory.create_entity('spike', (120, 30))
-        self.factory.create_entity('science_prop', (130, 20))
+        self.factory.create_entity('spike', (120, 6))
+        self.factory.create_entity('science_healer', (120, 30))
+        self.factory.create_entity('spike', (140, 6))
+        self.factory.create_entity('science_prop', (138, 35))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('I am a test scientist NPC',
                                               'I exist to slowly deliver\nthis monologue',

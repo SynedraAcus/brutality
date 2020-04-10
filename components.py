@@ -241,6 +241,33 @@ class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
                 self.owner.destructor.destroy()
 
 
+class HealingProjectileCollisionComponent(CollisionComponent):
+    """
+    Like a bullet, except that it heals whoever it hits instead of damaging them
+    """
+    def __init__(self, *args, healing=2, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.healing=healing
+
+    def collided_into(self, other):
+        if not other:
+            self.owner.destructor.destroy()
+        else:
+            entity = EntityTracker().entities[other]
+            if not entity.collision.passable:
+                if hasattr(entity, 'health'):
+                    self.dispatcher.add_event(BearEvent('brut_heal',
+                                                        (other, self.healing)))
+                self.owner.destructor.destroy()
+
+    def collided_by(self, other):
+        # Unlike most other projectiles, can also be collided into.
+        # This is guaranteed to destroy the bubble
+        self.dispatcher.add_event(BearEvent('brut_heal',
+                                            (other, self.healing)))
+        self.owner.destructor.destroy()
+
+
 class HazardCollisionComponent(CollisionComponent):
     """
     A collision component that damages whoever collides into it.
@@ -542,7 +569,6 @@ class SciencePropPowerInteractionComponent(PowerInteractionComponent):
         self.owner.widget.switch_to_image('powered')
 
     def take_action(self):
-        print('taking action')
         self.powered = False
         self.owner.widget.switch_to_image('unpowered')
 
@@ -619,6 +645,29 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
         d = loads(super().__repr__())
         d['range'] = self.range
         return dumps(d)
+
+
+class HealerPowerInteractionComponent(PowerInteractionComponent):
+    """
+    Shoots healing projectiles in random directions.
+
+    Expects owner to have a SpawnerComponent.
+    Expects its widget to be a SwitchWidget with 'powered' and 'unpowered'
+    states.
+    """
+    def get_power(self):
+        super().get_power()
+        self.owner.widget.switch_to_image('powered')
+
+    def take_action(self, *args, **kwargs):
+        vx = randint(-10, 10)
+        vy = randint(-10, 10)
+        self.owner.spawner.spawn('healing_projectile', (5 * vx // abs(vx) if vx != 0 else choice((5, -5)),
+                                                        5 * vy // abs(vy) if vy != 0 else choice((5, -5))),
+                                 vx=vx, vy=vy)
+        self.owner.widget.switch_to_image('unpowered')
+        self.powered = False
+        # TODO: HealingProjectile requires sounds
 
 
 class SpawnerComponent(Component):
