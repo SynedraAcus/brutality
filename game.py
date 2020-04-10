@@ -120,7 +120,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['set_bg_sound', 'brut_heal'])
+dispatcher.register_listener(logger, ['set_bg_sound', 'brut_heal', 'ecs_collision'])
 sound_files = {'step': 'step.wav',
                'shot': 'shot.wav',
                'punch': 'punch.wav',
@@ -235,3 +235,6 @@ loop.run()
 
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
+
+# TODO: some new enemy types
+# Test punks are okay but there should be some more

@@ -45,9 +45,9 @@ class EntityFactory:
                             'scientist_m_corpse', 'scientist_m2_corpse'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
                          'barricade_3', 'dept_locker', 'dept_fence',
-                         'dept_bench', 'dept_wall_inner',
+                         'dept_bench', 'dept_wall_inner', 'punchbag',
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
-                         'dept_chair_2', 'dept_table_boss',
+                         'dept_chair_2', 'dept_weight',
                          'science_table_1', 'science_table_2',
                          'science_device_1'}
         self.face_positions = {'broken_car': (0, 3),
@@ -58,11 +58,12 @@ class EntityFactory:
                                'dept_fence': (0, 0),
                                'dept_bench': (0, 2),
                                'dept_wall_inner': (0, 11),
+                               'punchbag': (0, 0),
+                               'dept_weight': (0, 8),
                                'dept_table_1': (0, 10),
                                'dept_table_2': (0, 11),
                                'dept_chair_1': (0, 2),
                                'dept_chair_2': (0, 2),
-                               # 'dept_table_boss': (0, 14),
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
                                'science_device_1': (0, 3)}
@@ -74,6 +75,8 @@ class EntityFactory:
                            'dept_fence': (21, 14),
                            'dept_bench': (17, 5),
                            'dept_wall_inner': (3, 21),
+                           'punchbag': (3, 26),
+                           'dept_weight': (23, 5),
                            'dept_table_1': (10, 8),
                            'dept_table_2': (11, 8),
                            'dept_chair_1': (5, 10),
@@ -90,6 +93,8 @@ class EntityFactory:
                        'dept_fence': 0,
                        'dept_bench': 2,
                        'dept_wall_inner': 11,
+                       'punchbag': 1,
+                       'dept_weight': 5,
                        'dept_table_1': 7,
                        'dept_table_2': 7,
                        'dept_chair_1': 1,
@@ -410,6 +415,10 @@ class EntityFactory:
                                                 owner=bg_entity))
         bg_entity.add_component(PositionComponent(self.dispatcher))
         bg_entity.add_component(DestructorComponent(self.dispatcher))
+        bg_entity.add_component(CollisionComponent(self.dispatcher,
+                                                   depth=size[1],
+                                                   face_size=size,
+                                                   passable=False))
         return bg_entity
 
     def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):

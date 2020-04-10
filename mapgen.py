@@ -8,7 +8,7 @@ from entities import EntityFactory
 
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
-
+from bear_hug.bear_utilities import BearLayoutException
 
 class LevelManager(metaclass=Singleton):
     """
@@ -36,6 +36,8 @@ class LevelManager(metaclass=Singleton):
         self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25),
                                    'department': (10, 20)}
+        self.styles = {'ghetto', 'dept'}
+        self.types = {'corridor'}
 
     def should_remove(self, entity):
         """
@@ -86,19 +88,188 @@ class LevelManager(metaclass=Singleton):
         # if current level is set, destroy it
         if self.level_switch.current_level:
             self.destroy_current_level()
-        getattr(self, self.methods[level_id])()
-        # set player position to whatever it should be
-        player = EntityTracker().entities[self.player_entity]
-        player.position.move(*self.starting_positions[level_id])
+        if level_id in self.methods:
+            getattr(self, self.methods[level_id])()
+            # set player position to whatever it should be
+            player = EntityTracker().entities[self.player_entity]
+            player.position.move(*self.starting_positions[level_id])
+        else:
+            style, level_type = level_id.split('_')
+            player_pos = self.generate_level(style, level_type)
+            player = EntityTracker().entities[self.player_entity]
+            player.position.move(*player_pos)
         self.level_switch.current_level = level_id
         self.level_switch.enable()
+
+    def generate_level(self, style='ghetto', level_type='corridor'):
+        """
+        Generate a required type of level
+        :param style: str. A location type (ghetto, dept, lab, etc)
+        :param level_type: str. A level type (corridor, hostage, etc)
+        :return:
+        """
+        if style not in self.styles:
+            raise ValueError(f'Invalid level style "{style}" for levelgen')
+        if level_type not in self.types:
+            raise ValueError(f'Invalid level type "{level_type}" for levelgen')
+        # TODO: decompose generate_level into methods
+        player_pos = (20, 20)
+        # Generate style basics: BG and decorations
+        if style == 'ghetto':
+            # TODO: customizable level sizes
+            self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+            self.factory.create_entity('floor', (0, 20), size=(500, 30))
+            self.factory.create_entity('invis', (0, 51), size=(500, 9))
+            # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
+            # other items (possibly incuding more bags)
+            garbage_pos = []
+            for _ in range(6):
+                # Make sure garbage heaps are properly spaced
+                while True:
+                    x = random.randint(0, 240)
+                    max_dist = len(garbage_pos) > 0 \
+                               and max((abs(x - i) for i in garbage_pos)) \
+                               or 1000
+                    if max_dist > 50:
+                        garbage_pos.append(x)
+                        break
+                self.factory.create_entity('garbage_bag', (x, 18))
+                for i in range(random.randint(3, 6)):
+                    t = random.choice(
+                        ('can', 'can2', 'cigarettes', 'garbage_bag',
+                         'bucket', 'pizza_box'))
+                    self.factory.create_entity(t, (x + random.randint(-5, 5),
+                                                   22 + random.randint(-2, 2)))
+        elif style == 'dept':
+            self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+            self.factory.create_entity('floor', (0, 20), size=(500, 30))
+            self.factory.create_entity('invis', (0, 50), size=(500, 9))
+            # No garbage or similar stuff on the department floor
+        # Placing actual game content
+        #
+        # The level is decomposed into a bunch of prefab-like "rooms".
+        # They may correspond to the rooms (unexpected, huh?), piles of stuff,
+        # enemy groups, etc.
+        if style == 'ghetto' and level_type == 'corridor':
+            # In case of the ghetto, elements are just piles of things
+            # randomly placed (with some spacing)
+            running_len = 0
+            while running_len < 450:
+                running_len += self.ghetto_room()
+        elif style =='dept' and level_type == 'corridor':
+            # In case of the department, the map is made of rooms
+            # Each room consists of some stuff and its rightmost wall
+            running_len = 0
+            while running_len < 450:
+                running_len += self.dept_room(running_len)
+            # Exit block should contain the level switch and maybe some stuff
+        self.factory.create_entity('level_switch', (running_len+1, 20),
+                                   size=(500-running_len - 1, 30))
+        # Returns the starting position for the player
+        return player_pos
+
+    def ghetto_room(self, left_edge):
+        pass
+
+    def dept_room(self, left_edge):
+        """
+        Generate a single department room.
+
+        :return: room width
+        """
+        # The size of the future room
+        if 450 - left_edge < 55:
+            return 450 - left_edge
+        room_width = random.randint(55, min(100, 450-left_edge))
+        # Most obvious: rightmost wall
+        door_style = random.randint(0, 2)
+        if door_style == 0:
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 25,
+                                        11))
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 37,
+                                        23))
+        if door_style == 1:
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 15,
+                                        0))
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 34,
+                                        20))
+        elif door_style == 2:
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 15,
+                                        0))
+            self.factory.create_entity('dept_wall_inner',
+                                       (left_edge + room_width - 27,
+                                        12))
+        # Populating the room
+        # room_type = random.randint(0, 2)
+        room_type = 2
+        if room_type == 0:
+            # office:
+            # Contains tables and chairs. These are placed in a grid, with a
+            # quarter randomly omitted
+            # May contain a talkative NPC
+            tables = int(room_width/40)
+            for table_column in range(tables):
+                for table_row in range(2):
+                    if random.random() < 0.25:
+                        continue
+                    self.factory.create_entity('dept_chair_1', (left_edge + table_column * 40 + 3 - 20 * table_row,
+                                                                13 + 20 * table_row))
+                    self.factory.create_entity('dept_table_1', (left_edge + 40 * table_column + 6 - 20 * table_row,
+                                                                10 + 20 * table_row))
+                    # TODO: Talkative cop NPC
+        elif room_type == 1:
+            # Gym:
+            # Contains punchbags near the wall, maybe some other sports
+            # equipment. Also benches near upper and lower wall
+            used_space = 10
+            # Upper wall
+            while used_space < room_width - 30:
+                element = random.random()
+                if element < 0.3:
+                    # A punchbag and some space
+                    self.factory.create_entity('punchbag',
+                                               (left_edge + 7 + used_space, 0))
+                    used_space += 20
+                elif element < 0.6:
+                    self.factory.create_entity('dept_weight',
+                                               (left_edge + used_space + 5, 14))
+                    used_space += 30
+                elif element < 0.9:
+                    self.factory.create_entity('dept_bench',
+                                               (left_edge + used_space, 15))
+                    used_space += 20
+                else:
+                    used_space += 10
+                if random.random() < 0.4:
+                    # Bottom benches are placed regardless of top wall contents
+                    self.factory.create_entity('dept_bench',
+                                               (left_edge + used_space - 30,
+                                                45))
+        elif room_type == 2:
+            # Right wall lockers
+            skip = {0: (1, 1, 1, 0, 0, 0, 0, 0),
+                    1: (0, 0, 1, 1, 1, 0, 0, 0),
+                    2: (0, 0, 0, 0, 0, 1, 1, 1)}
+            for i in range(8):
+                if not skip[door_style][i]:
+                    self.factory.create_entity('dept_locker',
+                                               (left_edge + room_width - 13 - 4 * i,
+                                                4 + 4 * i))
+            # TODO: do something useful with the dept_corridor room generator
+            # Dept corridor is generally mostly proof of concept, because I
+            # don't currently have any need for dept corridor levels. Maybe as
+            # an exposition sometime when I need to talk to some cop?
+        return room_width
 
     def _ghetto_test(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
-        # The purpose of this invisible collider is to have some space below the
-        # screen in case eg corpses are spawned at the very bottom
         self.factory.create_entity('signpost', (70, 14), text='To ghetto',
                                    text_color='orange')
         self.factory.create_entity('level_switch', (64, 23),
@@ -109,6 +280,9 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (39, 23),
                                    size=(20, 4),
                                    next_level='department')
+        self.factory.create_entity('level_switch', (90, 23),
+                                   size=(20, 4),
+                                   next_level='dept_corridor')
         self.factory.create_entity('emitter', (100, 40))
         self.factory.create_entity('spike', (120, 6))
         self.factory.create_entity('science_healer', (120, 30))
