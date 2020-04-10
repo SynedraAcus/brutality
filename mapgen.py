@@ -3,12 +3,15 @@ Map generators
 """
 
 import random
+
+from math import sqrt
+
 from listeners import SpawnItem, SpawningListener
 from entities import EntityFactory
 
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
-from bear_hug.bear_utilities import BearLayoutException
+
 
 class LevelManager(metaclass=Singleton):
     """
@@ -151,16 +154,19 @@ class LevelManager(metaclass=Singleton):
         # They may correspond to the rooms (unexpected, huh?), piles of stuff,
         # enemy groups, etc.
         if style == 'ghetto' and level_type == 'corridor':
-            # In case of the ghetto, elements are just piles of things
-            # randomly placed (with some spacing)
-            running_len = 0
+            # In case of the ghetto, "rooms" are just piles of things placed
+            # randomly (with some spacing), but with no actual walls
+            # First 50 chars are left empty to make sure the player is not
+            # dropped right into the middle of the battle
+            running_len = 50
             while running_len < 450:
-                running_len += self.ghetto_room()
+                running_len += self.ghetto_room(running_len)
         elif style =='dept' and level_type == 'corridor':
             # In case of the department, the map is made of rooms
             # Each room consists of some stuff and its rightmost wall
             running_len = 0
-            while running_len < 450:
+            # The end of ghetto corridor is reserved for a final battle
+            while running_len < 400:
                 running_len += self.dept_room(running_len)
             # Exit block should contain the level switch and maybe some stuff
         self.factory.create_entity('level_switch', (running_len+1, 20),
@@ -169,7 +175,93 @@ class LevelManager(metaclass=Singleton):
         return player_pos
 
     def ghetto_room(self, left_edge):
-        pass
+        """
+        Generate a single ghetto room
+
+        (which is not actually a room, it is just a piece of street without
+        walls which contains a single element)
+        :param left_edge:
+        :return:
+        """
+        # The size of the future room
+        if 400 - left_edge < 55:
+            return 450 - left_edge
+        room_width = random.randint(60, min(100, 450-left_edge))
+        element = random.random()
+        # TODO: store the room probabilities in a parameter for easy editing
+        if element < 0.1:
+            # A broken car
+            self.factory.create_entity('broken_car', (left_edge+(room_width - 44) // 2,
+                                                      12))
+        elif element < 0.25:
+            pass # Empty piece of land
+        elif element < 0.75:
+            # A simple battle
+            punk_count = random.randint(2, 4)
+            positions = [(random.randint(left_edge + 5,
+                                         left_edge + room_width-5),
+                                random.randint(10, 25))]
+            for _ in range(punk_count):
+                # Drop the punks at some distance from each other
+                dist = 0
+                while dist < 10:
+                    punk_pos = (random.randint(left_edge + 5,
+                                               left_edge + room_width - 5),
+                                random.randint(10, 25))
+                    dist = min(sqrt((punk_pos[0] - x[0]) ** 2 +
+                                    (punk_pos[1] - x[1]) ** 2)
+                               for x in positions)
+                positions.append(punk_pos)
+            for punk_pos in positions:
+                self.factory.create_entity(random.choice(('bottle_punk',
+                                                          'nunchaku_punk')),
+                                           punk_pos)
+            if random.random() < 0.6:
+                # Maybe add them a barrel to hang around
+                barrel_pos = (left_edge + room_width // 2, 25)
+                self.factory.create_entity('barrel', barrel_pos)
+                for _ in range(random.randint(3, 5)):
+                    # Sprinkle with some garbage
+                    self.factory.create_entity(random.choice(('can', 'can2',
+                                                              'cigarettes',
+                                                              'garbage_bag',
+                                                              'bucket',
+                                                              'pizza_box')),
+                                               (barrel_pos[0] + random.randint(-5, 5),
+                                                barrel_pos[1] + 9 + random.randint(-2, 2)))
+        else:
+            # Barricaded stash
+            stash_y = random.choice((16, 37))
+            first = random.choice(('barricade_1', 'barricade_2', 'barricade_3'))
+            second = first
+            while second == first:
+                second = random.choice(('barricade_1', 'barricade_2',
+                                        'barricade_3'))
+            first_pos = (left_edge + room_width//2 - random.randint(20, 30),
+                         stash_y + random.randint(-3, 3))
+            second_pos = (first_pos[0] + random.randint(30, 45),
+                          first_pos[1] + random.randint(-3, 3))
+            self.factory.create_entity(first, first_pos)
+            self.factory.create_entity(second, second_pos)
+            items = ('bandage', 'nunchaku', 'bottle_launcher', 'pistol')
+            item_probs = (0.4, 0.25, 0.25, 0.1)
+            for _ in range(random.randint(1, 3)):
+                roll = random.random()
+                for i, prob in enumerate(item_probs):
+                    roll -= prob
+                    if roll <= 0:
+                        self.factory.create_entity(items[i],
+                                                   (random.randint(first_pos[0] + 20, second_pos[0] - 5),
+                                                    stash_y + random.randint(5, 10)))
+                        break
+            if random.random() < 0.7:
+                # Most stashes are at least somewhat guarded
+                self.factory.create_entity(random.choice(('bottle_punk',
+                                                         'nunchaku_punk')),
+                                           (left_edge + room_width // 2,
+                                            stash_y + random.randint(-5, 5)))
+
+        return room_width
 
     def dept_room(self, left_edge):
         """
@@ -282,7 +374,7 @@ class LevelManager(metaclass=Singleton):
                                    next_level='department')
         self.factory.create_entity('level_switch', (90, 23),
                                    size=(20, 4),
-                                   next_level='dept_corridor')
+                                   next_level='ghetto_corridor')
         self.factory.create_entity('emitter', (100, 40))
         self.factory.create_entity('spike', (120, 6))
         self.factory.create_entity('science_healer', (120, 30))

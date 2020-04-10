@@ -238,3 +238,13 @@ loop.run()
 
 # TODO: some new enemy types
 # Test punks are okay but there should be some more
+
+# TODO: more indoor barriers
+# Stuff like flower pots, small tables, etc; basically things useful for any
+# indoor level
+
+# TODO: expending and replenishing ammo
+
+# TODO: more items for ghetto stashes
+
+# TODO: balance note: decrease the Molotov range by 10 chars or so
