@@ -450,11 +450,12 @@ class CharacterHealthComponent(HealthComponent):
     Expects owner to have SpawnerComponent, HandInterfaceComponent and
     DestructorComponent
     """
-    def __init__(self, *args, corpse=None,
+    def __init__(self, *args, corpse=None, heal_sounds=('bandage', ),
                  hit_sounds=None, death_sounds=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.corpse_type = corpse
         self.hit_sounds = hit_sounds
+        self.heal_sounds = heal_sounds
         self.death_sounds = death_sounds
         self.last_hp = self.hitpoints
 
@@ -463,6 +464,10 @@ class CharacterHealthComponent(HealthComponent):
             self.last_hp = self.hitpoints
             self.dispatcher.add_event(BearEvent('play_sound',
                                                 choice(self.hit_sounds)))
+        elif 0 < self.last_hp < self.hitpoints and self.heal_sounds:
+            self.last_hp = self.hitpoints
+            self.dispatcher.add_event(BearEvent('play_sound',
+                                                choice(self.heal_sounds)))
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
                                      relative_pos=(0, self.owner.widget.height - 9))
@@ -667,7 +672,6 @@ class HealerPowerInteractionComponent(PowerInteractionComponent):
                                  vx=vx, vy=vy)
         self.owner.widget.switch_to_image('unpowered')
         self.powered = False
-        # TODO: HealingProjectile requires sounds
 
 
 class SpawnerComponent(Component):
