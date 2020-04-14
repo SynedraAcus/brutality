@@ -6,8 +6,9 @@ import random
 
 from math import sqrt
 
-from listeners import SpawnItem, SpawningListener
 from entities import EntityFactory
+from listeners import SpawnItem, SpawningListener
+from plot import PlotManager
 
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
@@ -274,13 +275,13 @@ class LevelManager(metaclass=Singleton):
         :return: room width
         """
         # The size of the future room
-        cop_monologues = (('Captain\'s an ass,\nif you ask me.', ),
-                          ('Hey there', 'How\'s it going?'),
-                          ('Anybody seen my badge?',),
-                          ('Hi', ),
-                          ('Howdy',),
-                          ('The whole damn city\nis going to hell',
-                           'We need to clean up\nthe streets'))
+        # cop_monologues = (('Captain\'s an ass,\nif you ask me.', ),
+        #                   ('Hey there', 'How\'s it going?'),
+        #                   ('Anybody seen my badge?',),
+        #                   ('Hi', ),
+        #                   ('Howdy',),
+        #                   ('The whole damn city\nis going to hell',
+        #                    'We need to clean up\nthe streets'))
         if 450 - left_edge < 55:
             return 450 - left_edge
         room_width = random.randint(55, min(100, 450-left_edge))
@@ -325,12 +326,11 @@ class LevelManager(metaclass=Singleton):
                     self.factory.create_entity('dept_table_1', (left_edge + 40 * table_column + 6 - 20 * table_row,
                                                                 10 + 15 * table_row))
                     if random.random() < 0.3:
-                        cop_pos = (left_edge + 40 * table_column + 3 - 20 * table_row,
-                                   5 + 20 * table_row)
-                        # TODO: move monologues to plot manager
+                        monologue=PlotManager().get_peaceful_phrase('cops')
                         self.factory.create_entity('cop_npc',
-                                                   cop_pos,
-                                                   monologue=random.choice(cop_monologues))
+                                                   (left_edge + 40 * table_column + 3 - 20 * table_row,
+                                                   5 + 20 * table_row),
+                                                   monologue=monologue)
         elif room_type == 1:
             # Gym:
             # Contains punchbags near the wall, maybe some other sports
