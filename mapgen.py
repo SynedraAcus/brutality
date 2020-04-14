@@ -117,9 +117,13 @@ class LevelManager(metaclass=Singleton):
             raise ValueError(f'Invalid level type "{level_type}" for levelgen')
         # TODO: decompose generate_level into methods
         player_pos = (20, 20)
+        # Since the ScrollingECSLayout does not support resizing, "smaller"
+        # levels will still need to be 500 chars wide. To simulate less
+        # spacious places, just make a smaller piece surrounded with walls
+        # and/or level exits and leave the rest empty
+
         # Generate style basics: BG and decorations
         if style == 'ghetto':
-            # TODO: customizable level sizes
             self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -270,6 +274,13 @@ class LevelManager(metaclass=Singleton):
         :return: room width
         """
         # The size of the future room
+        cop_monologues = (('Captain\'s an ass,\nif you ask me.', ),
+                          ('Hey there', 'How\'s it going?'),
+                          ('Anybody seen my badge?',),
+                          ('Hi', ),
+                          ('Howdy',),
+                          ('The whole damn city\nis going to hell',
+                           'We need to clean up\nthe streets'))
         if 450 - left_edge < 55:
             return 450 - left_edge
         room_width = random.randint(55, min(100, 450-left_edge))
@@ -297,8 +308,8 @@ class LevelManager(metaclass=Singleton):
                                        (left_edge + room_width - 27,
                                         12))
         # Populating the room
-        # room_type = random.randint(0, 2)
-        room_type = 2
+        room_type = random.randint(0, 2)
+        # room_type = 0
         if room_type == 0:
             # office:
             # Contains tables and chairs. These are placed in a grid, with a
@@ -310,10 +321,16 @@ class LevelManager(metaclass=Singleton):
                     if random.random() < 0.25:
                         continue
                     self.factory.create_entity('dept_chair_1', (left_edge + table_column * 40 + 3 - 20 * table_row,
-                                                                13 + 20 * table_row))
+                                                                13 + 15 * table_row))
                     self.factory.create_entity('dept_table_1', (left_edge + 40 * table_column + 6 - 20 * table_row,
-                                                                10 + 20 * table_row))
-                    # TODO: Talkative cop NPC
+                                                                10 + 15 * table_row))
+                    if random.random() < 0.3:
+                        cop_pos = (left_edge + 40 * table_column + 3 - 20 * table_row,
+                                   5 + 20 * table_row)
+                        # TODO: move monologues to plot manager
+                        self.factory.create_entity('cop_npc',
+                                                   cop_pos,
+                                                   monologue=random.choice(cop_monologues))
         elif room_type == 1:
             # Gym:
             # Contains punchbags near the wall, maybe some other sports
@@ -372,7 +389,15 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (39, 23),
                                    size=(20, 4),
                                    next_level='department')
+        self.factory.create_entity('signpost', (95, 14), text='Dept\ncorridor',
+                                   text_color='blue')
         self.factory.create_entity('level_switch', (90, 23),
+                                   size=(20, 4),
+                                   next_level='dept_corridor')
+        self.factory.create_entity('signpost', (130, 14),
+                                   text='Ghetto\ncorridor',
+                                   text_color='orange')
+        self.factory.create_entity('level_switch', (120, 23),
                                    size=(20, 4),
                                    next_level='ghetto_corridor')
         self.factory.create_entity('emitter', (100, 40))

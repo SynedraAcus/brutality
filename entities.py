@@ -579,6 +579,97 @@ class EntityFactory:
                                             event_value=entity_id))
         return cop_entity
 
+    def _create_cop_npc(self, entity_id, monologue=('Phrase 1', 'Phrase 2'),
+                        **kwargs):
+        cop_entity = Entity(id=entity_id)
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
+                                              'r_2': self.atlas.get_element('cop_r_2'),
+                                              'l_1': self.atlas.get_element('cop_l_1'),
+                                              'l_2': self.atlas.get_element('cop_l_2')},
+                                 initial_image='r_1')
+        cop_entity.add_component(WalkerComponent(self.dispatcher))
+        cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        cop_entity.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                          depth=1))
+        cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        cop_entity.add_component(FactionComponent(self.dispatcher,
+                                                  faction='police'))
+        cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
+                                                          corpse='cop_corpse',
+                                                          hitpoints=10,
+                                                          hit_sounds=('cop_hit', ),
+                                                          death_sounds=('cop_death', )))
+        cop_entity.add_component(DestructorComponent(self.dispatcher))
+        # Creating hand entities
+        f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr', 'cop_hand_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl', 'cop_hand_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br', 'cop_hand_back',
+                                         direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                 owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
+                                                        hand_entities={
+                                                            'forward_l': f_l.id,
+                                                            'forward_r': f_r.id,
+                                                            'back_l': b_l.id,
+                                                            'back_r': b_r.id},
+                                                        hands_offsets={
+                                                            'forward_l': (-2, 5),
+                                                            'forward_r': (0, 5),
+                                                            'back_l': (-3, 4),
+                                                            'back_r': (3, 4)},
+                                                        item_offsets={
+                                                            'forward_l': (0, 0),
+                                                            'forward_r': (7, 0),
+                                                            'back_l': (0, 0),
+                                                            'back_r': (4, 0)},
+                                                        left_item=left_fist.id,
+                                                        right_item=right_fist.id))
+        # AI
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': CivilianWaitState(self.dispatcher,
+                                                           runaway_state='run',
+                                                           enemy_factions=(
+                                                           'punks',),
+                                                           enemy_perception_distance=50,
+                                                           player_interaction_state='talk',
+                                                           pc_id='cop_1'),
+                                 'run': CivilianRunawayState(self.dispatcher,
+                                                             pc_id='cop_1',
+                                                             peaceful_state='wait',
+                                                             enemy_perception_distance=50,
+                                                             enemy_factions=(
+                                                             'punks',)),
+                                 'talk': CivilianTalkState(self.dispatcher,
+                                                           pc_id='cop_1',
+                                                           peaceful_state='wait',
+                                                           runaway_state='run',
+                                                           enemy_perception_distance=50,
+                                                           enemy_factions=(
+                                                           'punks',),
+                                                           phrase_sounds=(
+                                                           'male_phrase_1',
+                                                           'male_phrase_2',
+                                                           'male_phrase_3',
+                                                           'male_phrase_4',
+                                                           'male_phrase_5'),
+                                                           monologue=monologue,
+                                                           phrase_pause=1.5)},
+                         current_state='wait',
+                         owner=cop_entity)
+        return cop_entity
+
     def _create_dept_boss(self, entity_id, monologue=('Line 1', 'Line 2'), **kwargs):
         """
         A monologue NPC boss
