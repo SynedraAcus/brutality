@@ -438,8 +438,8 @@ class CivilianTalkState(CivilianAIState):
                                                 choice(self.phrase_sounds)))
         self.owner.spawner.spawn('message', (-x_offset, 0),
                                  text=self.monologue[self.next_phrase],
-                                 vy=-3,
-                                 vx=randint(-1, 1),
+                                 vy=-2,
+                                 vx=0,
                                  color=self.phrase_color,
                                  destroy_condition='timeout',
                                  lifetime=5.0)

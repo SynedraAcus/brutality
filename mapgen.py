@@ -37,12 +37,17 @@ class LevelManager(metaclass=Singleton):
         self.methods = {'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
                         'department': '_department',
+                        'boss_leave_it': '_boss_leave_it',
+                        'boss_saved': '_boss_good',
+                        'boss_failed': '_boss_bad',
                         'boss_talk': '_boss_talk',
                         'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25),
                                    'department': (10, 20),
-                                   'boss_talk': (80, 20)}
+                                   'boss_leave_it': (80, 20),
+                                   'boss_saved': (80, 20),
+                                   'boss_failed': (80, 20)}
         self.styles = {'ghetto', 'dept'}
         self.types = {'corridor'}
 
@@ -395,7 +400,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('signpost', (45, 30), text='Boss_talk')
         self.factory.create_entity('level_switch', (40, 39),
                                    size=(20, 4),
-                                   next_level='boss_talk')
+                                   next_level='boss_saved')
         self.factory.create_entity('signpost', (45, 14), text='To dept',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (39, 23),
@@ -427,7 +432,47 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
 
-    def _boss_talk(self):
+    # A dirty hack around passing the monologue to boss-talk properly. Three
+    # methods cover three possible dialogues without affecting level itself
+    # Later this hack would be replaced with properly drawing dialogue from
+    # PlotManager directly in generate_level
+    def _boss_leave_it(self):
+        """
+        :return:
+        """
+        monologue=('So, on one hand, good work',
+                   'Keeping the streets clean\nand all that',
+                   'Nice.',
+                   'On the other:\nyou\'ve stepped on some toes',
+                   'which would rather\nstay un-stepped-on.',
+                   'I like you, I really do.\nSo do me a favor',
+                   'Leave this business be',
+                   'It\'s not worth your job,\nlet alone your life.',
+                   'Fight someone your own weight.',
+                   'DISMISSED!')
+        self._boss_talk(monologue=monologue)
+
+    def _boss_good(self):
+        monologue=('Good work.',
+                   'Order restored,\nthe hostage safe...',
+                   'Some punk ass busted, as well.',
+                   'Really good work, cowboy.',
+                   'One day you\'d make\na decent captain',
+                   'Not just yet,\nbut one day you will.')
+        self._boss_talk(monologue=monologue)
+
+    def _boss_bad(self):
+        monologue=('What the fuck this was',
+                   'Who do you think you are?',
+                   'Bruce motherfucking Willis?',
+                   'Going on a rescue mission alone\nis cool on one condition:',
+                   'THAT YOUR FUCKING HOSTAGE SURVIVES',
+                   'NOT FUCKING DIES, SURVIVES',
+                   'You\'re gonna hang for this.'
+                   'Dismissed, asshole.')
+        self._boss_talk(monologue=monologue)
+
+    def _boss_talk(self, monologue=('Line one', 'Line two')):
         self.dispatcher.add_event(BearEvent('set_bg_sound',
                                             'supercop_bg'))
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
@@ -440,9 +485,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_chair_1', (49, 17))
         self.factory.create_entity('cop_npc', (52, 12), monologue='')
         self.factory.create_entity('dept_boss', (60, 8),
-                                   monologue=('Line one',
-                                              'Line two',
-                                              'Lines three\nand four'))
+                                   monologue=monologue)
         self.factory.create_entity('dept_wall_inner', (120, 0))
         self.factory.create_entity('dept_wall_inner', (100, 20))
         self.factory.create_entity('dept_table_2', (105, 35))
