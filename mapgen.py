@@ -36,7 +36,8 @@ class LevelManager(metaclass=Singleton):
         self.player_entity = player_entity
         self.methods = {'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
-                        'department': '_department'}
+                        'department': '_department',
+                        'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25),
                                    'department': (10, 20)}
@@ -105,6 +106,17 @@ class LevelManager(metaclass=Singleton):
         self.level_switch.current_level = level_id
         self.level_switch.enable()
 
+    def next_goal_level(self):
+        """
+        Generate the next goal level
+        :return:
+        """
+        goal = PlotManager().current_goal
+        player_pos = self.generate_level(goal.location,
+                                         goal.level_types[goal.current_stage])
+        self.level_switch.current_level = f'{goal.location}_{goal.level_types[goal.current_stage]}'
+        player = EntityTracker().entities[self.player_entity]
+
     def generate_level(self, style='ghetto', level_type='corridor'):
         """
         Generate a required type of level
@@ -168,7 +180,7 @@ class LevelManager(metaclass=Singleton):
             running_len = 50
             while running_len < 450:
                 running_len += self.ghetto_room(running_len)
-        elif style =='dept' and level_type == 'corridor':
+        elif style == 'dept' and level_type == 'corridor':
             # In case of the department, the map is made of rooms
             # Each room consists of some stuff and its rightmost wall
             running_len = 0

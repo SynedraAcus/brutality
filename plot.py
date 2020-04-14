@@ -6,12 +6,47 @@ import random
 
 from bear_hug.ecs import Singleton
 
+# TODO: Goal description in the main menu
+
+
+class Goal:
+    """
+    A description of the current player goal.
+
+    Basically a quest plus some basic levelgen data and exposition text
+    """
+    def __init__(self,
+                 name='Menu',
+                 description = 'I\'m in a main menu',
+                 enemy_factions=('punks', ),
+                 ally_factions=('cops',),
+                 location='ghetto',
+                 level_types=('corridor', ),
+                 exposition_monologues=(('This is a main menu',
+                                         'Walk into one of the transporters\nto the right',
+                                         'I recommend the NEW GAME')),
+                 chatter={'cops': 'Cop chatter',
+                          'scientists': 'Scientist chatter'},
+                 next_on_win=('tutorial', ),
+                 next_on_lose=None):
+        self.name = name
+        self.chatter = chatter
+        self.exposition_monologues = exposition_monologues
+        self.location = location
+        self.description = description
+        self.enemy_factions = enemy_factions
+        self.ally_factions = ally_factions
+        self.level_types = level_types
+        self.next_on_win = next_on_win
+        self.next_on_lose = next_on_lose
+        self.current_stage = 0
+
 
 class PlotManager(metaclass=Singleton):
     """
     A master class in control of the plot
     """
-    def __init__(self):
+    def __init__(self, goals={}, initial_goal={}):
         # TODO: more general phrases
         # Phrases useful in any kind of plot - random faction-specific chatter
         self.general_phrases = {'cops': (('Captain\'s an ass,\nif you ask me.', ),
@@ -32,7 +67,24 @@ class PlotManager(metaclass=Singleton):
                                                 'Why are they even...',
                                                 'Oh, nevermind,',
                                                 'Just thinking aloud'))}
-        pass
+        for goal in goals:
+            if not isinstance(goal, Goal):
+                raise TypeError(f'{type(goal)} used instead of Goal in PlotManager')
+        self.goals = goals
+        self.current_goal = self.goals[initial_goal]
+
+    def next_stage(self):
+        """
+        Advance a goal.
+
+        If a current goal was completed, start the next one.
+        :return:
+        """
+        self.current_goal.current_stage += 1
+        if self.current_goal.current_stage >= len(self.current_goal.level_types):
+            next_goal = random.choice(self.current_goal.next_on_win)
+            self.current_goal = self.goals[next_goal]
+            self.current_goal.current_stage = 0
 
     def get_peaceful_phrase(self, faction='cops'):
         """

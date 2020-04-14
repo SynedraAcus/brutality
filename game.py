@@ -17,6 +17,7 @@ from entities import EntityFactory
 from mapgen import LevelManager
 from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
+from plot import Goal, PlotManager
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -177,6 +178,33 @@ saving = SavingListener()
 dispatcher.register_listener(saving, 'brut_save_game')
 loading = LoadingListener(dispatcher, factory, levelgen, loop)
 dispatcher.register_listener(loading, 'brut_load_game')
+
+################################################################################
+# Goals
+################################################################################
+
+punk_fight = Goal(name='punk_fight',
+                  description='I was sent to throw the punks\nout of the street',
+                  enemy_factions=('punks', ),
+                  ally_factions=('cops', 'scientists', 'civilians'),
+                  location='ghetto',
+                  level_types=('corridor', ),
+                  exposition_monologues=(None, ),
+                  next_on_win=('scientist_drugs', 'scientist_hostage')
+                  )
+sc_drugs = Goal(name='scientist_drugs',
+                description='Apparently, they were protecting a drug lab',
+                enemy_factions=('punks', 'scientists'),
+                ally_factions=('cops', 'civilians'),
+                location='ghetto',
+                level_types=('corridor', ),
+                exposition_monologues=('Hey you',
+                                       'The cop',
+                                       'Look out: there is a drug lab\ndown the street',
+                                       'and they wouldn\'t just\nlet you walk in'),
+                next_on_win=('drug_lab')
+                )
+
 ################################################################################
 # Test menu
 ################################################################################
