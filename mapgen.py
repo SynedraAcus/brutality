@@ -37,10 +37,12 @@ class LevelManager(metaclass=Singleton):
         self.methods = {'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
                         'department': '_department',
+                        'boss_talk': '_boss_talk',
                         'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25),
-                                   'department': (10, 20)}
+                                   'department': (10, 20),
+                                   'boss_talk': (80, 20)}
         self.styles = {'ghetto', 'dept'}
         self.types = {'corridor'}
 
@@ -288,14 +290,6 @@ class LevelManager(metaclass=Singleton):
 
         :return: room width
         """
-        # The size of the future room
-        # cop_monologues = (('Captain\'s an ass,\nif you ask me.', ),
-        #                   ('Hey there', 'How\'s it going?'),
-        #                   ('Anybody seen my badge?',),
-        #                   ('Hi', ),
-        #                   ('Howdy',),
-        #                   ('The whole damn city\nis going to hell',
-        #                    'We need to clean up\nthe streets'))
         if 450 - left_edge < 55:
             return 450 - left_edge
         room_width = random.randint(55, min(100, 450-left_edge))
@@ -398,6 +392,10 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (64, 23),
                                    size=(20, 4),
                                    next_level='ghetto_tutorial')
+        self.factory.create_entity('signpost', (45, 30), text='Boss_talk')
+        self.factory.create_entity('level_switch', (40, 39),
+                                   size=(20, 4),
+                                   next_level='boss_talk')
         self.factory.create_entity('signpost', (45, 14), text='To dept',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (39, 23),
@@ -414,11 +412,6 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (120, 23),
                                    size=(20, 4),
                                    next_level='ghetto_corridor')
-        self.factory.create_entity('emitter', (100, 40))
-        self.factory.create_entity('spike', (120, 6))
-        self.factory.create_entity('science_healer', (120, 30))
-        self.factory.create_entity('spike', (140, 6))
-        self.factory.create_entity('science_prop', (138, 35))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('I am a test scientist NPC',
                                               'I exist to slowly deliver\nthis monologue',
@@ -430,10 +423,36 @@ class LevelManager(metaclass=Singleton):
                                               'Or dead.',
                                               'I can also be killed.',
                                               'But please don\'t do that'))
-        self.factory.create_entity('target', (50, 30))
         # self.factory.create_entity('bottle_punk', (100, 10))
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
+
+    def _boss_talk(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound',
+                                            'supercop_bg'))
+        self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('floor', (0, 20), size=(500, 30))
+        self.factory.create_entity('invis', (0, 51), size=(500, 9))
+        self.factory.create_entity('dept_wall_inner', (30, 0))
+        self.factory.create_entity('dept_wall_inner', (18, 12))
+        self.factory.create_entity('dept_wall_inner', (6, 24))
+        self.factory.create_entity('dept_table_1', (48, 17))
+        self.factory.create_entity('dept_chair_1', (49, 17))
+        self.factory.create_entity('cop_npc', (52, 12), monologue='')
+        self.factory.create_entity('dept_boss', (60, 8),
+                                   monologue=('Line one',
+                                              'Line two',
+                                              'Lines three\nand four'))
+        self.factory.create_entity('dept_wall_inner', (120, 0))
+        self.factory.create_entity('dept_wall_inner', (100, 20))
+        self.factory.create_entity('dept_table_2', (105, 35))
+        self.factory.create_entity('dept_chair_2', (125, 40))
+        self.factory.create_entity('dept_locker', (131, 4))
+        self.factory.create_entity('dept_locker', (127, 8))
+        self.factory.create_entity('dept_locker', (124, 12))
+        self.factory.create_entity('dept_bench', (143, 15))
+        self.factory.create_entity('level_switch', (140, 20), size=(70, 30),
+                                   next_level='ghetto_test')
 
 
     def _department(self):

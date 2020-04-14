@@ -8,6 +8,11 @@ from bear_hug.ecs import Singleton
 
 # TODO: Goal description in the main menu
 
+# TODO: Get the goal-based levelgen to actually work
+# For the demo, all levels are assembled manually. Although the code in this
+# file and the next_goal_level method of LevelManager can serve as useful basis
+# for future plot generation system, I just haven't figured out the correct
+# abstract structure behind the whole system yet.
 
 class Goal:
     """

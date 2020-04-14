@@ -81,7 +81,6 @@ class EntityFactory:
                            'dept_table_2': (11, 8),
                            'dept_chair_1': (5, 10),
                            'dept_chair_2': (5, 10),
-                           # 'dept_table_boss': (24, 10),
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
                            'science_device_1': (6, 17)}
@@ -99,7 +98,6 @@ class EntityFactory:
                        'dept_table_2': 7,
                        'dept_chair_1': 1,
                        'dept_chair_2': 1,
-                       'dept_table_boss': 6,
                        'science_table_1': 7,
                        'science_table_2': 2,
                        'science_device_1': 3}

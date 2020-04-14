@@ -181,10 +181,12 @@ dispatcher.register_listener(loading, 'brut_load_game')
 
 ################################################################################
 # Goals
+# Not actually used anywhere, will be developed later
 ################################################################################
 
+
 punk_fight = Goal(name='punk_fight',
-                  description='I was sent to throw the punks\nout of the street',
+                  description='I was sent to throw some punks\nout of the street',
                   enemy_factions=('punks', ),
                   ally_factions=('cops', 'scientists', 'civilians'),
                   location='ghetto',
@@ -204,6 +206,7 @@ sc_drugs = Goal(name='scientist_drugs',
                                        'and they wouldn\'t just\nlet you walk in'),
                 next_on_win=('drug_lab')
                 )
+
 
 ################################################################################
 # Test menu
