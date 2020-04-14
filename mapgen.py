@@ -125,6 +125,7 @@ class LevelManager(metaclass=Singleton):
 
         # Generate style basics: BG and decorations
         if style == 'ghetto':
+            self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
             self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -149,6 +150,7 @@ class LevelManager(metaclass=Singleton):
                     self.factory.create_entity(t, (x + random.randint(-5, 5),
                                                    22 + random.randint(-2, 2)))
         elif style == 'dept':
+            self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
             self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 50), size=(500, 9))

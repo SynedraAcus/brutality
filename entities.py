@@ -1143,7 +1143,7 @@ class EntityFactory:
                                                       8),
                                            z_level=z_level,
                                            emit_ecs=True)
-            vx = 20
+            vx = 17
         else:
             widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_nw'),
                                                       self.atlas.get_element('bottle_sw'),
@@ -1152,7 +1152,7 @@ class EntityFactory:
                                                       8),
                                            z_level=z_level,
                                            emit_ecs=True)
-            vx = -20
+            vx = -17
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
                                                acceleration=40, vx=vx, vy=-35,

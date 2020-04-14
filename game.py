@@ -246,5 +246,3 @@ loop.run()
 # TODO: expending and replenishing ammo
 
 # TODO: more items for ghetto stashes
-
-# TODO: balance note: decrease the Molotov range by 10 chars or so

@@ -260,7 +260,7 @@ class BottleAgressorCombatState(AgressorCombatState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 35 <= abs(dx) <= 40 and abs(dy) <= 3:
+        if 30 <= abs(dx) <= 40 and abs(dy) <= 3:
             return self.owner.hands.use_hand('right')
         elif self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 3:
             return self.owner.hands.use_hand('left')
