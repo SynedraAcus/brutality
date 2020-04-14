@@ -41,12 +41,16 @@ class LevelManager(metaclass=Singleton):
                         'boss_saved': '_boss_good',
                         'boss_failed': '_boss_bad',
                         'boss_talk': '_boss_talk',
+                        'ghetto_expo_h': '_ghetto_expo_hostage',
+                        'ghetto_expo_d': '_ghetto_expo_drugs',
                         'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
                                    'ghetto_tutorial': (5, 25),
                                    'department': (10, 20),
                                    'boss_leave_it': (80, 20),
                                    'boss_saved': (80, 20),
+                                   'ghetto_expo_h': (20, 20),
+                                   'ghetto_expo_d': (20, 20),
                                    'boss_failed': (80, 20)}
         self.styles = {'ghetto', 'dept'}
         self.types = {'corridor'}
@@ -185,13 +189,19 @@ class LevelManager(metaclass=Singleton):
             # First 50 chars are left empty to make sure the player is not
             # dropped right into the middle of the battle
             running_len = 50
-            while running_len < 450:
+            while running_len < 400:
                 running_len += self.ghetto_room(running_len)
+            self.factory.create_entity('barricade_1', (440, 12))
+            self.factory.create_entity('barricade_2', (435, 30))
+            self.factory.create_entity('barricade_3', (425, 40))
+            self.factory.create_entity('bottle_punk', (460, 30))
+            self.factory.create_entity('bottle_punk', (460, 25))
+            self.factory.create_entity('bottle_punk', (460, 10))
+            running_len = 450
         elif style == 'dept' and level_type == 'corridor':
             # In case of the department, the map is made of rooms
             # Each room consists of some stuff and its rightmost wall
             running_len = 0
-            # The end of ghetto corridor is reserved for a final battle
             while running_len < 400:
                 running_len += self.dept_room(running_len)
             # Exit block should contain the level switch and maybe some stuff
@@ -397,10 +407,10 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (64, 23),
                                    size=(20, 4),
                                    next_level='ghetto_tutorial')
-        self.factory.create_entity('signpost', (45, 30), text='Boss_talk')
+        self.factory.create_entity('signpost', (45, 30), text='Expo')
         self.factory.create_entity('level_switch', (40, 39),
                                    size=(20, 4),
-                                   next_level='boss_saved')
+                                   next_level='ghetto_expo_d')
         self.factory.create_entity('signpost', (45, 14), text='To dept',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (39, 23),
@@ -432,10 +442,13 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('nunchaku_punk', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
 
+
+
     # A dirty hack around passing the monologue to boss-talk properly. Three
     # methods cover three possible dialogues without affecting level itself
     # Later this hack would be replaced with properly drawing dialogue from
-    # PlotManager directly in generate_level
+    # PlotManager directly in generate_level.
+    # Same for _ghetto_expo_* methods
     def _boss_leave_it(self):
         """
         :return:
@@ -458,7 +471,8 @@ class LevelManager(metaclass=Singleton):
                    'Some punk ass busted, as well.',
                    'Really good work, cowboy.',
                    'One day you\'d make\na decent captain',
-                   'Not just yet,\nbut one day you will.')
+                   'Not just yet,\nbut one day you will.',
+                   'Dismissed.')
         self._boss_talk(monologue=monologue)
 
     def _boss_bad(self):
@@ -471,6 +485,25 @@ class LevelManager(metaclass=Singleton):
                    'You\'re gonna hang for this.'
                    'Dismissed, asshole.')
         self._boss_talk(monologue=monologue)
+
+    def _ghetto_expo_hostage(self):
+        self.generate_level('ghetto', 'corridor')
+        # TODO: civilian NPC for the ghetto exposition
+        self.factory.create_entity('cop_npc', (25, 10),
+                                   monologue=('They\'ve besieged a lab\ndown the street',
+                                              'No idea what\'s in the lab',
+                                              'But you should hurry.',
+                                              'There are definitely people\nlocked inside'))
+
+    def _ghetto_expo_drugs(self):
+        self.generate_level('ghetto', 'corridor')
+        self.factory.create_entity('cop_npc', (25, 10),
+                                   monologue=('Officer.',
+                                              'Thank God you\'re here',
+                                              'That meth lab down the street\nwas bad enough,',
+                                              'but now these assholes\nhave trashed the entire hood',
+                                              'Do something about it',
+                                              'Please.'))
 
     def _boss_talk(self, monologue=('Line one', 'Line two')):
         self.dispatcher.add_event(BearEvent('set_bg_sound',

@@ -715,7 +715,7 @@ class EntityFactory:
                                                                           'male_phrase_4',
                                                                           'male_phrase_5'),
                                                            monologue=monologue,
-                                                           phrase_color='#ffffff',
+                                                           phrase_color='#aaaaaa',
                                                            phrase_pause=1.5)},
                          current_state='wait',
                          owner=boss)

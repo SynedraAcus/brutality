@@ -277,3 +277,5 @@ loop.run()
 # TODO: expending and replenishing ammo
 
 # TODO: more items for ghetto stashes
+
+# TODO: interlink demo levels correctly
