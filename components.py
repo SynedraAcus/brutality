@@ -667,6 +667,7 @@ class HealerPowerInteractionComponent(PowerInteractionComponent):
     def take_action(self, *args, **kwargs):
         vx = randint(-10, 10)
         vy = randint(-10, 10)
+        self.dispatcher.add_event(BearEvent('play_sound', 'balloon'))
         self.owner.spawner.spawn('healing_projectile', (5 * vx // abs(vx) if vx != 0 else choice((5, -5)),
                                                         5 * vy // abs(vy) if vy != 0 else choice((5, -5))),
                                  vx=vx, vy=vy)
