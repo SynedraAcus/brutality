@@ -52,7 +52,7 @@ class LevelManager(metaclass=Singleton):
                                    'ghetto_expo_h': (20, 20),
                                    'ghetto_expo_d': (20, 20),
                                    'boss_failed': (80, 20)}
-        self.styles = {'ghetto', 'dept'}
+        self.styles = {'ghetto', 'dept', 'lab'}
         self.types = {'corridor'}
 
     def should_remove(self, entity):
@@ -178,6 +178,11 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 50), size=(500, 9))
             # No garbage or similar stuff on the department floor
+        elif style == 'lab':
+            self.dispatcher.add_event(BearEvent('set_bg_sound', None))
+            self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+            self.factory.create_entity('floor', (0, 20), size=(500, 30))
+            self.factory.create_entity('invis', (0, 50), size=(500, 9))
         # Placing actual game content
         #
         # The level is decomposed into a bunch of prefab-like "rooms".
@@ -191,6 +196,7 @@ class LevelManager(metaclass=Singleton):
             running_len = 50
             while running_len < 400:
                 running_len += self.ghetto_room(running_len)
+            # final barricade
             self.factory.create_entity('barricade_1', (440, 12))
             self.factory.create_entity('barricade_2', (435, 30))
             self.factory.create_entity('barricade_3', (425, 40))
@@ -205,6 +211,51 @@ class LevelManager(metaclass=Singleton):
             while running_len < 400:
                 running_len += self.dept_room(running_len)
             # Exit block should contain the level switch and maybe some stuff
+        elif style == 'lab' and level_type == 'corridor':
+            # The lab consists of 6 70-char rooms plus the 80-char final zone.
+            # First and last room are prefabs, other 4 are randomly shuffled
+
+            # Room layout
+            for room_no in range(1, 7):
+                # TODO: The inner walls and BG walls for the lab
+                self.factory.create_entity('dept_wall_inner',
+                                           (room_no * 70 - 15, 0))
+                # self.factory.create_entity('spike', (room_no*70 - 22, 18))
+                # self.factory.create_entity('spike', (room_no * 70 - 12, 18))
+                # self.factory.create_entity('spike', (room_no * 70 + 2, 5))
+                # self.factory.create_entity('spike', (room_no*70 + 35, 5))
+                # self.factory.create_entity('dept_wall_inner',
+                #                            (room_no * 70 - 27, 12))
+            # Initial room
+            player_pos = (5, 20)
+            self.factory.create_entity('female_scientist', (20, 10),
+                                       monologue=('You\'re here to destroy this place?',
+                                                  'Good riddance if you ask me,',
+                                                  'Although my colleagues\nmight, well...',
+                                                  'disagree',
+                                                  'Anyway, I never wanted\nto be part of this.',
+                                                  'Here\'s something\nyou should know:',
+                                                  'The emitter near the table\nactivates the machines',
+                                                  'Activated spikes can\npower everything else',
+                                                  'I think you would want\nthis machine powered',
+                                                  'Break the spike\nto kill the circuit',
+                                                  'Good luck'))
+            self.factory.create_entity('science_table_2', (0, 10))
+            self.factory.create_entity('emitter', (10, 25))
+            self.factory.create_entity('science_healer', (30, 19))
+            self.factory.create_entity('spike', (39, 30))
+            self.factory.create_entity('spike', (54, 15))
+            # Final room - a simple machine to disassemble
+            self.factory.create_entity('spike', (440, 5), powered=True)
+            self.factory.create_entity('spike', (440, 30))
+            self.factory.create_entity('spike', (450, 5))
+            self.factory.create_entity('spike', (450, 30))
+            self.factory.create_entity('spike', (445, 20))
+            running_len = 70
+            while running_len < 400:
+                # Roomgen code will be here
+                running_len += 70
+            running_len = 450
         self.factory.create_entity('level_switch', (running_len+1, 20),
                                    size=(500-running_len - 1, 30))
         # Returns the starting position for the player
@@ -416,11 +467,11 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (39, 23),
                                    size=(20, 4),
                                    next_level='department')
-        self.factory.create_entity('signpost', (95, 14), text='Dept\ncorridor',
+        self.factory.create_entity('signpost', (95, 14), text='Lab\ncorridor',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (90, 23),
                                    size=(20, 4),
-                                   next_level='dept_corridor')
+                                   next_level='lab_corridor')
         self.factory.create_entity('signpost', (130, 14),
                                    text='Ghetto\ncorridor',
                                    text_color='orange')

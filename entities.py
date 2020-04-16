@@ -440,7 +440,7 @@ class EntityFactory:
                                             lifetime=0.1))
         return muzzle
 
-    def _create_spike(self, entity_id, **kwargs):
+    def _create_spike(self, entity_id, powered=False, **kwargs):
         spike = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'unpowered': self.atlas.get_element('science_spike_unpowered'),
                                               'powered': self.atlas.get_element('science_spike_powered')},
@@ -458,7 +458,7 @@ class EntityFactory:
         spike.add_component(SpikePowerInteractionComponent(self.dispatcher,
                                                            action_cooldown=0.1,
                                                            range=40,
-                                                           powered=False))
+                                                           powered=powered))
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return spike
 
