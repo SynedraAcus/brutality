@@ -410,7 +410,7 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('signpost', (45, 30), text='Expo')
         self.factory.create_entity('level_switch', (40, 39),
                                    size=(20, 4),
-                                   next_level='ghetto_expo_d')
+                                   next_level='boss_leave_it')
         self.factory.create_entity('signpost', (45, 14), text='To dept',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (39, 23),

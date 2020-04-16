@@ -51,7 +51,7 @@ class PlotManager(metaclass=Singleton):
     """
     A master class in control of the plot
     """
-    def __init__(self, goals={}, initial_goal={}):
+    def __init__(self, goals=(), initial_goal={}):
         # TODO: more general phrases
         # Phrases useful in any kind of plot - random faction-specific chatter
         self.general_phrases = {'cops': (('Captain\'s an ass,\nif you ask me.', ),
@@ -72,11 +72,11 @@ class PlotManager(metaclass=Singleton):
                                                 'Why are they even...',
                                                 'Oh, nevermind,',
                                                 'Just thinking aloud'))}
-        for goal in goals:
-            if not isinstance(goal, Goal):
-                raise TypeError(f'{type(goal)} used instead of Goal in PlotManager')
-        self.goals = goals
-        self.current_goal = self.goals[initial_goal]
+        # for goal in goals:
+        #     if not isinstance(goal, Goal):
+        #         raise TypeError(f'{type(goal)} used instead of Goal in PlotManager')
+        # self.goals = goals
+        # self.current_goal = self.goals[initial_goal]
 
     def next_stage(self):
         """
