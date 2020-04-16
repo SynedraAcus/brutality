@@ -576,6 +576,7 @@ class SciencePropPowerInteractionComponent(PowerInteractionComponent):
     def take_action(self):
         self.powered = False
         self.owner.widget.switch_to_image('unpowered')
+        self.dispatcher.add_event(BearEvent('play_sound', 'blue_machine'))
 
 
 class SpikePowerInteractionComponent(PowerInteractionComponent):
