@@ -284,6 +284,79 @@ class BottleAgressorCombatState(AgressorCombatState):
 
 
 ################################################################################
+# Fighter types: attack only target faction
+# Ignore everything else, but non-enemy behaviours can be extended later
+################################################################################
+
+
+class FighterState(AIState):
+    def __init__(self, *args,
+                 enemy_factions=None, enemy_perception_distance=50,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.enemy_factions = enemy_factions
+        self.enemy_perception_distance = 50
+        self.walk_direction = (0, 0)
+        self.steps_left = 0
+
+
+class FighterWaitState(FighterState):
+    """
+    Wait for a valid target
+    """
+    def __init__(self, *args, combat_state='fight', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.combat_state = combat_state
+
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if current_closest:
+            return self.combat_state
+
+    def take_action(self):
+        return 0.2
+
+
+class FighterFistCombatState(FighterState):
+    """
+    Punch close enemies
+    """
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.perception_distance)
+        if not current_closest:
+            return self.peaceful_state
+        else:
+            # Store enemy entity for future reference
+            self.current_closest = current_closest
+
+    def take_action(self):
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        if 5 <= abs(dx) <= 15 and abs(dy) <= 3:
+            # If in melee range, attack with right hand
+            return self.owner.hands.use_hand('right')
+        else:
+            # walk toward the enemy
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
+            else:
+                # Recosidering direction
+                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
+                                      randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy,
+                                                       self.dy_preference)
+                return 0
+
+
+################################################################################
 # Civilian: a peaceful NPC who just stands there, maybe delivering some
 # monologue
 ################################################################################
