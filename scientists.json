@@ -210,6 +210,20 @@
     "ysize": 15
   },
   {
+    "name": "science_table_3",
+    "x": 20,
+    "y": 56,
+    "xsize": 33,
+    "ysize": 18
+  },
+  {
+    "name": "science_table_4",
+    "x": 0,
+    "y": 60,
+    "xsize": 19,
+    "ysize": 17
+  },
+  {
     "name": "science_device_1",
     "x": 58,
     "y": 29,

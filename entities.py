@@ -40,7 +40,8 @@ class EntityFactory:
         # TODO: move decoration and barried data to TSV or something
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box',
-                            'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse',
+                            'cop_corpse', 'bottle_punk_corpse',
+                            'nunchaku_punk_corpse',
                             'scientist_f_corpse', 'scientist_f2_corpse',
                             'scientist_m_corpse', 'scientist_m2_corpse'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
@@ -49,6 +50,7 @@ class EntityFactory:
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
                          'dept_chair_2', 'dept_weight',
                          'science_table_1', 'science_table_2',
+                         'science_table_3', 'science_table_4',
                          'science_device_1'}
         self.face_positions = {'broken_car': (0, 3),
                                'barricade_1': (0, 2),
@@ -66,6 +68,8 @@ class EntityFactory:
                                'dept_chair_2': (0, 2),
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
+                               'science_table_3': (0, 9),
+                               'science_table_4': (0, 9),
                                'science_device_1': (0, 3)}
         self.face_sizes = {'broken_car': (33, 11),
                            'barricade_1': (7, 14),
@@ -83,6 +87,8 @@ class EntityFactory:
                            'dept_chair_2': (5, 10),
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
+                           'science_table_3': (29, 9),
+                           'science_table_4': (11, 9),
                            'science_device_1': (6, 17)}
         self.depths = {'broken_car': 4,
                        'barricade_1': 5,
@@ -100,6 +106,8 @@ class EntityFactory:
                        'dept_chair_2': 1,
                        'science_table_1': 7,
                        'science_table_2': 2,
+                       'science_table_3': 2,
+                       'science_table_4': 7,
                        'science_device_1': 3}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):

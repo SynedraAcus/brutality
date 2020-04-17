@@ -213,21 +213,16 @@ class LevelManager(metaclass=Singleton):
             # Exit block should contain the level switch and maybe some stuff
         elif style == 'lab' and level_type == 'corridor':
             # The lab consists of 6 70-char rooms plus the 80-char final zone.
-            # First and last room are prefabs, other 4 are randomly shuffled
+            # First and last room are prefabs, other 5 are randomly shuffled
 
             # Room layout
-            for room_no in range(1, 7):
-                # TODO: The inner walls and BG walls for the lab
-                self.factory.create_entity('dept_wall_inner',
-                                           (room_no * 70 - 15, 0))
-                # self.factory.create_entity('spike', (room_no*70 - 22, 18))
-                # self.factory.create_entity('spike', (room_no * 70 - 12, 18))
-                # self.factory.create_entity('spike', (room_no * 70 + 2, 5))
-                # self.factory.create_entity('spike', (room_no*70 + 35, 5))
-                # self.factory.create_entity('dept_wall_inner',
-                #                            (room_no * 70 - 27, 12))
+            # for room_no in range(1, 7):
+            #     # TODO: The inner walls and BG walls for the lab
+            #     self.factory.create_entity('dept_wall_inner',
+            #                                (room_no * 70 - 15, 0))
             # Initial room
             player_pos = (5, 20)
+            self.factory.create_entity('dept_wall_inner', (55, 0))
             self.factory.create_entity('female_scientist', (20, 10),
                                        monologue=('You\'re here to destroy this place?',
                                                   'Good riddance if you ask me,',
@@ -248,18 +243,60 @@ class LevelManager(metaclass=Singleton):
             # Final room - a simple machine to disassemble
             self.factory.create_entity('spike', (440, 5), powered=True)
             self.factory.create_entity('spike', (440, 30))
-            self.factory.create_entity('spike', (450, 5))
-            self.factory.create_entity('spike', (450, 30))
-            self.factory.create_entity('spike', (445, 20))
+            # self.factory.create_entity('spike', (450, 5))
+            # self.factory.create_entity('spike', (450, 30))
+            # self.factory.create_entity('spike', (445, 20))
             running_len = 70
-            while running_len < 400:
+            room_order = [0, 1, 2, 3, 4]
+            random.shuffle(room_order)
+            for room in room_order:
                 # Roomgen code will be here
-                running_len += 70
+                running_len += self._lab_room(running_len, room)
             running_len = 450
         self.factory.create_entity('level_switch', (running_len+1, 20),
                                    size=(500-running_len - 1, 30))
         # Returns the starting position for the player
         return player_pos
+
+    def _lab_room(self, left_edge, room_type=0):
+        """
+        Generate a lab room
+
+        A 70 char wide room. walls
+        :return:
+        """
+        # room_type = 4
+        self.factory.create_entity('dept_wall_inner', (left_edge + 55, 0))
+        if room_type == 0:
+            # Two combatants
+            self.factory.create_entity('science_table_1', (left_edge - 8, 9))
+            self.factory.create_entity('dept_chair_2', (left_edge + 10, 15))
+            self.factory.create_entity('spike', (left_edge + 30, 5))
+            self.factory.create_entity('science_prop', (left_edge + 45, 10))
+        elif room_type == 1:
+            # One combatant
+            self.factory.create_entity('science_table_2', (left_edge - 1, 10))
+        elif room_type == 2:
+            # A single drop
+            # The player probably already has enough weapons at this point and
+            # can easily heal by walking back towards the level start
+            self.factory.create_entity('dept_locker', (left_edge - 3, 4))
+            item = random.choice(('bandage', 'emitter', 'pistol'))
+            self.factory.create_entity(item, (left_edge + 12, 24))
+            self.factory.create_entity('science_table_3', (left_edge + 22, 15))
+            self.factory.create_entity('spike', (left_edge + 50, 5))
+            self.factory.create_entity('spike', (left_edge + 25, 5))
+        elif room_type == 3:
+            for i in range(4):
+                self.factory.create_entity('science_device_1', (left_edge + 20 * i - 4, 4))
+                self.factory.create_entity('science_device_1', (left_edge + 20 * i - 9, 10))
+                if i < 3 and random.random() < 1:
+                    self.factory.create_entity('bandage', (left_edge + 20 * i + 5, 25))
+        elif room_type == 4:
+            self.factory.create_entity('science_table_4', (left_edge - 6, 12))
+            self.factory.create_entity('dept_chair_2', (left_edge + 4, 16))
+            # Two combatants
+        return 70
 
     def ghetto_room(self, left_edge):
         """
