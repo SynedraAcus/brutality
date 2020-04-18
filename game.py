@@ -14,9 +14,10 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
     MenuWidget, MenuItem
 
 from entities import EntityFactory
-from mapgen import LevelManager
+from mapgen import LevelManager, restart
 from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
+from plot import Goal, PlotManager
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -184,20 +185,50 @@ saving = SavingListener()
 dispatcher.register_listener(saving, 'brut_save_game')
 loading = LoadingListener(dispatcher, factory, levelgen, loop)
 dispatcher.register_listener(loading, 'brut_load_game')
+
+################################################################################
+# Goals
+# Not actually used anywhere, will be developed later
+################################################################################
+
+
+punk_fight = Goal(name='punk_fight',
+                  description='I was sent to throw some punks\nout of the street',
+                  enemy_factions=('punks', ),
+                  ally_factions=('cops', 'scientists', 'civilians'),
+                  location='ghetto',
+                  level_types=('corridor', ),
+                  exposition_monologues=(None, ),
+                  next_on_win=('scientist_drugs', 'scientist_hostage')
+                  )
+sc_drugs = Goal(name='scientist_drugs',
+                description='Apparently, they were protecting a drug lab',
+                enemy_factions=('punks', 'scientists'),
+                ally_factions=('cops', 'civilians'),
+                location='ghetto',
+                level_types=('corridor', ),
+                exposition_monologues=('Hey you',
+                                       'The cop',
+                                       'Look out: there is a drug lab\ndown the street',
+                                       'and they wouldn\'t just\nlet you walk in'),
+                next_on_win=('drug_lab')
+                )
+
+
 ################################################################################
 # Test menu
 ################################################################################
 
 menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_close_menu', None)),
-              MenuItem(f'Plot (TBD)', color='white', highlight_color='blue',
-                       action=lambda: print('Button 2')),
-              MenuItem(f'Items', color='white', highlight_color='blue',
+              MenuItem('Restart', color='white', highlight_color='blue',
+                       action=lambda: restart(levelgen, factory, dispatcher, loop)),
+              MenuItem('Items', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_show_items', None)),
-              MenuItem(f'Load', color='white', highlight_color='blue',
+              MenuItem(f'Load (TBD)', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_load_game',
                                                 'save.json')),
-              MenuItem(f'Save', color='white', highlight_color='blue',
+              MenuItem(f'Save (TBD)', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_save_game',
                                                 'save.json')),
               MenuItem(f'Quit', color='white', highlight_color='blue',
@@ -227,7 +258,7 @@ else:
     # RUn a single tick so EntityTracker is aware of everything before level
     # is being generated
     loop._run_iteration(0)
-    levelgen.set_level('ghetto_test')
+    levelgen.set_level('main_menu')
 
 
 # Actually starting
@@ -242,3 +273,18 @@ loop.run()
 
 #TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
+
+# TODO: some new enemy types
+# Test punks are okay but there should be some more
+
+# TODO: more indoor barriers
+# Stuff like flower pots, small tables, etc; basically things useful for any
+# indoor level
+
+# TODO: expending and replenishing ammo
+
+# TODO: more items for ghetto stashes
+
+# TODO: interlink demo levels correctly
+
+# TODO: Enemy taunts (in-combat phrases)

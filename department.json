@@ -57,10 +57,17 @@
   },
   {
     "name": "dept_wall_inner",
-    "x": 78,
+    "x": 85,
     "y": 0,
     "xsize": 15,
     "ysize": 32
+  },
+  {
+    "name": "dept_weight",
+    "x": 55,
+    "y": 27,
+    "xsize": 26,
+    "ysize": 14
   },
   {
     "name": "dept_table_1",

@@ -619,8 +619,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                 dy = self.owner.position.y - entity.position.y
                 dist = sqrt(dx ** 2 + dy ** 2)
                 if dist <= self.range and entity.id not in self.target_names:
-                    self.targets[entity.id] = (entity.position.pos[0],
-                                               entity.position.pos[1])
+                    self.targets[entity.id] = (entity.position.pos[0] + entity.widget.width // 2,
+                                               entity.position.pos[1] + entity.widget.height - 12)
                     self.target_names.append(entity.id)
         elif event.event_type == 'ecs_destroy':
             if event.event_value in self.targets:
@@ -630,8 +630,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
     def take_action(self, *args, **kwargs):
         if self.targets:
             target = self.targets[choice(self.target_names)]
-            dx = target[0] - self.owner.position.x
-            dy = target[1] - self.owner.position.y
+            dx = target[0] - self.owner.position.x - 2
+            dy = target[1] - self.owner.position.y - 7
             # Trivially proven from:
             # 1) V**2 = vx**2 + vy ** 2
             # 2) vx/vy = dx/dy

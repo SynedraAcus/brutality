@@ -52,7 +52,7 @@ class HitpointBar(Layout):
         if self.need_update:
             green_x = round(len(self.colors[0]) * self.current_hp / self.max_hp)
             self.children[0].colors =\
-                [['green' for _ in range(green_x+1)] + ['red' for _ in range(green_x+1, self.width)]
+                [['green' for _ in range(green_x)] + ['red' for _ in range(green_x, self.width)]
                  for y in range(self.height)]
             self.children[1].text = f'{self.current_hp}/{self.max_hp}'
             self._rebuild_self()
@@ -111,7 +111,11 @@ class TypingLabelWidget(Layout):
                 # permit drawing multiple characters
                 drawn = False
                 while not drawn:
-                    c = self.label.chars[self.current_draw_y][self.current_draw_x]
+                    try:
+                        c = self.label.chars[self.current_draw_y][self.current_draw_x]
+                    except IndexError:
+                        c = ' '
+                        drawn = True
                     if c and c != ' ':
                         # Draw a single char from a label, if there is one
                         self.visible_label.chars[self.current_draw_y][self.current_draw_x] = c

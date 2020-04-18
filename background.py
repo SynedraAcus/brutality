@@ -2,10 +2,10 @@
 A PatternGenerator for backrounds
 """
 
-from bear_hug.bear_utilities import BearException, shapes_equal, copy_shape
-
-from math import isclose
 import random
+from math import isclose
+
+from bear_hug.bear_utilities import BearException, shapes_equal, copy_shape
 
 ################################################################################
 # Transition dicts for backgrounds
@@ -55,6 +55,11 @@ dept_transition = {'dept_wall_1': {'dept_wall_1': 0.9,
                                    'dept_wall_3': 0.15},
                    'dept_wall_3': {'dept_wall_1': 0.85,
                                    'dept_wall_2': 0.15}}
+
+lab_transition = {'lab_wall_2': {'lab_wall_1': 0.95,
+                                 'lab_wall_2': 0.05},
+                  'lab_wall_1': {'lab_wall_1': 0.8,
+                                 'lab_wall_2': 0.2}}
 
 
 def generate_tiled(atlas, pattern, size):

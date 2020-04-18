@@ -1,20 +1,14 @@
-from random import randint
-
-from bear_hug.bear_utilities import copy_shape, BearECSException,\
-    BearResourceException
-from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
-    DestructorComponent, deserialize_entity, CollisionComponent,\
+from bear_hug.bear_utilities import copy_shape
+from bear_hug.ecs import WidgetComponent, deserialize_entity, \
     WalkerCollisionComponent, DecayComponent
-from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
-from bear_hug.resources import Atlas, XpLoader
 
-from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
-    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState,\
-    CivilianTalkState
-from background import tile_randomly, generate_bg, ghetto_transition,\
-    dept_transition
+from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState, \
+    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState, \
+    CivilianTalkState, FighterFistCombatState, FighterWaitState
+from background import tile_randomly, generate_bg, ghetto_transition, \
+    dept_transition, lab_transition
 from components import *
 from widgets import ParticleWidget, LevelSwitchWidget, SignpostWidget
 
@@ -40,16 +34,18 @@ class EntityFactory:
         # TODO: move decoration and barried data to TSV or something
         self.decorations = {'can', 'can2', 'cigarettes', 'garbage_bag',
                             'bucket', 'pizza_box',
-                            'cop_corpse', 'bottle_punk_corpse', 'nunchaku_punk_corpse',
+                            'cop_corpse', 'bottle_punk_corpse',
+                            'nunchaku_punk_corpse',
                             'scientist_f_corpse', 'scientist_f2_corpse',
                             'scientist_m_corpse', 'scientist_m2_corpse'}
         self.barriers = {'broken_car', 'barricade_1', 'barricade_2',
                          'barricade_3', 'dept_locker', 'dept_fence',
-                         'dept_bench', 'dept_wall_inner',
+                         'dept_bench', 'dept_wall_inner', 'punchbag',
                          'dept_table_1', 'dept_table_2', 'dept_chair_1',
-                         'dept_chair_2', 'dept_table_boss',
+                         'dept_chair_2', 'dept_weight',
                          'science_table_1', 'science_table_2',
-                         'science_device_1'}
+                         'science_table_3', 'science_table_4',
+                         'science_device_1', 'lab_wall_inner'}
         self.face_positions = {'broken_car': (0, 3),
                                'barricade_1': (0, 2),
                                'barricade_2': (0, 3),
@@ -58,13 +54,17 @@ class EntityFactory:
                                'dept_fence': (0, 0),
                                'dept_bench': (0, 2),
                                'dept_wall_inner': (0, 11),
+                               'lab_wall_inner': (0, 11),
+                               'punchbag': (0, 0),
+                               'dept_weight': (0, 8),
                                'dept_table_1': (0, 10),
                                'dept_table_2': (0, 11),
                                'dept_chair_1': (0, 2),
                                'dept_chair_2': (0, 2),
-                               # 'dept_table_boss': (0, 14),
                                'science_table_1': (0, 9),
                                'science_table_2': (0, 6),
+                               'science_table_3': (0, 9),
+                               'science_table_4': (0, 9),
                                'science_device_1': (0, 3)}
         self.face_sizes = {'broken_car': (33, 11),
                            'barricade_1': (7, 14),
@@ -74,13 +74,17 @@ class EntityFactory:
                            'dept_fence': (21, 14),
                            'dept_bench': (17, 5),
                            'dept_wall_inner': (3, 21),
+                           'lab_wall_inner': (3, 21),
+                           'punchbag': (3, 26),
+                           'dept_weight': (23, 5),
                            'dept_table_1': (10, 8),
                            'dept_table_2': (11, 8),
                            'dept_chair_1': (5, 10),
                            'dept_chair_2': (5, 10),
-                           # 'dept_table_boss': (24, 10),
                            'science_table_1': (11, 9),
                            'science_table_2': (29, 9),
+                           'science_table_3': (29, 9),
+                           'science_table_4': (11, 9),
                            'science_device_1': (6, 17)}
         self.depths = {'broken_car': 4,
                        'barricade_1': 5,
@@ -90,13 +94,17 @@ class EntityFactory:
                        'dept_fence': 0,
                        'dept_bench': 2,
                        'dept_wall_inner': 11,
+                       'lab_wall_inner': 11,
+                       'punchbag': 1,
+                       'dept_weight': 5,
                        'dept_table_1': 7,
                        'dept_table_2': 7,
                        'dept_chair_1': 1,
                        'dept_chair_2': 1,
-                       'dept_table_boss': 6,
                        'science_table_1': 7,
                        'science_table_2': 2,
+                       'science_table_3': 2,
+                       'science_table_4': 7,
                        'science_device_1': 3}
 
     def load_entity_from_JSON(self, json_string, emit_show=True):
@@ -198,6 +206,15 @@ class EntityFactory:
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
+        wall.add_component(DestructorComponent(self.dispatcher))
+        wall.add_component(CollisionComponent(self.dispatcher, depth=20))
+        return wall
+
+    def _create_lab_bg(self, entity_id, size=(50, 20), **kwargs):
+        wall = Entity(id=entity_id)
+        w = generate_bg(self.atlas, lab_transition, size[0])
+        wall.add_component(WidgetComponent(self.dispatcher, Widget(*w)))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=False))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -410,6 +427,10 @@ class EntityFactory:
                                                 owner=bg_entity))
         bg_entity.add_component(PositionComponent(self.dispatcher))
         bg_entity.add_component(DestructorComponent(self.dispatcher))
+        bg_entity.add_component(CollisionComponent(self.dispatcher,
+                                                   depth=size[1],
+                                                   face_size=size,
+                                                   passable=False))
         return bg_entity
 
     def _create_muzzle_flash(self, entity_id, direction='r', **kwargs):
@@ -433,7 +454,7 @@ class EntityFactory:
                                             lifetime=0.1))
         return muzzle
 
-    def _create_spike(self, entity_id, **kwargs):
+    def _create_spike(self, entity_id, powered=False, **kwargs):
         spike = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'unpowered': self.atlas.get_element('science_spike_unpowered'),
                                               'powered': self.atlas.get_element('science_spike_powered')},
@@ -451,7 +472,7 @@ class EntityFactory:
         spike.add_component(SpikePowerInteractionComponent(self.dispatcher,
                                                            action_cooldown=0.1,
                                                            range=40,
-                                                           powered=False))
+                                                           powered=powered))
         spike.add_component(SpawnerComponent(self.dispatcher, factory=self))
         return spike
 
@@ -570,6 +591,91 @@ class EntityFactory:
                                             event_value=entity_id))
         return cop_entity
 
+    def _create_cop_npc(self, entity_id, monologue=('Phrase 1', 'Phrase 2'),
+                        **kwargs):
+        cop_entity = Entity(id=entity_id)
+        widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('cop_r_1'),
+                                              'r_2': self.atlas.get_element('cop_r_2'),
+                                              'l_1': self.atlas.get_element('cop_l_1'),
+                                              'l_2': self.atlas.get_element('cop_l_2')},
+                                 initial_image='r_1')
+        cop_entity.add_component(WalkerComponent(self.dispatcher))
+        cop_entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        cop_entity.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                          depth=1))
+        cop_entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        cop_entity.add_component(FactionComponent(self.dispatcher,
+                                                  faction='police'))
+        cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
+                                                          corpse='cop_corpse',
+                                                          hitpoints=10,
+                                                          hit_sounds=('cop_hit', ),
+                                                          death_sounds=('cop_death', )))
+        cop_entity.add_component(DestructorComponent(self.dispatcher))
+        # Creating hand entities
+        f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr', 'cop_hand_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl', 'cop_hand_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br', 'cop_hand_back',
+                                         direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                 owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=cop_entity)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        cop_entity.add_component(HandInterfaceComponent(self.dispatcher,
+                                                        hand_entities={
+                                                            'forward_l': f_l.id,
+                                                            'forward_r': f_r.id,
+                                                            'back_l': b_l.id,
+                                                            'back_r': b_r.id},
+                                                        hands_offsets={
+                                                            'forward_l': (-2, 5),
+                                                            'forward_r': (0, 5),
+                                                            'back_l': (-3, 4),
+                                                            'back_r': (3, 4)},
+                                                        item_offsets={
+                                                            'forward_l': (0, 0),
+                                                            'forward_r': (7, 0),
+                                                            'back_l': (0, 0),
+                                                            'back_r': (4, 0)},
+                                                        left_item=left_fist.id,
+                                                        right_item=right_fist.id))
+        # AI
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': CivilianWaitState(self.dispatcher,
+                                                           runaway_state='wait',
+                                                           enemy_factions=(
+                                                           'punks',),
+                                                           enemy_perception_distance=50,
+                                                           player_interaction_state='talk',
+                                                           pc_id='cop_1'),
+                                 'talk': CivilianTalkState(self.dispatcher,
+                                                           pc_id='cop_1',
+                                                           peaceful_state='wait',
+                                                           runaway_state='wait',
+                                                           enemy_perception_distance=50,
+                                                           enemy_factions=(
+                                                           'punks',),
+                                                           phrase_sounds=(
+                                                           'male_phrase_1',
+                                                           'male_phrase_2',
+                                                           'male_phrase_3',
+                                                           'male_phrase_4',
+                                                           'male_phrase_5'),
+                                                           monologue=monologue,
+                                                           phrase_pause=1.5)},
+                         current_state='wait',
+                         owner=cop_entity)
+        return cop_entity
+
     def _create_dept_boss(self, entity_id, monologue=('Line 1', 'Line 2'), **kwargs):
         """
         A monologue NPC boss
@@ -617,7 +723,7 @@ class EntityFactory:
                                                                           'male_phrase_4',
                                                                           'male_phrase_5'),
                                                            monologue=monologue,
-                                                           phrase_color='#ffffff',
+                                                           phrase_color='#aaaaaa',
                                                            phrase_pause=1.5)},
                          current_state='wait',
                          owner=boss)
@@ -649,10 +755,10 @@ class EntityFactory:
         ai = AIComponent(self.dispatcher,
                          states={'wait': AgressorPeacefulState(self.dispatcher,
                                                                combat_state='attack',
-                                                               perception_distance=50),
+                                                               perception_distance=65),
                                  'attack': NunchakuAgressorCombatState(self.dispatcher,
                                                                        peaceful_state='wait',
-                                                                       perception_distance=50,
+                                                                       perception_distance=65,
                                                                        melee_range=(12, 15))},
                          current_state='wait',
                          owner=nunchaku)
@@ -722,11 +828,11 @@ class EntityFactory:
         ai = AIComponent(self.dispatcher,
                          states={'wait': AgressorPeacefulState(self.dispatcher,
                                                        combat_state='attack',
-                                                       perception_distance=50),
+                                                       perception_distance=65),
                                  'attack': BottleAgressorCombatState(self.dispatcher,
                                                      peaceful_state='wait',
                                                      melee_range=(0, 7),
-                                                     perception_distance=50)},
+                                                     perception_distance=65)},
                          current_state='wait',
                          owner=punk)
         punk.add_component(FactionComponent(self.dispatcher,
@@ -855,13 +961,103 @@ class EntityFactory:
                                                            runaway_state='run',
                                                            enemy_perception_distance=50,
                                                            enemy_factions=('punks',),
-                                                           phrase_sounds=('female_phrase_1',
-                                                                          'female_phrase_2',
-                                                                          'female_phrase_3',
-                                                                          'female_phrase_4',
-                                                                          'female_phrase_5'),
+                                                           phrase_color='#0059B2',
+                                                           phrase_sounds=('male_phrase_1',
+                                                                          'male_phrase_2',
+                                                                          'male_phrase_3',
+                                                                          'male_phrase_4',
+                                                                          'male_phrase_5'),
                                                            monologue=monologue,
                                                            phrase_pause=1.5)},
+                         current_state='wait',
+                         owner=scientist)
+        scientist.add_component(ai)
+        return scientist
+
+    def _create_scientist_enemy(self, entity_id):
+        scientist = Entity(id=entity_id)
+        # Choosing between two male scientist models
+        prefix = choice(('scientist_m', 'scientist_m2'))
+        if prefix == 'scientist_m':
+            hand_prefix = 'scientist_skinny_hand'
+        else:
+            hand_prefix = 'scientist_hand'
+        widget = SwitchingWidget(
+            images_dict={'r_1': self.atlas.get_element(f'{prefix}_r_1'),
+                         'r_2': self.atlas.get_element(f'{prefix}_r_2'),
+                         'l_1': self.atlas.get_element(f'{prefix}_l_1'),
+                         'l_2': self.atlas.get_element(f'{prefix}_l_2'),
+                         },
+            initial_image='r_1')
+        scientist.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        scientist.add_component(WalkerComponent(self.dispatcher))
+        scientist.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                         depth=1))
+        scientist.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        scientist.add_component(DestructorComponent(self.dispatcher))
+        scientist.add_component(FactionComponent(self.dispatcher,
+                                                 faction='scientists'))
+        # TODO: give scientists their own hit and death sounds
+        scientist.add_component(CharacterHealthComponent(self.dispatcher,
+                                                         corpse=f'{prefix}_corpse',
+                                                         hitpoints=5,
+                                                         hit_sounds=(
+                                                         'male_dmg',),
+                                                         death_sounds=(
+                                                             'punk_death',)))
+        # Creating hand entities
+        f_l = self._create_hand(f'{entity_id}_hand_fl',
+                                f'{hand_prefix}_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr',
+                                f'{hand_prefix}_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl',
+                                f'{hand_prefix}_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br',
+                                f'{hand_prefix}_back',
+                                direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        scientist.add_component(HandInterfaceComponent(self.dispatcher,
+                                                       hand_entities={
+                                                           'forward_l': f_l.id,
+                                                           'forward_r': f_r.id,
+                                                           'back_l': b_l.id,
+                                                           'back_r': b_r.id},
+                                                       hands_offsets={
+                                                           'forward_l': (
+                                                               -2, 5),
+                                                           'forward_r': (0, 5),
+                                                           'back_l': (-3, 4),
+                                                           'back_r': (3, 4)},
+                                                       item_offsets={
+                                                           'forward_l': (0, 0),
+                                                           'forward_r': (6, 0),
+                                                           'back_l': (0, -1),
+                                                           'back_r': (3, 0)},
+                                                       left_item=left_fist.id,
+                                                       right_item=right_fist.id))
+        # AI
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': FighterWaitState(self.dispatcher,
+                                                          enemy_factions=(
+                                                           'police',),
+                                                          combat_state='fight',
+                                                          enemy_perception_distance=50),
+                                 'fight': FighterFistCombatState(self.dispatcher,
+                                                                 enemy_factions=('police',),
+                                                                 enemy_perception_distance=50,
+                                                                 wait_state='wait')
+                                 },
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)
@@ -1043,7 +1239,7 @@ class EntityFactory:
                                                       8),
                                            z_level=z_level,
                                            emit_ecs=True)
-            vx = 20
+            vx = 17
         else:
             widget = SimpleAnimationWidget(Animation((self.atlas.get_element('bottle_nw'),
                                                       self.atlas.get_element('bottle_sw'),
@@ -1052,7 +1248,7 @@ class EntityFactory:
                                                       8),
                                            z_level=z_level,
                                            emit_ecs=True)
-            vx = -20
+            vx = -17
         entity.add_component(WidgetComponent(self.dispatcher, widget))
         entity.add_component(GravityPositionComponent(self.dispatcher,
                                                acceleration=40, vx=vx, vy=-35,
@@ -1192,6 +1388,7 @@ class EntityFactory:
                                              should_hide=False))
         entity.add_component(HealingItemBehaviourComponent(self.dispatcher,
                                                     single_use=True,
+                                                    use_sound='bandage',
                                                     owning_entity=owning_entity,
                                                     item_name='Bandage',
                                                     item_description='A piece of sterile bandage.\nIt isn\'t much, but still \na lot better than nothing.'))

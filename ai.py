@@ -260,7 +260,7 @@ class BottleAgressorCombatState(AgressorCombatState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 35 <= abs(dx) <= 40 and abs(dy) <= 3:
+        if 30 <= abs(dx) <= 40 and abs(dy) <= 3:
             return self.owner.hands.use_hand('right')
         elif self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 3:
             return self.owner.hands.use_hand('left')
@@ -276,6 +276,86 @@ class BottleAgressorCombatState(AgressorCombatState):
                 return 0.2
             else:
                 # Recosidering direction
+                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
+                                      randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy,
+                                                       self.dy_preference)
+                return 0
+
+
+################################################################################
+# Fighter types: attack only target faction
+# Ignore everything else, but non-enemy behaviours can be extended later
+################################################################################
+
+
+class FighterState(AIState):
+    def __init__(self, *args,
+                 enemy_factions=None, enemy_perception_distance=50,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.enemy_factions = enemy_factions
+        self.enemy_perception_distance = 50
+        self.walk_direction = (0, 0)
+        self.steps_left = 0
+        self.current_closest = None
+
+
+class FighterWaitState(FighterState):
+    """
+    Wait for a valid target
+    """
+    def __init__(self, *args, combat_state='fight', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.combat_state = combat_state
+
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if current_closest:
+            return self.combat_state
+
+    def take_action(self):
+        return 0.2
+
+
+class FighterFistCombatState(FighterState):
+    """
+    Punch close enemies
+    """
+    def __init__(self, *args, wait_state=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait_state = wait_state
+        self.dy_preference = 0.15
+
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if not current_closest:
+            return self.wait_state
+        else:
+            # Store enemy entity for future reference
+            self.current_closest = current_closest
+
+    def take_action(self):
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        if 4 <= abs(dx) <= 8 and abs(dy) <= 2:
+            # If in melee range, attack with right hand
+            return self.owner.hands.use_hand(choice(('right', 'left')))
+        else:
+            # walk toward the enemy
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
+            else:
+                # Reconsidering direction
                 self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
                                       randint(4, 7))
                 self.walk_direction = choose_direction(dx, dy,
@@ -438,8 +518,8 @@ class CivilianTalkState(CivilianAIState):
                                                 choice(self.phrase_sounds)))
         self.owner.spawner.spawn('message', (-x_offset, 0),
                                  text=self.monologue[self.next_phrase],
-                                 vy=-3,
-                                 vx=randint(-1, 1),
+                                 vy=-2,
+                                 vx=0,
                                  color=self.phrase_color,
                                  destroy_condition='timeout',
                                  lifetime=5.0)
