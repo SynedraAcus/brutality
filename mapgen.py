@@ -268,14 +268,15 @@ class LevelManager(metaclass=Singleton):
         # room_type = 4
         self.factory.create_entity('dept_wall_inner', (left_edge + 55, 0))
         if room_type == 0:
-            # Two combatants
             self.factory.create_entity('science_table_1', (left_edge - 8, 9))
             self.factory.create_entity('dept_chair_2', (left_edge + 10, 15))
             self.factory.create_entity('spike', (left_edge + 30, 5))
             self.factory.create_entity('science_prop', (left_edge + 45, 10))
+            self.factory.create_entity('scientist_enemy', (left_edge+20, 10))
+            self.factory.create_entity('scientist_enemy', (left_edge+35, 20))
         elif room_type == 1:
-            # One combatant
             self.factory.create_entity('science_table_2', (left_edge - 1, 10))
+            self.factory.create_entity('scientist_enemy', (left_edge + 40, 10))
         elif room_type == 2:
             # A single drop
             # The player probably already has enough weapons at this point and
@@ -295,7 +296,8 @@ class LevelManager(metaclass=Singleton):
         elif room_type == 4:
             self.factory.create_entity('science_table_4', (left_edge - 6, 12))
             self.factory.create_entity('dept_chair_2', (left_edge + 4, 16))
-            # Two combatants
+            self.factory.create_entity('scientist_enemy', (left_edge + 18, 12))
+            self.factory.create_entity('scientist_enemy', (left_edge + 16, 18))
         return 70
 
     def ghetto_room(self, left_edge):
@@ -481,7 +483,7 @@ class LevelManager(metaclass=Singleton):
                                                (left_edge + room_width - 13 - 4 * i,
                                                 4 + 4 * i))
             # TODO: do something useful with the dept_corridor room generator
-            # Dept corridor is generally mostly proof of concept, because I
+            # Dept corridor is  mostly proof of concept, because I
             # don't currently have any need for dept corridor levels. Maybe as
             # an exposition sometime when I need to talk to some cop?
         return room_width

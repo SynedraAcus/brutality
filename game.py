@@ -279,3 +279,5 @@ loop.run()
 # TODO: more items for ghetto stashes
 
 # TODO: interlink demo levels correctly
+
+# TODO: Enemy taunts (in-combat phrases)
