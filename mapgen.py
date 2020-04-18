@@ -59,6 +59,7 @@ class LevelManager(metaclass=Singleton):
         self.level_switch = level_switch
         self.player_entity = player_entity
         self.methods = {'main_menu': '_menu',
+                        'final': '_final',
                         'ghetto_one': '_ghetto_one',
                         'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
@@ -72,6 +73,7 @@ class LevelManager(metaclass=Singleton):
                         'ghetto_expo_d': '_ghetto_expo_drugs',
                         'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
+                                   'final': (10, 10),
                                    'main_menu': (10, 20),
                                    'ghetto_one': (20, 20),
                                    'ghetto_tutorial': (5, 25),
@@ -531,13 +533,27 @@ class LevelManager(metaclass=Singleton):
                                               ))
         self.factory.create_entity('signpost', (45, 30), text='Skip\ntutorial')
         self.factory.create_entity('level_switch', (37, 39),
-                                   size=(20, 4),
+                                   size=(60, 9),
                                    next_level='ghetto_one')
-        self.factory.create_entity('signpost', (55, 14), text='DEPARTMENT',
+        self.factory.create_entity('signpost', (57, 14), text='DEPARTMENT',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (49, 23),
-                                   size=(20, 4),
+                                   size=(60, 8),
                                    next_level='department')
+
+    def _final(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
+        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('floor', (0, 21), size=(500, 30))
+        self.factory.create_entity('invis', (0, 51), size=(500, 9))
+        self.factory.create_entity('signpost', (30, 25),
+                                   text='Back to\nmain menu')
+        self.factory.create_entity('level_switch', (25, 35), size=(20, 4),
+                                   next_level='main_menu')
+        self.factory.create_entity('female_scientist', (20, 20),
+                                   monologue=('Thank you for playing!',
+                                              'This is all for now.',
+                                              'Stay tuned for further updates'))
 
     def _ghetto_test(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
@@ -604,7 +620,7 @@ class LevelManager(metaclass=Singleton):
                    'It\'s not worth your job,\nlet alone your life.',
                    'Fight someone your own weight.',
                    'DISMISSED!')
-        self._boss_talk(monologue=monologue)
+        self._boss_talk(monologue=monologue, next_level='final')
 
     def _boss_good(self):
         monologue=('Good work.',
