@@ -320,6 +320,26 @@
     "y": 21,
     "xsize": 1,
     "ysize": 1
+  },
+  {
+    "name": "lab_wall_1",
+    "x": 74,
+    "y": 61,
+    "xsize": 6,
+    "ysize": 20
+  },
+  {
+   "name": "lab_wall_2",
+    "x": 81,
+    "y": 61,
+    "xsize": 12,
+    "ysize": 20
+  },
+  {
+    "name": "lab_wall_inner",
+    "x": 54,
+    "y": 68,
+    "xsize": 15,
+    "ysize": 32
   }
-
 ]

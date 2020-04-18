@@ -3,15 +3,14 @@ Map generators
 """
 
 import random
-
 from math import sqrt
+
+from bear_hug.ecs import EntityTracker, Singleton
+from bear_hug.event import BearEvent, BearEventDispatcher
 
 from entities import EntityFactory
 from listeners import SpawnItem, SpawningListener
 from plot import PlotManager
-
-from bear_hug.ecs import EntityTracker, Singleton
-from bear_hug.event import BearEvent, BearEventDispatcher
 
 
 # TODO: make restart that doesn't require directly interacting with the guts of every system
@@ -213,7 +212,7 @@ class LevelManager(metaclass=Singleton):
             # No garbage or similar stuff on the department floor
         elif style == 'lab':
             self.dispatcher.add_event(BearEvent('set_bg_sound', None))
-            self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
+            self.factory.create_entity('lab_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 50), size=(500, 9))
         # Placing actual game content
@@ -248,14 +247,9 @@ class LevelManager(metaclass=Singleton):
             # The lab consists of 6 70-char rooms plus the 80-char final zone.
             # First and last room are prefabs, other 5 are randomly shuffled
 
-            # Room layout
-            # for room_no in range(1, 7):
-            #     # TODO: The inner walls and BG walls for the lab
-            #     self.factory.create_entity('dept_wall_inner',
-            #                                (room_no * 70 - 15, 0))
             # Initial room
             player_pos = (5, 20)
-            self.factory.create_entity('dept_wall_inner', (55, 0))
+            self.factory.create_entity('lab_wall_inner', (55, 0))
             self.factory.create_entity('female_scientist', (20, 10),
                                        monologue=('You\'re here to destroy this place?',
                                                   'Good riddance if you ask me,',
@@ -271,20 +265,17 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('science_table_2', (0, 10))
             self.factory.create_entity('emitter', (10, 25))
             self.factory.create_entity('science_healer', (30, 19))
-            self.factory.create_entity('spike', (39, 30))
-            self.factory.create_entity('spike', (54, 15))
+            self.factory.create_entity('spike', (35, 30))
+            self.factory.create_entity('spike', (49, 15))
             # Final room - a simple machine to disassemble
             self.factory.create_entity('spike', (440, 5), powered=True)
             self.factory.create_entity('spike', (440, 30))
-            # self.factory.create_entity('spike', (450, 5))
-            # self.factory.create_entity('spike', (450, 30))
-            # self.factory.create_entity('spike', (445, 20))
             running_len = 70
             room_order = [0, 1, 2, 3, 4]
             random.shuffle(room_order)
             for room in room_order:
                 # Roomgen code will be here
-                running_len += self._lab_room(running_len, room)
+                running_len += self.lab_room(running_len, room)
             running_len = 450
         self.factory.create_entity('level_switch', (running_len+1, 20),
                                    size=(500-running_len - 1, 30),
@@ -292,7 +283,7 @@ class LevelManager(metaclass=Singleton):
         # Returns the starting position for the player
         return player_pos
 
-    def _lab_room(self, left_edge, room_type=0):
+    def lab_room(self, left_edge, room_type=0):
         """
         Generate a lab room
 
@@ -300,7 +291,7 @@ class LevelManager(metaclass=Singleton):
         :return:
         """
         # room_type = 4
-        self.factory.create_entity('dept_wall_inner', (left_edge + 55, 0))
+        self.factory.create_entity('lab_wall_inner', (left_edge + 55, 0))
         if room_type == 0:
             self.factory.create_entity('science_table_1', (left_edge - 8, 9))
             self.factory.create_entity('dept_chair_2', (left_edge + 10, 15))
@@ -539,12 +530,12 @@ class LevelManager(metaclass=Singleton):
                                               'I recommend starting from the\nDEPARTMENT'
                                               ))
         self.factory.create_entity('signpost', (45, 30), text='Skip\ntutorial')
-        self.factory.create_entity('level_switch', (40, 39),
+        self.factory.create_entity('level_switch', (37, 39),
                                    size=(20, 4),
                                    next_level='ghetto_one')
-        self.factory.create_entity('signpost', (45, 14), text='DEPARTMENT',
+        self.factory.create_entity('signpost', (55, 14), text='DEPARTMENT',
                                    text_color='blue')
-        self.factory.create_entity('level_switch', (39, 23),
+        self.factory.create_entity('level_switch', (49, 23),
                                    size=(20, 4),
                                    next_level='department')
 

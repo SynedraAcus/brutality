@@ -8,7 +8,7 @@ from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState, 
     BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState, \
     CivilianTalkState, FighterFistCombatState, FighterWaitState
 from background import tile_randomly, generate_bg, ghetto_transition, \
-    dept_transition
+    dept_transition, lab_transition
 from components import *
 from widgets import ParticleWidget, LevelSwitchWidget, SignpostWidget
 
@@ -45,7 +45,7 @@ class EntityFactory:
                          'dept_chair_2', 'dept_weight',
                          'science_table_1', 'science_table_2',
                          'science_table_3', 'science_table_4',
-                         'science_device_1'}
+                         'science_device_1', 'lab_wall_inner'}
         self.face_positions = {'broken_car': (0, 3),
                                'barricade_1': (0, 2),
                                'barricade_2': (0, 3),
@@ -54,6 +54,7 @@ class EntityFactory:
                                'dept_fence': (0, 0),
                                'dept_bench': (0, 2),
                                'dept_wall_inner': (0, 11),
+                               'lab_wall_inner': (0, 11),
                                'punchbag': (0, 0),
                                'dept_weight': (0, 8),
                                'dept_table_1': (0, 10),
@@ -73,6 +74,7 @@ class EntityFactory:
                            'dept_fence': (21, 14),
                            'dept_bench': (17, 5),
                            'dept_wall_inner': (3, 21),
+                           'lab_wall_inner': (3, 21),
                            'punchbag': (3, 26),
                            'dept_weight': (23, 5),
                            'dept_table_1': (10, 8),
@@ -92,6 +94,7 @@ class EntityFactory:
                        'dept_fence': 0,
                        'dept_bench': 2,
                        'dept_wall_inner': 11,
+                       'lab_wall_inner': 11,
                        'punchbag': 1,
                        'dept_weight': 5,
                        'dept_table_1': 7,
@@ -203,6 +206,15 @@ class EntityFactory:
         widget = Widget(*w)
         wall.add_component(WidgetComponent(self.dispatcher, widget))
         wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
+        wall.add_component(DestructorComponent(self.dispatcher))
+        wall.add_component(CollisionComponent(self.dispatcher, depth=20))
+        return wall
+
+    def _create_lab_bg(self, entity_id, size=(50, 20), **kwargs):
+        wall = Entity(id=entity_id)
+        w = generate_bg(self.atlas, lab_transition, size[0])
+        wall.add_component(WidgetComponent(self.dispatcher, Widget(*w)))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=False))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -949,6 +961,7 @@ class EntityFactory:
                                                            runaway_state='run',
                                                            enemy_perception_distance=50,
                                                            enemy_factions=('punks',),
+                                                           phrase_color='#0059B2',
                                                            phrase_sounds=('male_phrase_1',
                                                                           'male_phrase_2',
                                                                           'male_phrase_3',
