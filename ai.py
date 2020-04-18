@@ -310,7 +310,6 @@ class FighterWaitState(FighterState):
         self.combat_state = combat_state
 
     def switch_state(self):
-        print(self.owner)
         current_closest = find_closest_enemy(self.owner,
                                              self.enemy_perception_distance,
                                              self.enemy_factions)

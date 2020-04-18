@@ -14,7 +14,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
     MenuWidget, MenuItem
 
 from entities import EntityFactory
-from mapgen import LevelManager
+from mapgen import LevelManager, restart
 from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
     SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
 from plot import Goal, PlotManager
@@ -214,14 +214,14 @@ sc_drugs = Goal(name='scientist_drugs',
 
 menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_close_menu', None)),
-              MenuItem(f'Plot (TBD)', color='white', highlight_color='blue',
-                       action=lambda: print('Button 2')),
-              MenuItem(f'Items', color='white', highlight_color='blue',
+              MenuItem('Restart', color='white', highlight_color='blue',
+                       action=lambda: restart(levelgen)),
+              MenuItem('Items', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_show_items', None)),
-              MenuItem(f'Load', color='white', highlight_color='blue',
+              MenuItem(f'Load (TBD)', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_load_game',
                                                 'save.json')),
-              MenuItem(f'Save', color='white', highlight_color='blue',
+              MenuItem(f'Save (TBD)', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_save_game',
                                                 'save.json')),
               MenuItem(f'Quit', color='white', highlight_color='blue',

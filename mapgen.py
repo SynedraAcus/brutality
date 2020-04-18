@@ -14,6 +14,21 @@ from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
 
 
+def restart(level_manager):
+    """
+    Restart the game
+    :return:
+    """
+    player_entity = EntityTracker().entities['cop_1']
+    player_entity.hands.drop('left')
+    player_entity.hands.drop('right')
+    level_manager.set_level('ghetto_test')
+    missing_hp = player_entity.health.max_hitpoints - player_entity.health.hitpoints
+    return (BearEvent('brut_heal', ('cop_1',
+                                     missing_hp)),
+            BearEvent('brut_close_menu', None))
+
+
 class LevelManager(metaclass=Singleton):
     """
     A class responsible for creating levels.
@@ -589,11 +604,13 @@ class LevelManager(metaclass=Singleton):
         self.generate_level('ghetto', 'corridor')
         self.factory.create_entity('cop_npc', (25, 10),
                                    monologue=('Officer.',
-                                              'Thank God you\'re here',
-                                              'That meth lab down the street\nwas bad enough,',
-                                              'but now these assholes\nhave trashed the entire hood',
-                                              'Do something about it',
-                                              'Please.'))
+                                              'There is a meth lab nearby',
+                                              'Apparently the punks\nare just hired muscle,',
+                                              'and some old guys\nin lab coats',
+                                              'are behind it all',
+                                              'You\'ll find the lab\ndown the street',
+                                              'But be careful:\nthese guys are',
+                                              'anything but harmless'))
 
     def _boss_talk(self, monologue=('Line one', 'Line two')):
         self.dispatcher.add_event(BearEvent('set_bg_sound',
