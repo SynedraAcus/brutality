@@ -227,15 +227,20 @@ class SpawningListener(Listener, metaclass=Singleton):
             if not self.player_entity:
                 self.player_entity = EntityTracker().entities[self.player_id]
             for spawn in self.spawns:
-                if rectangles_collide(spawn.pos, spawn.size,
-                                      self.player_entity.position.pos,
-                                      self.player_entity.widget.size):
-                    self.factory.create_entity(spawn.item,
-                                               # Spawn in the middle
-                                               (int(spawn.pos[0]+spawn.size[0]/2),
-                                                int(spawn.pos[1]+spawn.size[1]/2)),
-                                               **spawn.kwargs)
-                    self.spawns.remove(spawn)
+                try:
+                    if rectangles_collide(spawn.pos, spawn.size,
+                                          self.player_entity.position.pos,
+                                          self.player_entity.widget.size):
+                        self.factory.create_entity(spawn.item,
+                                                   # Spawn in the middle
+                                                   (int(spawn.pos[0]+spawn.size[0]/2),
+                                                    int(spawn.pos[1]+spawn.size[1]/2)),
+                                                   **spawn.kwargs)
+                        self.spawns.remove(spawn)
+                except AttributeError:
+                    # Sometimes it interacts with half-destroyed entities during
+                    # level switch process. 
+                    pass
 
 
 class SavingListener(Listener):
@@ -440,7 +445,10 @@ class MenuListener(Listener):
                                   ['tick', 'service', 'misc_input', 'key_down'])
         self.currently_showing = True
         # Disabling character input
-        EntityTracker().entities['cop_1'].controller.accepts_input = False
+        try:
+            EntityTracker().entities['cop_1'].controller.accepts_input = False
+        except KeyError:
+            pass
 
     def hide_menu(self):
         self.terminal.remove_widget(self.menu_widget)

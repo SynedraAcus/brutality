@@ -111,7 +111,11 @@ class TypingLabelWidget(Layout):
                 # permit drawing multiple characters
                 drawn = False
                 while not drawn:
-                    c = self.label.chars[self.current_draw_y][self.current_draw_x]
+                    try:
+                        c = self.label.chars[self.current_draw_y][self.current_draw_x]
+                    except IndexError:
+                        c = ' '
+                        drawn = True
                     if c and c != ' ':
                         # Draw a single char from a label, if there is one
                         self.visible_label.chars[self.current_draw_y][self.current_draw_x] = c

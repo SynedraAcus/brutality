@@ -14,19 +14,29 @@ from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.event import BearEvent, BearEventDispatcher
 
 
-def restart(level_manager):
+# TODO: make restart that doesn't require directly interacting with the guts of every system
+def restart(level_manager, factory, dispatcher, loop):
     """
     Restart the game
     :return:
     """
-    player_entity = EntityTracker().entities['cop_1']
-    player_entity.hands.drop('left')
-    player_entity.hands.drop('right')
-    level_manager.set_level('ghetto_test')
-    missing_hp = player_entity.health.max_hitpoints - player_entity.health.hitpoints
-    return (BearEvent('brut_heal', ('cop_1',
-                                     missing_hp)),
-            BearEvent('brut_close_menu', None))
+    try:
+        player_entity = EntityTracker().entities['cop_1']
+        player_entity.hands.drop('left')
+        player_entity.hands.drop('right')
+        missing_hp = player_entity.health.max_hitpoints - player_entity.health.hitpoints
+        dispatcher.add_event(BearEvent('brut_heal', ('cop_1',
+                                                     missing_hp)))
+        dispatcher.add_event(BearEvent('brut_close_menu', None))
+    except KeyError:
+        player_entity = factory._create_cop('cop_1')
+        dispatcher.add_event(BearEvent('ecs_create', player_entity))
+        dispatcher.add_event(BearEvent('ecs_add', ('cop_1', 20, 20)))
+        dispatcher.add_event(BearEvent('brut_heal', ('cop_1', 100)))
+        dispatcher.add_event(BearEvent('brut_close_menu', None))
+        loop._run_iteration(0)
+    level_manager.set_level('main_menu')
+
 
 
 class LevelManager(metaclass=Singleton):
@@ -49,8 +59,11 @@ class LevelManager(metaclass=Singleton):
         self.spawner = spawner
         self.level_switch = level_switch
         self.player_entity = player_entity
-        self.methods = {'ghetto_test': '_ghetto_test',
+        self.methods = {'main_menu': '_menu',
+                        'ghetto_one': '_ghetto_one',
+                        'ghetto_test': '_ghetto_test',
                         'ghetto_tutorial': '_ghetto_tutorial',
+                        'lab_fight': '_lab_fight',
                         'department': '_department',
                         'boss_leave_it': '_boss_leave_it',
                         'boss_saved': '_boss_good',
@@ -60,9 +73,12 @@ class LevelManager(metaclass=Singleton):
                         'ghetto_expo_d': '_ghetto_expo_drugs',
                         'goal': 'next_goal_level'}
         self.starting_positions = {'ghetto_test': (10, 20),
+                                   'main_menu': (10, 20),
+                                   'ghetto_one': (20, 20),
                                    'ghetto_tutorial': (5, 25),
                                    'department': (10, 20),
-                                   'boss_leave_it': (80, 20),
+                                   'lab_fight': (10, 20),
+                                   'boss_leave_it': (70, 20),
                                    'boss_saved': (80, 20),
                                    'ghetto_expo_h': (20, 20),
                                    'ghetto_expo_d': (20, 20),
@@ -143,11 +159,13 @@ class LevelManager(metaclass=Singleton):
         self.level_switch.current_level = f'{goal.location}_{goal.level_types[goal.current_stage]}'
         player = EntityTracker().entities[self.player_entity]
 
-    def generate_level(self, style='ghetto', level_type='corridor'):
+    def generate_level(self, style='ghetto', level_type='corridor',
+                       next_level='ghetto_test'):
         """
         Generate a required type of level
         :param style: str. A location type (ghetto, dept, lab, etc)
         :param level_type: str. A level type (corridor, hostage, etc)
+        :param next_level: str. A level ID for the level switch
         :return:
         """
         if style not in self.styles:
@@ -269,7 +287,8 @@ class LevelManager(metaclass=Singleton):
                 running_len += self._lab_room(running_len, room)
             running_len = 450
         self.factory.create_entity('level_switch', (running_len+1, 20),
-                                   size=(500-running_len - 1, 30))
+                                   size=(500-running_len - 1, 30),
+                                   next_level=next_level)
         # Returns the starting position for the player
         return player_pos
 
@@ -400,7 +419,7 @@ class LevelManager(metaclass=Singleton):
                 self.factory.create_entity(random.choice(('bottle_punk',
                                                          'nunchaku_punk')),
                                            (left_edge + room_width // 2,
-                                            stash_y + random.randint(-5, 5)))
+                                            min(stash_y + random.randint(-5, 5), 35)))
 
         return room_width
 
@@ -503,6 +522,32 @@ class LevelManager(metaclass=Singleton):
             # an exposition sometime when I need to talk to some cop?
         return room_width
 
+################################################################################
+#
+# Prefab levels
+#
+################################################################################
+
+    def _menu(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
+        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('floor', (0, 20), size=(500, 30))
+        self.factory.create_entity('female_scientist', (20, 15),
+                                   monologue=('Welcome to the BRUTALITY prototype',
+                                              'Try Esc to access menu\nand WASD/arrows to walk',
+                                              'To begin the game, walk into\none of the switches to the right',
+                                              'I recommend starting from the\nDEPARTMENT'
+                                              ))
+        self.factory.create_entity('signpost', (45, 30), text='Skip\ntutorial')
+        self.factory.create_entity('level_switch', (40, 39),
+                                   size=(20, 4),
+                                   next_level='ghetto_one')
+        self.factory.create_entity('signpost', (45, 14), text='DEPARTMENT',
+                                   text_color='blue')
+        self.factory.create_entity('level_switch', (39, 23),
+                                   size=(20, 4),
+                                   next_level='department')
+
     def _ghetto_test(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
@@ -601,7 +646,7 @@ class LevelManager(metaclass=Singleton):
                                               'There are definitely people\nlocked inside'))
 
     def _ghetto_expo_drugs(self):
-        self.generate_level('ghetto', 'corridor')
+        self.generate_level('ghetto', 'corridor', 'lab_fight')
         self.factory.create_entity('cop_npc', (25, 10),
                                    monologue=('Officer.',
                                               'There is a meth lab nearby',
@@ -609,10 +654,17 @@ class LevelManager(metaclass=Singleton):
                                               'and some old guys\nin lab coats',
                                               'are behind it all',
                                               'You\'ll find the lab\ndown the street',
-                                              'But be careful:\nthese guys are',
-                                              'anything but harmless'))
+                                              'But be careful: these guys are\nanything but harmless'))
 
-    def _boss_talk(self, monologue=('Line one', 'Line two')):
+    def _ghetto_one(self):
+        self.generate_level('ghetto', 'corridor', 'ghetto_expo_d')
+
+    def _lab_fight(self):
+        self.generate_level('lab', 'corridor', 'boss_leave_it')
+
+
+    def _boss_talk(self, monologue=('Line one', 'Line two'),
+                   next_level='main_menu'):
         self.dispatcher.add_event(BearEvent('set_bg_sound',
                                             'supercop_bg'))
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
@@ -635,13 +687,12 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_locker', (124, 12))
         self.factory.create_entity('dept_bench', (143, 15))
         self.factory.create_entity('level_switch', (140, 20), size=(70, 30),
-                                   next_level='ghetto_test')
-
+                                   next_level=next_level)
 
     def _department(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
         self.factory.create_entity('level_switch', (415, 20),
-                                   size=(85, 30), next_level='ghetto_tutorial')
+                                   size=(85, 30), next_level='ghetto_one')
         self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -654,10 +705,19 @@ class LevelManager(metaclass=Singleton):
                             pos=(20, 20),
                             size=(10, 20),
                             kwargs={
-                                'text': 'Use your hands with Q and E\nWith no weapons, you still can punch',
+                                'text': 'Use your hands with Q and E\nWith no weapons equipped, you can punch',
                                 'destroy_condition': 'timeout',
                                 'lifetime': 5,
                                 'vy': -2}),
+                  SpawnItem(item='message',
+                            pos=(40, 20),
+                            size=(10, 20),
+                            kwargs={
+                                'text': 'Jump with spacebar',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 5,
+                                'vy': -2
+                            }),
                   SpawnItem(item='message',
                             pos=(130, 20),
                             size=(10, 20),

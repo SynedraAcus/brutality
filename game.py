@@ -215,7 +215,7 @@ sc_drugs = Goal(name='scientist_drugs',
 menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_close_menu', None)),
               MenuItem('Restart', color='white', highlight_color='blue',
-                       action=lambda: restart(levelgen)),
+                       action=lambda: restart(levelgen, factory, dispatcher, loop)),
               MenuItem('Items', color='white', highlight_color='blue',
                        action=lambda: BearEvent('brut_show_items', None)),
               MenuItem(f'Load (TBD)', color='white', highlight_color='blue',
@@ -251,7 +251,7 @@ else:
     # RUn a single tick so EntityTracker is aware of everything before level
     # is being generated
     loop._run_iteration(0)
-    levelgen.set_level('ghetto_test')
+    levelgen.set_level('main_menu')
 
 
 # Actually starting
