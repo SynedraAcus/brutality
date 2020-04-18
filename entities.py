@@ -1,19 +1,13 @@
-from random import choice, randint
-
-from bear_hug.bear_utilities import copy_shape, BearECSException,\
-    BearResourceException
-from bear_hug.ecs import Entity, WidgetComponent, PositionComponent, \
-    DestructorComponent, deserialize_entity, CollisionComponent,\
+from bear_hug.bear_utilities import copy_shape
+from bear_hug.ecs import WidgetComponent, deserialize_entity, \
     WalkerCollisionComponent, DecayComponent
-from bear_hug.event import BearEvent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
-from bear_hug.resources import Atlas, XpLoader
 
-from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
-    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState,\
+from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState, \
+    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState, \
     CivilianTalkState, FighterFistCombatState, FighterWaitState
-from background import tile_randomly, generate_bg, ghetto_transition,\
+from background import tile_randomly, generate_bg, ghetto_transition, \
     dept_transition
 from components import *
 from widgets import ParticleWidget, LevelSwitchWidget, SignpostWidget
@@ -645,22 +639,16 @@ class EntityFactory:
         # AI
         ai = AIComponent(self.dispatcher,
                          states={'wait': CivilianWaitState(self.dispatcher,
-                                                           runaway_state='run',
+                                                           runaway_state='wait',
                                                            enemy_factions=(
                                                            'punks',),
                                                            enemy_perception_distance=50,
                                                            player_interaction_state='talk',
                                                            pc_id='cop_1'),
-                                 'run': CivilianRunawayState(self.dispatcher,
-                                                             pc_id='cop_1',
-                                                             peaceful_state='wait',
-                                                             enemy_perception_distance=50,
-                                                             enemy_factions=(
-                                                             'punks',)),
                                  'talk': CivilianTalkState(self.dispatcher,
                                                            pc_id='cop_1',
                                                            peaceful_state='wait',
-                                                           runaway_state='run',
+                                                           runaway_state='wait',
                                                            enemy_perception_distance=50,
                                                            enemy_factions=(
                                                            'punks',),
