@@ -1,4 +1,4 @@
-from random import randint
+from random import choice, randint
 
 from bear_hug.bear_utilities import copy_shape, BearECSException,\
     BearResourceException
@@ -12,7 +12,7 @@ from bear_hug.resources import Atlas, XpLoader
 
 from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState,\
     BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState,\
-    CivilianTalkState
+    CivilianTalkState, FighterFistCombatState, FighterWaitState
 from background import tile_randomly, generate_bg, ghetto_transition,\
     dept_transition
 from components import *
@@ -968,6 +968,95 @@ class EntityFactory:
                                                                           'male_phrase_5'),
                                                            monologue=monologue,
                                                            phrase_pause=1.5)},
+                         current_state='wait',
+                         owner=scientist)
+        scientist.add_component(ai)
+        return scientist
+
+    def _create_scientist_enemy(self, entity_id):
+        scientist = Entity(id=entity_id)
+        # Choosing between two male scientist models
+        prefix = choice(('scientist_m', 'scientist_m2'))
+        if prefix == 'scientist_m':
+            hand_prefix = 'scientist_skinny_hand'
+        else:
+            hand_prefix = 'scientist_hand'
+        widget = SwitchingWidget(
+            images_dict={'r_1': self.atlas.get_element(f'{prefix}_r_1'),
+                         'r_2': self.atlas.get_element(f'{prefix}_r_2'),
+                         'l_1': self.atlas.get_element(f'{prefix}_l_1'),
+                         'l_2': self.atlas.get_element(f'{prefix}_l_2'),
+                         },
+            initial_image='r_1')
+        scientist.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        scientist.add_component(WalkerComponent(self.dispatcher))
+        scientist.add_component(WalkerCollisionComponent(self.dispatcher,
+                                                         depth=1))
+        scientist.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        scientist.add_component(DestructorComponent(self.dispatcher))
+        scientist.add_component(FactionComponent(self.dispatcher,
+                                                 faction='scientists'))
+        # TODO: give scientists their own hit and death sounds
+        scientist.add_component(CharacterHealthComponent(self.dispatcher,
+                                                         corpse=f'{prefix}_corpse',
+                                                         hitpoints=5,
+                                                         hit_sounds=(
+                                                         'male_dmg',),
+                                                         death_sounds=(
+                                                             'punk_death',)))
+        # Creating hand entities
+        f_l = self._create_hand(f'{entity_id}_hand_fl',
+                                f'{hand_prefix}_forward',
+                                direction='l')
+        f_r = self._create_hand(f'{entity_id}_hand_fr',
+                                f'{hand_prefix}_forward',
+                                direction='r')
+        b_l = self._create_hand(f'{entity_id}_hand_bl',
+                                f'{hand_prefix}_back',
+                                direction='l')
+        b_r = self._create_hand(f'{entity_id}_hand_br',
+                                f'{hand_prefix}_back',
+                                direction='r')
+        for hand in (f_l, f_r, b_l, b_r):
+            self.dispatcher.add_event(BearEvent('ecs_create', hand))
+            hand.position.tracked_entity = entity_id
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=scientist)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        scientist.add_component(HandInterfaceComponent(self.dispatcher,
+                                                       hand_entities={
+                                                           'forward_l': f_l.id,
+                                                           'forward_r': f_r.id,
+                                                           'back_l': b_l.id,
+                                                           'back_r': b_r.id},
+                                                       hands_offsets={
+                                                           'forward_l': (
+                                                               -2, 5),
+                                                           'forward_r': (0, 5),
+                                                           'back_l': (-3, 4),
+                                                           'back_r': (3, 4)},
+                                                       item_offsets={
+                                                           'forward_l': (0, 0),
+                                                           'forward_r': (6, 0),
+                                                           'back_l': (0, -1),
+                                                           'back_r': (3, 0)},
+                                                       left_item=left_fist.id,
+                                                       right_item=right_fist.id))
+        # AI
+        ai = AIComponent(self.dispatcher,
+                         states={'wait': FighterWaitState(self.dispatcher,
+                                                          enemy_factions=(
+                                                           'police',),
+                                                          combat_state='fight',
+                                                          enemy_perception_distance=50),
+                                 'fight': FighterFistCombatState(self.dispatcher,
+                                                                 enemy_factions=('police',),
+                                                                 enemy_perception_distance=50,
+                                                                 wait_state='wait')
+                                 },
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)

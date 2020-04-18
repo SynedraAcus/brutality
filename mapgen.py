@@ -526,8 +526,8 @@ class LevelManager(metaclass=Singleton):
                                               'Or dead.',
                                               'I can also be killed.',
                                               'But please don\'t do that'))
-        # self.factory.create_entity('bottle_punk', (100, 10))
-        self.factory.create_entity('nunchaku_punk', (150, 30))
+        self.factory.create_entity('scientist_enemy', (100, 10))
+        self.factory.create_entity('scientist_enemy', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
 
 

@@ -298,6 +298,7 @@ class FighterState(AIState):
         self.enemy_perception_distance = 50
         self.walk_direction = (0, 0)
         self.steps_left = 0
+        self.current_closest = None
 
 
 class FighterWaitState(FighterState):
@@ -309,6 +310,7 @@ class FighterWaitState(FighterState):
         self.combat_state = combat_state
 
     def switch_state(self):
+        print(self.owner)
         current_closest = find_closest_enemy(self.owner,
                                              self.enemy_perception_distance,
                                              self.enemy_factions)
@@ -323,11 +325,17 @@ class FighterFistCombatState(FighterState):
     """
     Punch close enemies
     """
+    def __init__(self, *args, wait_state=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait_state = wait_state
+        self.dy_preference = 0.15
+
     def switch_state(self):
         current_closest = find_closest_enemy(self.owner,
-                                             self.perception_distance)
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
         if not current_closest:
-            return self.peaceful_state
+            return self.wait_state
         else:
             # Store enemy entity for future reference
             self.current_closest = current_closest
@@ -338,9 +346,9 @@ class FighterFistCombatState(FighterState):
         dx = self.owner.position.x - self.current_closest.position.x
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 5 <= abs(dx) <= 15 and abs(dy) <= 3:
+        if 4 <= abs(dx) <= 8 and abs(dy) <= 2:
             # If in melee range, attack with right hand
-            return self.owner.hands.use_hand('right')
+            return self.owner.hands.use_hand(choice(('right', 'left')))
         else:
             # walk toward the enemy
             if self.walk_direction != (0, 0) and self.steps_left > 0:
@@ -348,7 +356,7 @@ class FighterFistCombatState(FighterState):
                 self.steps_left -= 1
                 return 0.2
             else:
-                # Recosidering direction
+                # Reconsidering direction
                 self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
                                       randint(4, 7))
                 self.walk_direction = choose_direction(dx, dy,
