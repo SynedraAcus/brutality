@@ -108,11 +108,11 @@ def find_closest_enemy(entity, perception_distance, enemy_factions=None):
     :return:
     """
     if enemy_factions:
-        enemies = list(EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions))
+        enemies = EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions)
     else:
-        enemies = list(EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction))
+        enemies = EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction)
     current_closest = None
     min_dist = None
     for enemy in enemies:
@@ -139,7 +139,7 @@ class AgressorPeacefulState(AIState):
 
     Takes no actions
     """
-    def __init__(self, *args, perception_distance=150, check_delay=0.1,
+    def __init__(self, *args, perception_distance=150, check_delay=0.3,
                  combat_state = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.perception_distance = perception_distance
@@ -527,8 +527,3 @@ class CivilianTalkState(CivilianAIState):
         # should not spawn all phrases at once
         self.next_phrase += 1
         return self.phrase_pause
-
-# Currently they get stuck around the obstacles and tend to start turning around
-# every few steps when on the edge of perception distance. It is probably gonna
-# look much better if they pick a direction, walk it for a few tens of steps,
-# then reconsider. Pretty trivial, but bound to look better
