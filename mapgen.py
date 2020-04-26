@@ -714,16 +714,16 @@ class LevelManager(metaclass=Singleton):
                             kwargs={
                                 'text': 'Use your hands with Q and E\nWith no weapons equipped, you can punch',
                                 'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}),
+                                'lifetime': 8,
+                                'vy': -1}),
                   SpawnItem(item='message',
                             pos=(40, 20),
                             size=(10, 20),
                             kwargs={
                                 'text': 'Jump with spacebar',
                                 'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2
+                                'lifetime': 8,
+                                'vy': -1
                             }),
                   SpawnItem(item='message',
                             pos=(130, 20),
@@ -731,16 +731,16 @@ class LevelManager(metaclass=Singleton):
                             kwargs={
                                 'text': 'Pick up items with Z and C\nWith pistol, you can shoot\nat any distance,\neven offscreen',
                                 'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}),
+                                'lifetime': 8,
+                                'vy': -1}),
                   SpawnItem(item='message',
                             pos=(150, 20),
                             size=(10, 8),
                             kwargs={
                                 'text': 'You can look around with numpad',
                                 'destroy_condition': 'timeout',
-                                'lifetime': 5,
-                                'vy': -2}))
+                                'lifetime': 8,
+                                'vy': -1}))
         self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
         self.factory.create_entity('dept_wall_inner', (0, 0))
