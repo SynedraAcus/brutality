@@ -5,7 +5,7 @@ from random import randint, choice
 
 from bear_hug.bear_utilities import BearECSException, rectangles_collide
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
-    SwitchWidgetComponent, Entity, EntityTracker, CollisionComponent,\
+    Entity, EntityTracker, CollisionComponent, \
     DestructorComponent
 
 

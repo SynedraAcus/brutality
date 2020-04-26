@@ -646,7 +646,6 @@ class LevelManager(metaclass=Singleton):
 
     def _ghetto_expo_hostage(self):
         self.generate_level('ghetto', 'corridor')
-        # TODO: civilian NPC for the ghetto exposition
         self.factory.create_entity('cop_npc', (25, 10),
                                    monologue=('They\'ve besieged a lab\ndown the street',
                                               'No idea what\'s in the lab',

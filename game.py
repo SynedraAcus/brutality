@@ -1,8 +1,9 @@
 #! /usr/bin/env python3.6
 
+import sys
+import traceback
 from argparse import ArgumentParser
 from os import path
-import sys
 
 from bear_hug.bear_hug import BearTerminal, BearLoop
 from bear_hug.bear_utilities import copy_shape
@@ -14,10 +15,10 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
     MenuWidget, MenuItem
 
 from entities import EntityFactory
-from mapgen import LevelManager, restart
-from listeners import ScrollListener, SavingListener, LoadingListener, SpawnItem,\
+from listeners import ScrollListener, SavingListener, LoadingListener, \
     SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
-from plot import Goal, PlotManager
+from mapgen import LevelManager, restart
+from plot import Goal
 from widgets import HitpointBar, ItemWindow
 
 parser = ArgumentParser('A game about beating people')
@@ -262,7 +263,13 @@ else:
 
 
 # Actually starting
-loop.run()
+try:
+    loop.run()
+except Exception as e:
+    # Should the game crash with an unhandled exception, it is logged to the
+    # file
+    print(''.join(traceback.format_exception(*sys.exc_info())),
+          file=open('crash_exception.log', mode='w'))
 
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
@@ -284,7 +291,5 @@ loop.run()
 # TODO: expending and replenishing ammo
 
 # TODO: more items for ghetto stashes
-
-# TODO: interlink demo levels correctly
 
 # TODO: Enemy taunts (in-combat phrases)
