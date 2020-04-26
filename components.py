@@ -1034,9 +1034,10 @@ class HandInterfaceComponent(Component):
                                   (self.owner.widget.width, 5)) and entity.item_behaviour.owning_entity is None:
                 other_item = entity
                 break
-        self.drop(hand)
         if other_item is None:
-            # If there is no item, drop whatever there was and reactivate fist
+            # If there is no item, drop whatever there was right under player's
+            # feet and reactivate fist
+            self.drop(hand, shift=False)
             if hand == 'right':
                 self.right_item = f'fist_{self.owner.id}_right'
                 self.dispatcher.add_event(BearEvent('brut_pick_up',
@@ -1050,7 +1051,9 @@ class HandInterfaceComponent(Component):
                                                      'left',
                                                      self.left_item)))
         else:
-            # Pick up that item
+            # if there is another item, current one is thrown slightly to the
+            # side, and a new one is picked up
+            self.drop(hand)
             other_item.item_behaviour.owning_entity = self.owner
             other_item.hiding.hide()
             self.dispatcher.add_event(BearEvent('play_sound',
@@ -1064,7 +1067,7 @@ class HandInterfaceComponent(Component):
                                                  hand,
                                                  other_item.id)))
 
-    def drop(self, hand='right'):
+    def drop(self, hand='right', shift=True):
         """
         Drop whatever is in the corresponding hand.
 
@@ -1072,15 +1075,23 @@ class HandInterfaceComponent(Component):
         ID, so creating a "Perverted sword of four-handed fisting" or something
         is likely to cause all sorts of problems both to the engine and players'
         sanity), does nothing.
+
+        :param hand: str. Either 'right' or 'left'
+
+        :param shift: str. If True, the item is randomly offset by several chars.
+        If False, it is dropped right under the player. Defaults to True.
         """
         item_id = hand == 'right' and self.right_item or self.left_item
         if 'fist' not in item_id:
             item = EntityTracker().entities[item_id]
             item.item_behaviour.owning_entity = None
             item.hiding.show()
-            item.position.move(self.owner.position.x + randint(-3, 3),
-                               self.owner.position.y + self.owner.widget.height
-                               - item.widget.height + randint(-3, 3))
+            pos = [self.owner.position.x,
+                   self.owner.position.y + self.owner.widget.height - item.widget.height]
+            if shift:
+                pos[0] += randint(-3, 3)
+                pos[1] += randint(-3, 3)
+            item.position.move(*pos)
             item.widget.z_level = item.position.y + item.widget.height
             item.hiding.unhide()
             self.dispatcher.add_event(BearEvent('play_sound', 'item_drop'))

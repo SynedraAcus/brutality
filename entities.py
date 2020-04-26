@@ -1,6 +1,6 @@
 from bear_hug.bear_utilities import copy_shape
 from bear_hug.ecs import WidgetComponent, deserialize_entity, \
-    WalkerCollisionComponent, DecayComponent
+    WalkerCollisionComponent, DecayComponent, SwitchWidgetComponent
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 
