@@ -758,7 +758,7 @@ class EntityFactory:
         nunchaku.add_component(DestructorComponent(self.dispatcher))
         nunchaku.add_component(CharacterHealthComponent(self.dispatcher,
                                                         corpse='nunchaku_punk_corpse',
-                                                        hitpoints=5,
+                                                        hitpoints=7,
                                                         hit_sounds=('punk_hit',
                                                                     'punk_death'),
                                                         death_sounds=('punk_death', )
@@ -831,7 +831,7 @@ class EntityFactory:
         punk.add_component(DestructorComponent(self.dispatcher))
         punk.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='bottle_punk_corpse',
-                                                    hitpoints=5,
+                                                    hitpoints=7,
                                                     hit_sounds=('punk_hit',
                                                                 'punk_death'),
                                                     death_sounds=('punk_death', )))
@@ -1011,7 +1011,7 @@ class EntityFactory:
         # TODO: give scientists their own hit and death sounds
         scientist.add_component(CharacterHealthComponent(self.dispatcher,
                                                          corpse=f'{prefix}_corpse',
-                                                         hitpoints=5,
+                                                         hitpoints=4,
                                                          hit_sounds=(
                                                          'male_dmg',),
                                                          death_sounds=(
@@ -1184,7 +1184,7 @@ class EntityFactory:
                                               vx=vx, vy =vy,
                                               affect_z=False))
         spark.add_component(PowerProjectileCollisionComponent(self.dispatcher,
-                                                              damage=3,
+                                                              damage=1,
                                                               depth=3))
         spark.add_component(DestructorComponent(self.dispatcher))
         return spark
@@ -1328,6 +1328,31 @@ class EntityFactory:
         entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
         entity.add_component(DestructorComponent(self.dispatcher))
         entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        return entity
+
+    def _create_shiv(self, entity_id, owning_entity=None, **kwargs):
+        entity = Entity(entity_id)
+        widget = SwitchingWidget(
+            images_dict={'r': self.atlas.get_element('shiv_r'),
+                         'l': self.atlas.get_element('shiv_l')},
+            initial_image='r')
+        entity.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
+                                    owning_entity=owning_entity,
+                                    spawned_items={'punch': {'r': (-3, -2),
+                                                             'l': (4, -2)}},
+                                    use_delay=0.35,
+                                    item_name='Shiv',
+                                    item_description='A sharpened piece of steel,\none end wrapped in duct\ntape. Good enough for\nstabbing people.'))
+        entity.add_component(HidingComponent(self.dispatcher,
+                                             hide_condition='timeout',
+                                             lifetime=0.25,
+                                             is_working=False,
+                                             should_hide=False))
+        entity.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        entity.add_component(DestructorComponent(self.dispatcher))
+        entity.add_component(SpawnerComponent(self.dispatcher, factory=self))
+        entity.add_component(CollectableBehaviourComponent(self.dispatcher))
         return entity
 
     def _create_nunchaku(self, entity_id, owning_entity=None, **kwargs):

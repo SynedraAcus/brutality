@@ -63,6 +63,13 @@
     "ysize": 9
   },
   {
+    "name": "shiv_icon",
+    "x": 36,
+    "y": 94,
+    "xsize": 14,
+    "ysize": 9
+  },
+  {
     "name": "cop_r_1",
     "x": 40,
     "y": 1,
@@ -165,6 +172,20 @@
     "x": 7,
     "y": 39,
     "xsize": 5,
+    "ysize": 2
+  },
+  {
+    "name": "shiv_r",
+    "x": 5,
+    "y": 69,
+    "xsize": 3,
+    "ysize": 2
+  },
+  {
+    "name": "shiv_l",
+    "x": 9,
+    "y": 69,
+    "xsize": 3,
     "ysize": 2
   },
   {
