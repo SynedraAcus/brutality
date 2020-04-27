@@ -1472,7 +1472,7 @@ class EntityFactory:
                                                             use_delay=0.5,
                                                             use_sound='spark',
                                                             item_name='Spark emitter',
-                                                            item_description='Power source and a weapon\nThis tool can activate items\nby shooting at them, or\ndeactivate enemies (also by\nshooting at them).'))
+                                                            item_description='A tool for activating\nscientific devices.\nAlso usable as a very weak\ngun with infinite ammo.'))
         return entity
 
     def _create_spikebox(self, entity_id, owning_entity=None, **kwargs):
