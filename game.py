@@ -125,7 +125,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['set_bg_sound', 'brut_change_ammo'])
+#dispatcher.register_listener(logger, ['set_bg_sound', 'brut_change_ammo'])
 sound_files = {'step': 'step.wav',
                'shot': 'shot.wav',
                'punch': 'punch.wav',
