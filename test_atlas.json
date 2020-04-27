@@ -614,5 +614,12 @@
     "y": 117,
     "xsize": 15 ,
     "ysize": 4
+  },
+  {
+    "name": "ammo_pickup",
+    "x": 9,
+    "y": 64,
+    "xsize": 3,
+    "ysize": 4
   }
 ]

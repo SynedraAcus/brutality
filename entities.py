@@ -511,6 +511,17 @@ class EntityFactory:
         healer.add_component(DestructorComponent(self.dispatcher))
         return healer
 
+    def _create_ammo_pickup(self, entity_id, **kwargs):
+        e = Entity(entity_id)
+        e.add_component(WidgetComponent(self.dispatcher,
+                                        Widget(*self.atlas.get_element('ammo_pickup'))))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(DestructorComponent(self.dispatcher))
+        e.add_component(AmmoPickupCollisionComponent(self.dispatcher,
+                                                     passable=True,
+                                                     depth=2))
+        return e
+
 ################################################################################
 # CHARACTERS AND HANDS
 ################################################################################

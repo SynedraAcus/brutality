@@ -125,7 +125,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-dispatcher.register_listener(logger, ['set_bg_sound', 'brut_heal'])
+dispatcher.register_listener(logger, ['set_bg_sound', 'brut_change_ammo'])
 sound_files = {'step': 'step.wav',
                'shot': 'shot.wav',
                'punch': 'punch.wav',
@@ -291,6 +291,7 @@ except Exception as e:
 # Stuff like flower pots, small tables, etc; basically things useful for any
 # indoor level
 
+# TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
 # TODO: replenishing ammo
 
 # TODO: more items for ghetto stashes

@@ -396,8 +396,9 @@ class LevelManager(metaclass=Singleton):
                           first_pos[1] + random.randint(-3, 3))
             self.factory.create_entity(first, first_pos)
             self.factory.create_entity(second, second_pos)
-            items = ('bandage', 'nunchaku', 'bottle_launcher', 'pistol')
-            item_probs = (0.4, 0.25, 0.25, 0.1)
+            items = ('ammo_pickup', 'bandage', 'nunchaku',
+                     'bottle_launcher', 'pistol')
+            item_probs = (0.4, 0.3, 0.1, 0.1, 0.1)
             for _ in range(random.randint(1, 3)):
                 roll = random.random()
                 for i, prob in enumerate(item_probs):
@@ -526,8 +527,6 @@ class LevelManager(metaclass=Singleton):
         self.dispatcher.add_event(BearEvent('set_bg_sound', None))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
-        # TODO: remove test items from main menu level
-        self.factory.create_entity('pistol', (25, 40))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('Welcome to the BRUTALITY prototype',
                                               'Try Esc to access menu\nand WASD/arrows to walk',
@@ -742,7 +741,16 @@ class LevelManager(metaclass=Singleton):
                                 'text': 'You can look around with numpad',
                                 'destroy_condition': 'timeout',
                                 'lifetime': 8,
-                                'vy': -1}))
+                                'vy': -1}),
+                  SpawnItem(item='message',
+                            pos=(170, 30),
+                            size=(10, 20),
+                            kwargs={
+                                'text': 'Walk into ammo balls\n(like these)\nto reload your weapons',
+                                'destroy_condition': 'timeout',
+                                'lifetime': 8,
+                                'vy': -1})
+                  )
         self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
         self.factory.create_entity('dept_wall_inner', (0, 0))
@@ -769,6 +777,9 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_fence', (163, 22))
         self.factory.create_entity('dept_fence', (184, 22))
         self.factory.create_entity('dept_fence', (205, 22))
+        self.factory.create_entity('ammo_pickup', (190, 35))
+        self.factory.create_entity('ammo_pickup', (200, 35))
+        self.factory.create_entity('ammo_pickup', (210, 35))
         self.factory.create_entity('dept_wall_inner', (226, 0))
         self.factory.create_entity('dept_wall_inner', (215, 11))
         # Corridor

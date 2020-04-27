@@ -334,6 +334,32 @@ class GrenadeCollisionComponent(CollisionComponent):
                 self.owner.destructor.destroy()
 
 
+class AmmoPickupCollisionComponent(CollisionComponent):
+    """
+    A collision component for ammo pickup.
+
+    If collided into by an entity with hands, check whether this entity holds
+    an item that requires ammo. If it does, and if that item is not on full
+    ammo, recharges the item, emits the appropriate event and self-destructs.
+    """
+    def collided_by(self, other):
+        # No sense instantiating entity tracker three times for as many entities
+        tracker = EntityTracker()
+        entity = tracker.entities[other]
+        if hasattr(entity, 'hands'):
+            left_item = tracker.entities[entity.hands.left_item]
+            right_item = tracker.entities[entity.hands.right_item]
+            used = False
+            if left_item.item_behaviour.max_ammo and left_item.item_behaviour.ammo < left_item.item_behaviour.max_ammo:
+                left_item.item_behaviour.ammo = left_item.item_behaviour.max_ammo
+                used = True
+            if right_item.item_behaviour.max_ammo and right_item.item_behaviour.ammo < right_item.item_behaviour.max_ammo:
+                right_item.item_behaviour.ammo = right_item.item_behaviour.max_ammo
+                used = True
+            if used:
+                self.owner.destructor.destroy()
+
+
 class GrenadeComponent(Component):
     """
     The grenade behaviour.
@@ -1149,8 +1175,8 @@ class ItemBehaviourComponent(Component):
         super().__init__(*args, name='item_behaviour', **kwargs)
         self.single_use = single_use
         self.max_ammo = max_ammo
-        if isinstance(max_ammo, int):
-            self.ammo = self.max_ammo
+        self._ammo = None
+        self.ammo = max_ammo
         self.use_sound = use_sound
         self.is_destroying = False
         self.grab_offset = grab_offset
@@ -1164,6 +1190,20 @@ class ItemBehaviourComponent(Component):
         self._future_owner = None
         self.owning_entity = owning_entity
         self.dispatcher.register_listener(self, ('brut_use_item', 'tick'))
+
+    @property
+    def ammo(self):
+        return self._ammo
+
+    @ammo.setter
+    def ammo(self, value):
+        self._ammo = value
+        if value is not None:
+            if value > self.max_ammo:
+                raise ValueError('Setting ammo for more than maximum')
+            if self.owner:
+                self.dispatcher.add_event(BearEvent('brut_change_ammo',
+                                                (self.owner.id, self._ammo)))
 
     @property
     def owning_entity(self):
@@ -1257,12 +1297,10 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     def use_item(self):
         if self.max_ammo:
             if self.ammo == 0:
+                # TODO: sound or something to indicate a lack of ammo
                 return
             else:
                 self.ammo -= 1
-                self.dispatcher.add_event(BearEvent('brut_change_ammo',
-                                                    (self.owner.id, self.ammo)))
-                # TODO: sound or something to indicate a lack of ammo
         super().use_item()
         direction = self.owning_entity.position.direction
         # This component just passes the direction and Z, and expects projectile
