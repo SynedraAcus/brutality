@@ -7,7 +7,7 @@ from collections import namedtuple
 from json import dump, load
 
 from bear_hug.bear_utilities import BearLayoutException, rectangles_collide, \
-    BearECSException, copy_shape
+    copy_shape
 from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
@@ -484,13 +484,18 @@ class ItemDescriptionListener(Listener):
         if event.event_type == 'brut_show_items' and not self.is_showing:
             self.is_showing = True
             # Generating text
-            e = EntityTracker().entities[self.tracked_entity]
-            left = EntityTracker().entities[e.hands.left_item]
-            right = EntityTracker().entities[e.hands.right_item]
-            text = self.text_mask.format(left.item_behaviour.item_name,
-                                         left.item_behaviour.item_description,
-                                         right.item_behaviour.item_name,
-                                         right.item_behaviour.item_description)
+            try:
+                e = EntityTracker().entities[self.tracked_entity]
+                left = EntityTracker().entities[e.hands.left_item]
+                right = EntityTracker().entities[e.hands.right_item]
+                text = self.text_mask.format(left.item_behaviour.item_name,
+                                             left.item_behaviour.item_description,
+                                             right.item_behaviour.item_name,
+                                             right.item_behaviour.item_description)
+            except KeyError:
+                # Probably tried to read the inventory from nonexistent entity
+                # Ie the cop that was killed
+                text = 'Corpses don\'t have any\nitems.'
             chars = [[' ' for _ in range(28)] for _ in range(23)]
             colors = copy_shape(chars, '#000000')
             self.widget = TypingLabelWidget(chars, colors,
