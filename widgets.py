@@ -20,7 +20,7 @@ class HitpointBar(Layout):
     Subscribes to brut_damage and brut_heal and tracks all events involving the
     health of a target entity
     """
-    def __init__(self, target_entity=None, max_hp=10,
+    def __init__(self, target_entity=None, max_hp=15,
                  width=43, height=3):
         chars = [['\u2591' for x in range(width)] for y in range(height)]
         colors = [['green' for x in range(width)] for y in range(height)]

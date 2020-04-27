@@ -558,7 +558,7 @@ class EntityFactory:
                                                   faction='police'))
         cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
                                                           corpse='cop_corpse',
-                                                          hitpoints=10,
+                                                          hitpoints=15,
                                                           hit_sounds=('cop_hit', ),
                                                           death_sounds=('cop_death', )))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
@@ -860,9 +860,9 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
-        fist = self._create_fist(f'{entity_id}_fist',
+        shiv = self._create_shiv(f'{entity_id}_shiv',
                                  owning_entity=punk)
-        self.dispatcher.add_event(BearEvent('ecs_create', fist))
+        self.dispatcher.add_event(BearEvent('ecs_create', shiv))
         launcher = self._create_bottle_launcher(f'{entity_id}_bottle_launcher',
                                                 owning_entity=punk)
         self.dispatcher.add_event(BearEvent('ecs_create', launcher))
@@ -882,7 +882,7 @@ class EntityFactory:
                                                           'forward_r': (5, 1),
                                                           'back_l': (0, 0),
                                                           'back_r': (6, 0)},
-                                                      left_item=fist.id,
+                                                      left_item=shiv.id,
                                                       right_item=launcher.id))
         return punk
 
@@ -1125,12 +1125,13 @@ class EntityFactory:
         bullet_entity.add_component(PositionComponent(self.dispatcher, vx=vx,
                                                       affect_z=False))
         bullet_entity.add_component(ProjectileCollisionComponent(self.dispatcher,
-                                                                 damage=1,
-                                                                 depth=3))
+                                                                 damage=5,
+                                                                 depth=2))
         bullet_entity.add_component(DestructorComponent(self.dispatcher))
         return bullet_entity
 
-    def _create_punch(self, entity_id, direction='r', z_level=10, **kwargs):
+    def _create_punch(self, entity_id, direction='r', z_level=10, damage=3,
+                      **kwargs):
         """
         Send a punch
         :param entity_id:
@@ -1150,7 +1151,7 @@ class EntityFactory:
         punch.add_component(PositionComponent(self.dispatcher, vx=vx,
                                               affect_z=False))
         punch.add_component(ProjectileCollisionComponent(self.dispatcher,
-                                                         damage=3,
+                                                         damage=damage,
                                                          depth=3))
         punch.add_component(DestructorComponent(self.dispatcher))
         punch.add_component(DecayComponent(self.dispatcher,
@@ -1317,6 +1318,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (-3, -2),
                                                              'l': (2, -2)}},
+                                    damage=3,
                                     use_delay=0.35,
                                     item_name='Fist',
                                     item_description='Your own hand in punch mode.\nIt is not gonna break down\nany walls, but at least it\'s\nalways with you.'))
@@ -1342,6 +1344,7 @@ class EntityFactory:
                                     spawned_items={'punch': {'r': (-3, -2),
                                                              'l': (4, -2)}},
                                     use_delay=0.35,
+                                    damage=5,
                                     item_name='Shiv',
                                     item_description='A sharpened piece of steel,\none end wrapped in duct\ntape. Good enough for\nstabbing people.'))
         entity.add_component(HidingComponent(self.dispatcher,
@@ -1367,6 +1370,7 @@ class EntityFactory:
                                     owning_entity=owning_entity,
                                     spawned_items={'punch': {'r': (8, -1),
                                                              'l': (-1, -2)}},
+                                    damage=5,
                                     grab_offset={'r': (0, -1),
                                                  'l': (0, -1)},
                                     use_delay=0.6,

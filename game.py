@@ -292,8 +292,5 @@ except Exception as e:
 # indoor level
 
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
-# TODO: replenishing ammo
-
-# TODO: more items for ghetto stashes
 
 # TODO: Enemy taunts (in-combat phrases)

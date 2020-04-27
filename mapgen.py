@@ -396,10 +396,10 @@ class LevelManager(metaclass=Singleton):
                           first_pos[1] + random.randint(-3, 3))
             self.factory.create_entity(first, first_pos)
             self.factory.create_entity(second, second_pos)
-            items = ('ammo_pickup', 'bandage', 'nunchaku',
+            items = ('ammo_pickup', 'bandage', 'nunchaku', 'shiv',
                      'bottle_launcher', 'pistol')
-            item_probs = (0.4, 0.3, 0.1, 0.1, 0.1)
-            for _ in range(random.randint(1, 3)):
+            item_probs = (0.3, 0.3, 0.1, 0.1, 0.1, 0.1)
+            for _ in range(random.randint(3, 5)):
                 roll = random.random()
                 for i, prob in enumerate(item_probs):
                     roll -= prob

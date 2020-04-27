@@ -1290,9 +1290,11 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     """
     def __init__(self, *args, spawned_items={'bullet': {'r': (0, 0),
                                                         'l': (0, 0)}},
+                 damage=3,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.spawned_items = spawned_items
+        self.damage=damage
 
     def use_item(self):
         if self.max_ammo:
@@ -1309,7 +1311,8 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
             self.owner.spawner.spawn(item,
                                      self.spawned_items[item][direction],
                                      direction=direction,
-                                     z_level=self.owning_entity.widget.z_level)
+                                     z_level=self.owning_entity.widget.z_level,
+                                     damage=self.damage)
 
 
     def __repr__(self):
