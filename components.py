@@ -1138,6 +1138,7 @@ class ItemBehaviourComponent(Component):
 
     def __init__(self, *args, owning_entity=None,
                  single_use = False,
+                 max_ammo = None,
                  grab_offset = {'r': (0, 0),
                                 'l': (0, 0)},
                  item_name = 'PLACEHOLDER',
@@ -1147,6 +1148,9 @@ class ItemBehaviourComponent(Component):
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
         self.single_use = single_use
+        self.max_ammo = max_ammo
+        if isinstance(max_ammo, int):
+            self.ammo = self.max_ammo
         self.use_sound = use_sound
         self.is_destroying = False
         self.grab_offset = grab_offset
@@ -1251,6 +1255,14 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
         self.spawned_items = spawned_items
 
     def use_item(self):
+        if self.max_ammo:
+            if self.ammo == 0:
+                return
+            else:
+                self.ammo -= 1
+                self.dispatcher.add_event(BearEvent('brut_change_ammo',
+                                                    (self.owner.id, self.ammo)))
+                # TODO: sound or something to indicate a lack of ammo
         super().use_item()
         direction = self.owning_entity.position.direction
         # This component just passes the direction and Z, and expects projectile
@@ -1260,6 +1272,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
                                      self.spawned_items[item][direction],
                                      direction=direction,
                                      z_level=self.owning_entity.widget.z_level)
+
 
     def __repr__(self):
         d = loads(super().__repr__())

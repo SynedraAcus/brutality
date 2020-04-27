@@ -66,6 +66,7 @@ dispatcher.register_event_type('brut_heal') # EntityID, value (int)
 dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 dispatcher.register_event_type('brut_use_hand') #hand entity ID
 dispatcher.register_event_type('brut_pick_up') # owner entity ID, which hand (left or right), picked up entity ID
+dispatcher.register_event_type('brut_change_ammo') # Item entity ID, new ammo value
 # View operations
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus') # Entity ID
@@ -93,10 +94,12 @@ t.add_widget(Widget(*atlas.get_element('hud_bg')),
 hp_bar = HitpointBar(target_entity='cop_1')
 dispatcher.register_listener(hp_bar, ('brut_damage', 'brut_heal'))
 left_item_window = ItemWindow('cop_1', 'left', atlas)
-dispatcher.register_listener(left_item_window, 'brut_pick_up')
+dispatcher.register_listener(left_item_window,
+                             ('brut_pick_up', 'brut_change_ammo'))
 t.add_widget(left_item_window, (1, 51), layer=2)
 right_item_window = ItemWindow('cop_1', 'right', atlas)
-dispatcher.register_listener(right_item_window, 'brut_pick_up')
+dispatcher.register_listener(right_item_window,
+                             ('brut_pick_up', 'brut_change_ammo'))
 t.add_widget(right_item_window, (66, 51), layer=2)
 # Pseudo-events to let HUD know about the default fists
 dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'left', 'fist_pseudo')))
@@ -288,7 +291,7 @@ except Exception as e:
 # Stuff like flower pots, small tables, etc; basically things useful for any
 # indoor level
 
-# TODO: expending and replenishing ammo
+# TODO: replenishing ammo
 
 # TODO: more items for ghetto stashes
 

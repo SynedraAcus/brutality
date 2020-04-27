@@ -6,12 +6,11 @@ from json import dumps
 from math import sqrt
 from random import choice, uniform
 
-from bear_hug.bear_utilities import shapes_equal, copy_shape, BearException, \
-    generate_box, BearLayoutException
+from bear_hug.bear_utilities import copy_shape
+from bear_hug.ecs import EntityTracker
 from bear_hug.event import BearEvent
-from bear_hug.widgets import Animation, Widget, Label, Layout,\
+from bear_hug.widgets import Animation, Widget, Label, Layout, \
     SimpleAnimationWidget
-from bear_hug.bear_hug import BearTerminal
 
 
 class HitpointBar(Layout):
@@ -70,14 +69,41 @@ class ItemWindow(Widget):
         super().__init__(chars, colors)
         self.target_entity = target_entity
         self.target_hand = target_hand
+        self.current_item = None
         self.atlas = atlas
 
     def on_event(self, event):
         if event.event_type == 'brut_pick_up':
             if event.event_value[0] == self.target_entity and event.event_value[1] == self.target_hand:
+                self.current_item = event.event_value[2]
                 icon_id = f"{event.event_value[2].split('_')[0]}_icon"
                 self.chars, self.colors = self.atlas.get_element(icon_id)
+                try:
+                    entity = EntityTracker().entities[event.event_value[2]]
+                    if entity.item_behaviour.max_ammo:
+                        self.draw_ammo(entity.item_behaviour.ammo)
+                except KeyError:
+                    # In case of first tick pseudoevents which use invalid item
+                    # IDs, skip ammo drawing
+                    pass
                 self.terminal.update_widget(self)
+        if event.event_type == 'brut_change_ammo' and \
+                event.event_value[0] == self.current_item:
+            self.draw_ammo(EntityTracker().entities[event.event_value[0]].item_behaviour.ammo)
+            self.terminal.update_widget(self)
+
+    def draw_ammo(self, ammo_value):
+        """
+        Draw ammo marks on right side of the widget
+        :param ammo_value:
+        :return:
+        """
+        for i in range(ammo_value):
+            self.chars[i][13] = 'O'
+            self.colors[i][13] = '#ffffff'
+        for i in range(ammo_value,
+                       9):
+            self.chars[i][13] = ' '
 
 
 class TypingLabelWidget(Layout):

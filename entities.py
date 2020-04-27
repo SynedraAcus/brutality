@@ -1278,6 +1278,7 @@ class EntityFactory:
                                                          'l': (-2, 0)},
                                                'muzzle_flash': {'r': (5, -1),
                                                                'l': (-2, -1)}},
+                                max_ammo=6,
                                 use_sound='shot',
                                 use_delay = 0.5,
                                 item_name='Service pistol',

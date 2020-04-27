@@ -526,6 +526,8 @@ class LevelManager(metaclass=Singleton):
         self.dispatcher.add_event(BearEvent('set_bg_sound', None))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
+        # TODO: remove test items from main menu level
+        self.factory.create_entity('pistol', (25, 40))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('Welcome to the BRUTALITY prototype',
                                               'Try Esc to access menu\nand WASD/arrows to walk',
