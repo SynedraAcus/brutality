@@ -322,7 +322,7 @@ class FighterWaitState(FighterState):
 
 class FighterFistCombatState(FighterState):
     """
-    Punch close enemies
+    A combat state intended for fist-only fighter
     """
     def __init__(self, *args, wait_state=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -348,6 +348,54 @@ class FighterFistCombatState(FighterState):
         if 4 <= abs(dx) <= 8 and abs(dy) <= 2:
             # If in melee range, attack with right hand
             return self.owner.hands.use_hand(choice(('right', 'left')))
+        else:
+            # walk toward the enemy
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
+            else:
+                # Reconsidering direction
+                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
+                                      randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy,
+                                                       self.dy_preference)
+                return 0
+
+
+class FighterGunCombatState(FighterState):
+    """
+    A combat state for a fighter with a gun in right hand and nothing or a short
+    range melee weapon in the left.
+    """
+    def __init__(self, *args, wait_state=None, melee_range=(4, 8), **kwargs):
+        super().__init__(*args, **kwargs)
+        self.wait_state = wait_state
+        self.melee_range=melee_range
+        self.dy_preference = 0.15
+
+    def switch_state(self):
+        current_closest = find_closest_enemy(self.owner,
+                                             self.enemy_perception_distance,
+                                             self.enemy_factions)
+        if not current_closest:
+            return self.wait_state
+        else:
+            # Store enemy entity for future reference
+            self.current_closest = current_closest
+
+    def take_action(self):
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        if abs(dy) <= 2:
+            # Attack if within dy range. Melee from nearby, ranged at distance
+            if self.melee_range[0] <= abs(dx) <= self.melee_range[1]:
+                return self.owner.hands.use_hand('left')
+            else:
+                return self.owner.hands.use_hand('right')
         else:
             # walk toward the enemy
             if self.walk_direction != (0, 0) and self.steps_left > 0:
@@ -527,3 +575,5 @@ class CivilianTalkState(CivilianAIState):
         # should not spawn all phrases at once
         self.next_phrase += 1
         return self.phrase_pause
+
+# TODO: refactor AI states to remove boilerplate

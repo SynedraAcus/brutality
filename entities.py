@@ -6,7 +6,8 @@ from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
 
 from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState, \
     BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState, \
-    CivilianTalkState, FighterFistCombatState, FighterWaitState
+    CivilianTalkState, FighterFistCombatState, FighterWaitState, \
+    FighterGunCombatState
 from background import tile_randomly, generate_bg, ghetto_transition, \
     dept_transition, lab_transition
 from components import *
@@ -1013,7 +1014,7 @@ class EntityFactory:
                                                          corpse=f'{prefix}_corpse',
                                                          hitpoints=4,
                                                          hit_sounds=(
-                                                         'male_dmg',),
+                                                             'male_dmg',),
                                                          death_sounds=(
                                                              'punk_death',)))
         # Creating hand entities
@@ -1032,12 +1033,24 @@ class EntityFactory:
         for hand in (f_l, f_r, b_l, b_r):
             self.dispatcher.add_event(BearEvent('ecs_create', hand))
             hand.position.tracked_entity = entity_id
-        left_fist = self._create_fist(f'fist_{entity_id}_left',
+        left_item = self._create_fist(f'fist_{entity_id}_left',
                                       owning_entity=scientist)
-        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
-        right_fist = self._create_fist(f'fist_{entity_id}_right',
-                                       owning_entity=scientist)
-        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
+        self.dispatcher.add_event(BearEvent('ecs_create', left_item))
+        if prefix == 'scientist_m2':
+            right_item = self._create_fist(f'fist_{entity_id}_right',
+                                           owning_entity=scientist)
+            fight_state = FighterFistCombatState(self.dispatcher,
+                                                 enemy_factions=('police',),
+                                                 enemy_perception_distance=50,
+                                                 wait_state='wait')
+        else:
+            right_item = self._create_emitter(f'emitter_{entity_id}',
+                                              owning_entity=scientist)
+            fight_state = FighterGunCombatState(self.dispatcher,
+                                                enemy_factions=('police', ),
+                                                enemy_perception_distance=50,
+                                                wait_state='wait')
+        self.dispatcher.add_event(BearEvent('ecs_create', right_item))
         scientist.add_component(HandInterfaceComponent(self.dispatcher,
                                                        hand_entities={
                                                            'forward_l': f_l.id,
@@ -1055,19 +1068,17 @@ class EntityFactory:
                                                            'forward_r': (6, 0),
                                                            'back_l': (0, -1),
                                                            'back_r': (3, 0)},
-                                                       left_item=left_fist.id,
-                                                       right_item=right_fist.id))
+                                                       left_item=left_item.id,
+                                                       right_item=right_item.id))
         # AI
+
         ai = AIComponent(self.dispatcher,
                          states={'wait': FighterWaitState(self.dispatcher,
                                                           enemy_factions=(
                                                            'police',),
                                                           combat_state='fight',
                                                           enemy_perception_distance=50),
-                                 'fight': FighterFistCombatState(self.dispatcher,
-                                                                 enemy_factions=('police',),
-                                                                 enemy_perception_distance=50,
-                                                                 wait_state='wait')
+                                 'fight': fight_state
                                  },
                          current_state='wait',
                          owner=scientist)
