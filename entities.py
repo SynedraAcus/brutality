@@ -772,7 +772,7 @@ class EntityFactory:
         nunchaku.add_component(ai)
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
-        weapon = self._create_nunchaku(f'{entity_id}_nunchaku', owning_entity=nunchaku)
+        weapon = self._create_nunchaku(f'nunchaku_{entity_id}', owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
         fist = self._create_fist(f'fist_{entity_id}',
                                        owning_entity=nunchaku)
@@ -859,10 +859,10 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
-        shiv = self._create_shiv(f'{entity_id}_shiv',
+        shiv = self._create_shiv(f'shiv_{entity_id}',
                                  owning_entity=punk)
         self.dispatcher.add_event(BearEvent('ecs_create', shiv))
-        launcher = self._create_bottle_launcher(f'{entity_id}_bottle_launcher',
+        launcher = self._create_bottle_launcher(f'bottle_launcher_{entity_id}',
                                                 owning_entity=punk)
         self.dispatcher.add_event(BearEvent('ecs_create', launcher))
         punk.add_component(HandInterfaceComponent(self.dispatcher,
