@@ -8,6 +8,43 @@ from bear_hug.ecs import Component, EntityTracker
 from bear_hug.event import BearEvent
 
 
+def find_closest_enemy(entity, perception_distance, enemy_factions=None):
+    """
+    Finds closest enemy for leaving peaceful states or attack targeting.
+    :param entity: Entity. who is looking
+
+    :param perception_distance: Int. how far do they see
+
+    :param enemy_factions: None or an iterable of str. If not None, taken as a
+    list of enemy factions. If None, any different faction is treated as an enemy
+
+    :return:
+    """
+    if enemy_factions:
+        enemies = EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions)
+    else:
+        enemies = EntityTracker().filter_entities(
+            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction)
+    current_closest = None
+    min_dist = None
+    for enemy in enemies:
+        dx = entity.position.x - enemy.position.x
+        dy = entity.position.y - enemy.position.y
+        dist = sqrt(dx ** 2 + dy ** 2)
+        if (not min_dist or min_dist > dist) \
+                and dist < perception_distance:
+            current_closest = enemy
+    return current_closest
+
+
+def choose_direction(dx, dy, dy_preference):
+    dx_prob = abs(dx) / (abs(dx) + abs(dy)) - dy_preference
+    dy_prob = abs(dy) / (abs(dx) + abs(dy)) - dy_preference
+    return (-dx // abs(dx) if random() < dx_prob and dx_prob > 0 else 0,
+            -dy // abs(dy) if 0 < dy_prob < 1 - random() else 0)
+
+
 class AIComponent(Component):
     """
     A component responsible for wrapping the AI finite state machine.
@@ -70,10 +107,36 @@ class AIState:
     It can address the entity it controls as self.owner, similar to the
     components. Unlike the components, though, it does not add itself to the
     owner's __dict__
+
+    :param owner: Entity this state belongs to. Defaults to None
+
+    :param enemy_factions: factions this state treats like enemies. Setting this
+    to None makes it treat **ALL** factions except their own as such; to create
+    a state without any enemies, set this to nonexistent faction ID.
+    Defaults to None.
+
+    :param enemy_perception_distance: distance, in chars, at which enemies are
+    detected. Defaults to 50.
+
+    :param player_id: Entity ID for player character, used in things like talks.
+    Defaults to 'cop_1'
+
+    :param player_perception_distance: distance, in chars, at which player
+    character is detected. Defaults to 50.
     """
-    def __init__(self, dispatcher, owner=None):
+    def __init__(self, dispatcher, owner=None,
+                 enemy_factions=None,
+                 enemy_perception_distance=50,
+                 player_id='cop_1',
+                 player_perception_distance=50,
+                 current_closest=None):
         self.dispatcher = dispatcher
         self.owner = owner
+        self.enemy_factions = enemy_factions
+        self.enemy_perception_distance = enemy_perception_distance
+        self.player_id = player_id
+        self.player_perception_distance = player_perception_distance
+        self.current_closest = current_closest
 
     def take_action(self):
         """
@@ -93,399 +156,85 @@ class AIState:
         raise NotImplementedError('AIState.switch_state should be overridden')
 
 
-################################################################################
-# Agressor types: attack everyone with a different faction
-################################################################################
-
-def find_closest_enemy(entity, perception_distance, enemy_factions=None):
+class WaitAIState(AIState):
     """
-    Finds closest enemy for leaving peaceful states or attack targeting.
-    :param entity: Entity. who is looking
+    A state that does nothing and waits for either player or enemies to arrive.
 
-    :param perception_distance: Int. how far do they see
+    Upon that happening, it switches to the corresponding state (if set). If the
+    state is not set (default), the check doesn't happen. If both states are
+    set, enemy presence is checked first; if an enemy is detected, enemy_arrival
+    state is activated immediately without any attempts to check whether the
+    player is around.
 
-    :param enemy_factions: None or an iterable of str. If not None, taken as a list of enemy factions. If None, any different faction is treated as an enemy.
-    :return:
+    :param player_arrival_state: str or None. If not None, `switch_state`
+    returns this when player character is within `player_perception_distance`
+    chars.
+
+    :param enemy_arrival_state: str or None. If not None, `switch_state` returns
+    this when at least one enemy is within `enemy_perception_distance` chars.
+
+    :param check_delay: float. Time, in seconds, between two checks for enemy or
+    player presence.
     """
-    if enemy_factions:
-        enemies = EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions)
-    else:
-        enemies = EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction)
-    current_closest = None
-    min_dist = None
-    for enemy in enemies:
-        dx = entity.position.x - enemy.position.x
-        dy = entity.position.y - enemy.position.y
-        dist = sqrt(dx ** 2 + dy ** 2)
-        if (not min_dist or min_dist > dist) \
-                and dist < perception_distance:
-            current_closest = enemy
-    return current_closest
-
-
-def choose_direction(dx, dy, dy_preference):
-    dx_prob = abs(dx) / (abs(dx) + abs(dy)) - dy_preference
-    dy_prob = abs(dy) / (abs(dx) + abs(dy)) - dy_preference
-    return (-dx // abs(dx) if random() < dx_prob and dx_prob > 0 else 0,
-            -dy // abs(dy) if 0 < dy_prob < 1 - random() else 0)
-
-
-class AgressorPeacefulState(AIState):
-    """
-    Switches to AgressorCombatState if there is somebody to attack within
-    perception distance.
-
-    Takes no actions
-    """
-    def __init__(self, *args, perception_distance=150, check_delay=0.3,
-                 combat_state = None, **kwargs):
+    def __init__(self, *args,
+                 player_arrival_state=None,
+                 enemy_arrival_state=None,
+                 check_delay=0.1,
+                 **kwargs):
         super().__init__(*args, **kwargs)
-        self.perception_distance = perception_distance
+        if player_arrival_state and not isinstance(player_arrival_state, str):
+            raise TypeError(f'{type(player_arrival_state)} used instead of str for WaitAIState')
+        if enemy_arrival_state and not isinstance(enemy_arrival_state, str):
+            raise TypeError(f'{type(enemy_arrival_state)} used instead of str for WaitAIState')
+        self.player_arrival_state = player_arrival_state
+        self.enemy_arrival_state = enemy_arrival_state
         self.check_delay = check_delay
-        self.combat_state = combat_state
-
-    def switch_state(self):
-        current_closest = find_closest_enemy(self.owner,
-                                             self.perception_distance)
-        if current_closest:
-            # Set combat music
-            # TODO: some fadeout between this and previous bg
-            # Maybe a general thing with bg sound switches?
-            self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
-            return self.combat_state
 
     def take_action(self):
         return self.check_delay
 
-
-class AgressorCombatState(AIState):
-    """
-    A base class for agressor combat states.
-
-    Switches to a peaceful state when there is nobody to fight, but expects
-    child classes to define ``take_action``
-
-    :param peaceful_state: str. State to switch to when there is nobody to fight
-
-    :param perception_distance: int. how far does he see, in chars
-
-    :param melee_range: 2-tuple of ints Minimum and maximum dx at which melee is
-    attempted. Wnen ``abs(dx)<melee_range[0]``, tries to walk away
-
-    :param dy_preference: float in range (0; 1). Whether to change dx, dy or
-    both is determined randomly based on their ratio. This number is added to
-    the probability of dx change, since most combat items attack horizontally
-    """
-    def __init__(self, *args, peaceful_state=None,
-                 perception_distance=150, melee_range=(10, 15),
-                 dy_preference = 0.15,
-                 **kwargs):
-        super().__init__(*args, **kwargs)
-        self.peaceful_state = peaceful_state
-        self.perception_distance = perception_distance
-        self.current_closest = None
-        self.melee_range = melee_range
-        self.dy_preference = 0.15
-        self.walk_direction = (0, 0)
-        self.steps_left = 0
-        self.dispatcher.register_listener(self, 'ecs_collision')
-
     def switch_state(self):
-        """
-        Similar to AgressorPeacefulState, except the other way around
-
-        :return:
-        """
-        current_closest = find_closest_enemy(self.owner,
-                                             self.perception_distance)
-        if not current_closest:
-            return self.peaceful_state
-        else:
-            # Store enemy entity for future reference
-            self.current_closest = current_closest
-
-    def on_event(self, event):
-        if event.event_type == 'ecs_collision' and event.event_value[0] == self.owner.id:
-            self.walk_direction = (randint(-1, 1), randint(-1, 1))
-            self.steps_left = randint(4, 7)
+        if self.enemy_arrival_state:
+            self.current_closest = find_closest_enemy(self.owner,
+                                                      self.enemy_perception_distance,
+                                                      self.enemy_factions)
+            if self.current_closest:
+                return self.enemy_arrival_state
+        if self.player_arrival_state:
+            player = EntityTracker().entities[self.player_id]
+            dx = player.position.x - self.owner.position.x
+            dy = player.position.y - self.owner.position.y
+            dist = sqrt(dx ** 2 + dy ** 2)
+            if dist <= self.player_perception_distance:
+                return self.player_arrival_state
+        return None
 
 
-class NunchakuAgressorCombatState(AgressorCombatState):
+class RunawayAIState(AIState):
     """
-    When there is an enemy in nunchaku range, tries to whack them with right
-    item
+    A state for running away from enemies.
+
+    :param wait_state: str. A wait state to which this switches when no enemies
+    are nearby. Cannot be set to None because otherwise this state can never be
+    left.
+
+    :param step_delay: float. A time it takes to make one step.
     """
-
-    def take_action(self):
-        # On every tick except the first after it got switched in,
-        # self.current_closest is freshly populated by switch.state.
-        # This check makes sure it's not trying to attack None on the 1st tick
-        if not self.current_closest:
-            return 0
-        dx = self.owner.position.x - self.current_closest.position.x
-        dy = self.owner.position.y - self.current_closest.position.y
-        self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 2:
-            # If in melee range, attack with right hand
-            return self.owner.hands.use_hand('right')
-        else:
-            # Correction for the range necessary to use nunchaku
-            dx -= self.melee_range[0] * dx//abs(dx) if dx != 0 else 0
-            if self.walk_direction != (0, 0) and self.steps_left > 0:
-                self.owner.position.walk(self.walk_direction)
-                self.steps_left -= 1
-                return 0.2
-            else:
-                # Recosidering direction
-                self.steps_left = min(abs(dx)+1, abs(dy)+1, randint(4, 7))
-                self.walk_direction = choose_direction(dx, dy, self.dy_preference)
-                return 0
-
-
-class BottleAgressorCombatState(AgressorCombatState):
-    """
-    Switches to a peaceful state when there is nobody to fight
-
-    When there is, it tries to either throw bottle from the right hand or
-    fight in melee with left hand (presumably a fist)
-    """
-    def take_action(self):
-        # On every tick except the first after it got switched in,
-        # self.current_closest is freshly populated by switch.state.
-        # This check makes sure it's not trying to attack None on the 1st tick
-        if not self.current_closest:
-            return 0
-        dx = self.owner.position.x - self.current_closest.position.x
-        dy = self.owner.position.y - self.current_closest.position.y
-        self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 30 <= abs(dx) <= 40 and abs(dy) <= 3:
-            return self.owner.hands.use_hand('right')
-        elif self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(dy) <= 2:
-            return self.owner.hands.use_hand('left')
-        self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if self.melee_range[0] <= abs(dx) <= self.melee_range[1] and abs(
-                dy) <= 1:
-            # If in melee range, attack with right hand
-            return self.owner.hands.use_hand('right')
-        else:
-            if self.walk_direction != (0, 0) and self.steps_left > 0:
-                self.owner.position.walk(self.walk_direction)
-                self.steps_left -= 1
-                return 0.2
-            else:
-                # Recosidering direction
-                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
-                                      randint(4, 7))
-                self.walk_direction = choose_direction(dx, dy,
-                                                       self.dy_preference)
-                return 0
-
-
-################################################################################
-# Fighter types: attack only target faction
-# Ignore everything else, but non-enemy behaviours can be extended later
-################################################################################
-
-
-class FighterState(AIState):
-    def __init__(self, *args,
-                 enemy_factions=None, enemy_perception_distance=50,
-                 **kwargs):
+    def __init__(self, *args, wait_state=None, step_delay=0.2, **kwargs):
         super().__init__(*args, **kwargs)
-        self.enemy_factions = enemy_factions
-        self.enemy_perception_distance = 50
-        self.walk_direction = (0, 0)
-        self.steps_left = 0
-        self.current_closest = None
-
-
-class FighterWaitState(FighterState):
-    """
-    Wait for a valid target
-    """
-    def __init__(self, *args, combat_state='fight', **kwargs):
-        super().__init__(*args, **kwargs)
-        self.combat_state = combat_state
-
-    def switch_state(self):
-        current_closest = find_closest_enemy(self.owner,
-                                             self.enemy_perception_distance,
-                                             self.enemy_factions)
-        if current_closest:
-            return self.combat_state
-
-    def take_action(self):
-        return 0.2
-
-
-class FighterFistCombatState(FighterState):
-    """
-    A combat state intended for fist-only fighter
-    """
-    def __init__(self, *args, wait_state=None, **kwargs):
-        super().__init__(*args, **kwargs)
+        if not isinstance(wait_state, str):
+            raise TypeError(f'{type(wait_state)} used instead of str for RunawayAIState')
         self.wait_state = wait_state
-        self.dy_preference = 0.15
+        self.step_delay = step_delay
 
     def switch_state(self):
-        current_closest = find_closest_enemy(self.owner,
+        self.current_closest = find_closest_enemy(self.owner,
                                              self.enemy_perception_distance,
                                              self.enemy_factions)
-        if not current_closest:
+        if self.current_closest:
+            return None
+        else:
             return self.wait_state
-        else:
-            # Store enemy entity for future reference
-            self.current_closest = current_closest
-
-    def take_action(self):
-        if not self.current_closest:
-            return 0
-        dx = self.owner.position.x - self.current_closest.position.x
-        dy = self.owner.position.y - self.current_closest.position.y
-        self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if 4 <= abs(dx) <= 8 and abs(dy) <= 2:
-            # If in melee range, attack with right hand
-            return self.owner.hands.use_hand(choice(('right', 'left')))
-        else:
-            # walk toward the enemy
-            if self.walk_direction != (0, 0) and self.steps_left > 0:
-                self.owner.position.walk(self.walk_direction)
-                self.steps_left -= 1
-                return 0.2
-            else:
-                # Reconsidering direction
-                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
-                                      randint(4, 7))
-                self.walk_direction = choose_direction(dx, dy,
-                                                       self.dy_preference)
-                return 0
-
-
-class FighterGunCombatState(FighterState):
-    """
-    A combat state for a fighter with a gun in right hand and nothing or a short
-    range melee weapon in the left.
-    """
-    def __init__(self, *args, wait_state=None, melee_range=(4, 8), **kwargs):
-        super().__init__(*args, **kwargs)
-        self.wait_state = wait_state
-        self.melee_range=melee_range
-        self.dy_preference = 0.15
-
-    def switch_state(self):
-        current_closest = find_closest_enemy(self.owner,
-                                             self.enemy_perception_distance,
-                                             self.enemy_factions)
-        if not current_closest:
-            return self.wait_state
-        else:
-            # Store enemy entity for future reference
-            self.current_closest = current_closest
-
-    def take_action(self):
-        if not self.current_closest:
-            return 0
-        dx = self.owner.position.x - self.current_closest.position.x
-        dy = self.owner.position.y - self.current_closest.position.y
-        self.owner.position.turn(dx < 0 and 'r' or 'l')
-        if abs(dy) <= 2:
-            # Attack if within dy range. Melee from nearby, ranged at distance
-            if self.melee_range[0] <= abs(dx) <= self.melee_range[1]:
-                return self.owner.hands.use_hand('left')
-            else:
-                return self.owner.hands.use_hand('right')
-        else:
-            # walk toward the enemy
-            if self.walk_direction != (0, 0) and self.steps_left > 0:
-                self.owner.position.walk(self.walk_direction)
-                self.steps_left -= 1
-                return 0.2
-            else:
-                # Reconsidering direction
-                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
-                                      randint(4, 7))
-                self.walk_direction = choose_direction(dx, dy,
-                                                       self.dy_preference)
-                return 0
-
-
-################################################################################
-# Civilian: a peaceful NPC who just stands there, maybe delivering some
-# monologue
-################################################################################
-
-
-class CivilianAIState(AIState):
-    """
-    A base class for civilians: remembers who he should talk to and who he
-    should run from.
-    """
-    def __init__(self, *args, pc_id, enemy_factions=None,
-                 player_perception_distance=20,
-                 enemy_perception_distance=50,
-                 **kwargs):
-        super().__init__(*args, **kwargs)
-        self.pc_id = pc_id
-        self.enemy_factions = enemy_factions
-        self.player_perception_distance = player_perception_distance
-        self.enemy_perception_distance = enemy_perception_distance
-
-
-class CivilianWaitState(CivilianAIState):
-    """
-    Waits either for enemy to run from, or for the PC to talk to
-    """
-    def __init__(self, *args, runaway_state=None,
-                 player_interaction_state=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.runaway_state = runaway_state
-        self.player_interaction_state = player_interaction_state
-
-    def switch_state(self):
-        # See if there is someone to run away from
-        current_closest = find_closest_enemy(self.owner,
-                                             self.enemy_perception_distance,
-                                             self.enemy_factions)
-        if current_closest:
-            return self.runaway_state
-        # If not, look if pc_id is within radius
-        try:
-            pc = EntityTracker().entities[self.pc_id]
-        except KeyError:
-            # Do not break if PC is dead
-            return
-        dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
-                    (self.owner.position.y - pc.position.y) ** 2)
-        if dist <= self.player_perception_distance:
-            return self.player_interaction_state
-
-    def take_action(self):
-        return 0.2
-
-
-class CivilianRunawayState(CivilianAIState):
-    """
-    Runs away from the enemy.
-
-    This state does not switch directly to player interaction. It can only be
-    left if there are no enemies, switching to wait state. Otherwise, NPCs could
-    randomly start talking in the middle of the battle.
-    """
-    def __init__(self, *args, peaceful_state=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.peaceful_state = peaceful_state
-        self.current_closest = None
-
-    def switch_state(self):
-        current_closest = find_closest_enemy(self.owner,
-                                             self.enemy_perception_distance,
-                                             self.enemy_factions)
-        if current_closest:
-            self.current_closest = current_closest
-        else:
-            return self.peaceful_state
 
     def take_action(self):
         if not self.current_closest:
@@ -498,30 +247,46 @@ class CivilianRunawayState(CivilianAIState):
             self.owner.position.walk((dx < 0 and -1 or 1, 0))
         else:
             self.owner.position.walk((0, dy < 0 and -1 or 1))
-        return 0.2
+        return self.step_delay
 
 
-class CivilianTalkState(CivilianAIState):
+class TalkAIState(AIState):
     """
-    While the player is within range, delivers his monologue.
+    A state for characters delivering a monologue to the player. Switches to
+    a runaway state when an enemy is around, and to the wait state if the player
+    is nowhere near, or when monologue is exhausted.
 
-    Switches to runaway_state if enemy is near or to wait state if the player
-    is too far (or upon exhausting the monologue)
+    :param wait_state: str or None. Non-active state to switch to.
 
-    :param monologue: iterable of strs. A series of phrases that this char delivers
+    :param enemy_arrival_state: str or None. State to switch to when enemies
+    arrive.
 
-    :param phrase_pause: float. A delay between phrases, in seconds
+    :param monologue: an iterable of str. A series of phrases to be delivered.
+    If a single-phrase monologue is required, it should still be wrapped within
+    a tuple because otherwise it iterates over string and spits out a series of
+    single-letter phrases.
+
+    :param phrase_delay: float. Delay, in seconds, between phrases.
+
+    :param phrase_color: A bearlibterminal-compatible color. What color should
+    the phrases be.
+
+    :param phrase_sounds: an iterable of str or None. If not None, one of these
+    lines, chosen randomly at equal probabilities, is played via `play_sound`
+    event. Sound validity is not checked and could create crashes if
+    SoundListener doesn't know these sound IDs.
     """
-    def __init__(self, *args, monologue=('Line one', 'Line two'),
-                 phrase_pause=1.2,
+    def __init__(self, *args,
+                 wait_state=None,
+                 enemy_arrival_state=None,
+                 monologue=('Line one', 'Line two'),
+                 phrase_delay=1.2,
                  phrase_color = 'gray',
                  phrase_sounds=None,
-                 peaceful_state=None,
-                 runaway_state=None,
                  **kwargs):
         super().__init__(*args, **kwargs)
-        self.peaceful_state = peaceful_state
-        self.runaway_state = runaway_state
+        self.wait_state = wait_state
+        self.enemy_arrival_state = enemy_arrival_state
         for line in monologue:
             if not isinstance(line, str):
                 raise ValueError(f'monologue for a CivilianTalkState should be an iterable of strs')
@@ -530,31 +295,30 @@ class CivilianTalkState(CivilianAIState):
         self.phrase_color = phrase_color
         # Index of the next phrase to be said
         self.next_phrase = 0
-        self.phrase_pause = phrase_pause
+        self.phrase_delay = phrase_delay
 
     def switch_state(self):
-
         # See if there is someone to run away from
         current_closest = find_closest_enemy(self.owner,
                                              self.enemy_perception_distance,
                                              self.enemy_factions)
         if current_closest:
-            return self.runaway_state
+            return self.enemy_arrival_state
         if self.next_phrase >= len(self.monologue):
-            return self.peaceful_state
+            return self.wait_state
         # If not, look if pc_id is within radius
-        pc = EntityTracker().entities[self.pc_id]
+        pc = EntityTracker().entities[self.player_id]
         dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
                     (self.owner.position.y - pc.position.y) ** 2)
         # Wait if he is not
         if dist > self.player_perception_distance:
-            return self.peaceful_state
+            return self.wait_state
 
     def take_action(self):
-        # Could've switched into talk state after already exhausting the monologue
+        # Could've switched into talk state after exhausting the monologue
         if self.next_phrase >= len(self.monologue):
             return 0
-        pc = EntityTracker().entities[self.pc_id]
+        pc = EntityTracker().entities[self.player_id]
         if self.owner.position.x >= pc.position.x:
             self.owner.position.turn('l')
         else:
@@ -574,6 +338,86 @@ class CivilianTalkState(CivilianAIState):
         # Could have waited a lot during combat or waiting, but it still
         # should not spawn all phrases at once
         self.next_phrase += 1
-        return self.phrase_pause
+        return self.phrase_delay
 
-# TODO: refactor AI states to remove boilerplate
+
+class CombatAIState(AIState):
+    """
+    A combatant state.
+
+    Looks for enemies and switches to wait state when it doesn't find them. If
+    there are enemies and dy <=2, checks whether dx is valid for either hand.
+    If dx falls within at least one of the ranges, valid hand is used. If both
+    hands are useful at current dx, one is chosen at random. To permanently
+    disable a hand, set its range to (0, 0) or any other tuple such that
+    range[0] <= dx <= range[1] is never True
+
+    If no attack is possible, tries to walk towards enemy.
+
+    :param right_range: 2-tuple of ints. min and max distance at which right
+    hand is used.
+
+    :param left_range: 2-tuple of ints. min and max distance at which left hand
+    is used.
+
+    :param wait_state: str. a state to which it switches when there is no enemy in
+    range.
+    """
+    def __init__(self, *args,
+                 right_range=(4, 8),
+                 left_range=(4, 8),
+                 wait_state=None,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.right_range = right_range
+        self.left_range = left_range
+        self.wait_state = wait_state
+        self.dy_preference = 0.15
+        self.walk_direction = None
+        self.steps_left = 0
+        self.dispatcher.register_listener(self, 'ecs_collision')
+
+    def switch_state(self):
+        self.current_closest = find_closest_enemy(self.owner,
+                                                  self.enemy_perception_distance,
+                                                  self.enemy_factions)
+        if not self.current_closest:
+            return self.wait_state
+
+    def take_action(self):
+        if not self.current_closest:
+            return 0
+        dx = self.owner.position.x - self.current_closest.position.x
+        dy = self.owner.position.y - self.current_closest.position.y
+        self.owner.position.turn(dx < 0 and 'r' or 'l')
+        valid_hands = []
+        if abs(dy) <= 2:
+            # If within dy range, check whether dx is valid for either hand
+            if self.left_range[0] <= abs(dx) <= self.left_range[1]:
+                valid_hands.append('left')
+            if self.right_range[0] <= abs(dx) <= self.right_range[1]:
+                valid_hands.append('right')
+        if len(valid_hands) == 2:
+            return self.owner.hands.use_hand(choice(valid_hands))
+        elif len(valid_hands) == 1:
+            return self.owner.hands.use_hand(valid_hands[0])
+        else:
+            # walk toward the enemy
+            if self.walk_direction != (0, 0) and self.steps_left > 0:
+                self.owner.position.walk(self.walk_direction)
+                self.steps_left -= 1
+                return 0.2
+            else:
+                # Reconsidering direction
+                self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
+                                      randint(4, 7))
+                self.walk_direction = choose_direction(dx, dy,
+                                                       self.dy_preference)
+                return 0
+
+    def on_event(self, event):
+        # This part is for switching direction upon collision. It prevents
+        # enemies from stupidly banging into the first wall they encounter
+        if event.event_type == 'ecs_collision' and event.event_value[0] == self.owner.id:
+            self.walk_direction = (randint(-1, 1), randint(-1, 1))
+            self.steps_left = randint(4, 7)

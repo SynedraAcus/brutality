@@ -4,10 +4,7 @@ from bear_hug.ecs import WidgetComponent, deserialize_entity, \
 from bear_hug.widgets import SimpleAnimationWidget, Animation, Widget, \
     SwitchingWidget, Label
 
-from ai import AIComponent, AgressorPeacefulState, NunchakuAgressorCombatState, \
-    BottleAgressorCombatState, CivilianRunawayState, CivilianWaitState, \
-    CivilianTalkState, FighterFistCombatState, FighterWaitState, \
-    FighterGunCombatState
+from ai import *
 from background import tile_randomly, generate_bg, ghetto_transition, \
     dept_transition, lab_transition
 from components import *
@@ -716,27 +713,23 @@ class EntityFactory:
         boss.add_component(FactionComponent(self.dispatcher, faction='cops'))
         boss.add_component(SpawnerComponent(self.dispatcher, factory=self))
         ai = AIComponent(self.dispatcher,
-                         states={'wait': CivilianWaitState(self.dispatcher,
-                                                           enemy_factions=('punks',),
-                                                           enemy_perception_distance=50,
-                                                           player_perception_distance=35,
-                                                           player_interaction_state='talk',
-                                                           runaway_state=None,
-                                                           pc_id='cop_1'),
-                                 'talk': CivilianTalkState(self.dispatcher,
-                                                           pc_id='cop_1',
-                                                           peaceful_state='wait',
-                                                           runaway_state=None,
-                                                           enemy_perception_distance=50,
-                                                           enemy_factions=('punks',),
-                                                           phrase_sounds=('male_phrase_1',
-                                                                          'male_phrase_2',
-                                                                          'male_phrase_3',
-                                                                          'male_phrase_4',
-                                                                          'male_phrase_5'),
-                                                           monologue=monologue,
-                                                           phrase_color='#aaaaaa',
-                                                           phrase_pause=1.5)},
+                         states={'wait': WaitAIState(self.dispatcher,
+                                                     enemy_factions=('punks',),
+                                                     player_perception_distance=35,
+                                                     player_id='cop_1',
+                                                     player_arrival_state='talk'),
+                                 'talk': TalkAIState(self.dispatcher,
+                                                    player_id='cop_1',
+                                                    player_perception_distance=35,
+                                                    wait_state='wait',
+                                                    phrase_sounds=('male_phrase_1',
+                                                                   'male_phrase_2',
+                                                                   'male_phrase_3',
+                                                                   'male_phrase_4',
+                                                                   'male_phrase_5'),
+                                                    monologue=monologue,
+                                                    phrase_color='#aaaaaa',
+                                                    phrase_delay=1.5)},
                          current_state='wait',
                          owner=boss)
         boss.add_component(ai)
@@ -765,13 +758,15 @@ class EntityFactory:
                                                         death_sounds=('punk_death', )
                                                         ))
         ai = AIComponent(self.dispatcher,
-                         states={'wait': AgressorPeacefulState(self.dispatcher,
-                                                               combat_state='attack',
-                                                               perception_distance=65),
-                                 'attack': NunchakuAgressorCombatState(self.dispatcher,
-                                                                       peaceful_state='wait',
-                                                                       perception_distance=65,
-                                                                       melee_range=(12, 15))},
+                         states={'wait': WaitAIState(self.dispatcher,
+                                                     enemy_perception_distance=65,
+                                                     enemy_arrival_state='combat',
+                                                     check_delay=0.2),
+                                 'combat': CombatAIState(self.dispatcher,
+                                                         enemy_perception_distance=65,
+                                                         right_range=(12, 15),
+                                                         left_range=(0, 0),
+                                                         wait_state='wait')},
                          current_state='wait',
                          owner=nunchaku)
         nunchaku.add_component(ai)
@@ -838,15 +833,18 @@ class EntityFactory:
                                                     death_sounds=('punk_death', )))
         # punk.add_component(BottleControllerComponent(self.dispatcher))
         ai = AIComponent(self.dispatcher,
-                         states={'wait': AgressorPeacefulState(self.dispatcher,
-                                                       combat_state='attack',
-                                                       perception_distance=65),
-                                 'attack': BottleAgressorCombatState(self.dispatcher,
-                                                     peaceful_state='wait',
-                                                     melee_range=(0, 7),
-                                                     perception_distance=65)},
+                         states={'wait': WaitAIState(self.dispatcher,
+                                                     enemy_perception_distance=65,
+                                                     enemy_arrival_state='combat',
+                                                     check_delay=0.2),
+                                 'combat': CombatAIState(self.dispatcher,
+                                                         enemy_perception_distance=65,
+                                                         left_range=(0, 7),
+                                                         right_range=(35, 45),
+                                                         wait_state='wait')},
                          current_state='wait',
                          owner=punk)
+        punk.add_component(ai)
         punk.add_component(FactionComponent(self.dispatcher,
                                                 faction='punks'))
         f_l = self._create_hand(f'{entity_id}_hand_fl',
@@ -956,31 +954,31 @@ class EntityFactory:
                                                        right_item=right_fist.id))
         # AI
         ai = AIComponent(self.dispatcher,
-                         states={'wait': CivilianWaitState(self.dispatcher,
-                                                           runaway_state='run',
-                                                           enemy_factions=('punks',),
-                                                           enemy_perception_distance=50,
-                                                           player_interaction_state='talk',
-                                                           pc_id='cop_1'),
-                                 'run': CivilianRunawayState(self.dispatcher,
-                                                             pc_id='cop_1',
-                                                             peaceful_state='wait',
-                                                             enemy_perception_distance=50,
-                                                             enemy_factions=('punks', )),
-                                 'talk': CivilianTalkState(self.dispatcher,
-                                                           pc_id='cop_1',
-                                                           peaceful_state='wait',
-                                                           runaway_state='run',
-                                                           enemy_perception_distance=50,
-                                                           enemy_factions=('punks',),
-                                                           phrase_color='#0059B2',
-                                                           phrase_sounds=('female_phrase_1',
-                                                                          'female_phrase_2',
-                                                                          'female_phrase_3',
-                                                                          'female_phrase_4',
-                                                                          'female_phrase_5'),
-                                                           monologue=monologue,
-                                                           phrase_pause=1.5)},
+                         states={'wait': WaitAIState(self.dispatcher,
+                                                     player_id='cop_1',
+                                                     player_perception_distance=50,
+                                                     player_arrival_state='talk',
+                                                     enemy_factions=('punks', ),
+                                                     enemy_perception_distance=50,
+                                                     enemy_arrival_state='run'),
+                                 'run': RunawayAIState(self.dispatcher,
+                                                       enemy_perception_distance=50,
+                                                       wait_state='wait'),
+                                 'talk': TalkAIState(self.dispatcher,
+                                                     player_id='cop_1',
+                                                     player_perception_distance=50,
+                                                     monologue=monologue,
+                                                     enemy_factions=('punks, '),
+                                                     enemy_perception_distance=50,
+                                                     phrase_color='#0059B2',
+                                                     phrase_sounds=(
+                                                     'female_phrase_1',
+                                                     'female_phrase_2',
+                                                     'female_phrase_3',
+                                                     'female_phrase_4',
+                                                     'female_phrase_5'
+                                                     ),
+                                                     phrase_delay=1.5)},
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)
@@ -1039,17 +1037,19 @@ class EntityFactory:
         if prefix == 'scientist_m2':
             right_item = self._create_fist(f'fist_{entity_id}_right',
                                            owning_entity=scientist)
-            fight_state = FighterFistCombatState(self.dispatcher,
-                                                 enemy_factions=('police',),
-                                                 enemy_perception_distance=50,
-                                                 wait_state='wait')
+            fight_state = CombatAIState(self.dispatcher,
+                                        enemy_perception_distance=65,
+                                        left_range=(0, 7),
+                                        right_range=(0, 7),
+                                        wait_state='wait')
         else:
             right_item = self._create_emitter(f'emitter_{entity_id}',
                                               owning_entity=scientist)
-            fight_state = FighterGunCombatState(self.dispatcher,
-                                                enemy_factions=('police', ),
-                                                enemy_perception_distance=50,
-                                                wait_state='wait')
+            fight_state = CombatAIState(self.dispatcher,
+                                          enemy_perception_distance=65,
+                                          left_range=(0, 7),
+                                          right_range=(8, 50),
+                                          wait_state='wait')
         self.dispatcher.add_event(BearEvent('ecs_create', right_item))
         scientist.add_component(HandInterfaceComponent(self.dispatcher,
                                                        hand_entities={
@@ -1071,15 +1071,12 @@ class EntityFactory:
                                                        left_item=left_item.id,
                                                        right_item=right_item.id))
         # AI
-
         ai = AIComponent(self.dispatcher,
-                         states={'wait': FighterWaitState(self.dispatcher,
-                                                          enemy_factions=(
-                                                           'police',),
-                                                          combat_state='fight',
-                                                          enemy_perception_distance=50),
-                                 'fight': fight_state
-                                 },
+                         states={'wait': WaitAIState(self.dispatcher,
+                                                     enemy_perception_distance=65,
+                                                     enemy_arrival_state='combat',
+                                                     check_delay=0.2),
+                                 'combat': fight_state},
                          current_state='wait',
                          owner=scientist)
         scientist.add_component(ai)
