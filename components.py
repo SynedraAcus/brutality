@@ -497,8 +497,11 @@ class CharacterHealthComponent(HealthComponent):
         if self.hitpoints == 0:
             self.owner.spawner.spawn(self.corpse_type,
                                      relative_pos=(0, self.owner.widget.height - 9))
-            self.owner.hands.drop('right')
-            self.owner.hands.drop('left')
+            # Drop non-fist items, if any
+            self.owner.hands.drop('right', restore_fist=True)
+            self.owner.hands.drop('left', restore_fist=True)
+            EntityTracker().entities[self.owner.hands.left_item].destructor.destroy()
+            EntityTracker().entities[self.owner.hands.right_item].destructor.destroy()
             if self.death_sounds:
                 if self.owner.id == 'cop_1':
                     self.dispatcher.add_event(BearEvent('set_bg_sound', None))
@@ -1063,23 +1066,11 @@ class HandInterfaceComponent(Component):
         if other_item is None:
             # If there is no item, drop whatever there was right under player's
             # feet and reactivate fist
-            self.drop(hand, shift=False)
-            if hand == 'right':
-                self.right_item = f'fist_{self.owner.id}_right'
-                self.dispatcher.add_event(BearEvent('brut_pick_up',
-                                                    (self.owner.id,
-                                                     'right',
-                                                     self.right_item)))
-            else:
-                self.left_item = f'fist_{self.owner.id}_right'
-                self.dispatcher.add_event(BearEvent('brut_pick_up',
-                                                    (self.owner.id,
-                                                     'left',
-                                                     self.left_item)))
+            self.drop(hand, shift=False, restore_fist=True)
         else:
             # if there is another item, current one is thrown slightly to the
             # side, and a new one is picked up
-            self.drop(hand)
+            self.drop(hand, restore_fist=False)
             other_item.item_behaviour.owning_entity = self.owner
             other_item.hiding.hide()
             self.dispatcher.add_event(BearEvent('play_sound',
@@ -1093,7 +1084,7 @@ class HandInterfaceComponent(Component):
                                                  hand,
                                                  other_item.id)))
 
-    def drop(self, hand='right', shift=True):
+    def drop(self, hand='right', shift=True, restore_fist=False):
         """
         Drop whatever is in the corresponding hand.
 
@@ -1104,8 +1095,13 @@ class HandInterfaceComponent(Component):
 
         :param hand: str. Either 'right' or 'left'
 
-        :param shift: str. If True, the item is randomly offset by several chars.
+        :param shift: bool. If True, the item is randomly offset by several chars.
         If False, it is dropped right under the player. Defaults to True.
+
+        :param restore_fist: bool. If True, item is set to
+        'fist_{owner_id}_{left|right}' and brut_pick_up is emitted. If False,
+        nothing is done about replacing a removing item, and calling code is
+        expected to fix it
         """
         item_id = hand == 'right' and self.right_item or self.left_item
         if 'fist' not in item_id:
@@ -1121,6 +1117,20 @@ class HandInterfaceComponent(Component):
             item.widget.z_level = item.position.y + item.widget.height
             item.hiding.unhide()
             self.dispatcher.add_event(BearEvent('play_sound', 'item_drop'))
+            if restore_fist:
+                # Install fist
+                if hand == 'right':
+                    self.right_item = f'fist_{self.owner.id}_right'
+                    self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                        (self.owner.id,
+                                                         'right',
+                                                         self.right_item)))
+                else:
+                    self.left_item = f'fist_{self.owner.id}_left'
+                    self.dispatcher.add_event(BearEvent('brut_pick_up',
+                                                        (self.owner.id,
+                                                         'left',
+                                                         self.left_item)))
 
     def on_event(self, event):
         if event.event_type == 'ecs_destroy':

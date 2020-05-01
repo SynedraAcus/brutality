@@ -769,9 +769,15 @@ class EntityFactory:
                                                   faction='punks'))
         weapon = self._create_nunchaku(f'nunchaku_{entity_id}', owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
-        fist = self._create_fist(f'fist_{entity_id}',
+        # Even if not used, both fists should exist for correct processing of
+        # item drop during character destruction. Plus, I may want to add some
+        # attack that forces enemies to drop their weapons
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=nunchaku)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
                                        owning_entity=nunchaku)
-        self.dispatcher.add_event(BearEvent('ecs_create', fist))
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl',
                                 'nunchaku_punk_hand_forward', direction='l')
@@ -802,7 +808,7 @@ class EntityFactory:
                                                             'back_l': (0, -1),
                                                             'back_r': (4, 0)},
                                                         right_item=weapon.id,
-                                                        left_item=fist.id))
+                                                        left_item=left_fist.id))
         return nunchaku
 
     def _create_bottle_punk(self, entity_id, **kwargs):
@@ -854,6 +860,15 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', f_r))
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
+        # Even if not used, both fists should exist for correct processing of
+        # item drop during character destruction. Plus, I may want to add some
+        # attack that forces enemies to drop their weapons
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=punk)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=punk)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         shiv = self._create_shiv(f'shiv_{entity_id}',
                                  owning_entity=punk)
         self.dispatcher.add_event(BearEvent('ecs_create', shiv))
@@ -1027,9 +1042,15 @@ class EntityFactory:
         for hand in (f_l, f_r, b_l, b_r):
             self.dispatcher.add_event(BearEvent('ecs_create', hand))
             hand.position.tracked_entity = entity_id
-        left_item = self._create_fist(f'fist_{entity_id}_left',
-                                      owning_entity=scientist)
-        self.dispatcher.add_event(BearEvent('ecs_create', left_item))
+        # Even if not used, both fists should exist for correct processing of
+        # item drop during character destruction. Plus, I may want to add some
+        # attack that forces enemies to drop their weapons
+        left_fist = self._create_fist(f'fist_{entity_id}_left',
+                                      owning_entity=nunchaku)
+        self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
+        right_fist = self._create_fist(f'fist_{entity_id}_right',
+                                       owning_entity=nunchaku)
+        self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         if prefix == 'scientist_m2':
             right_item = self._create_fist(f'fist_{entity_id}_right',
                                            owning_entity=scientist)
@@ -1064,7 +1085,7 @@ class EntityFactory:
                                                            'forward_r': (6, 0),
                                                            'back_l': (0, -1),
                                                            'back_r': (3, 0)},
-                                                       left_item=left_item.id,
+                                                       left_item=left_fist.id,
                                                        right_item=right_item.id))
         # AI
         ai = AIComponent(self.dispatcher,
