@@ -243,7 +243,8 @@ menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
                        action=lambda: BearEvent('misc_input', 'TK_CLOSE'))
               ]
 menu = MenuWidget(dispatcher, terminal=t, items=menu_items, items_pos=(5, 6),
-                  background=Widget(*atlas.get_element('police_menu_bg')))
+                  background=Widget(*atlas.get_element('police_menu_bg')),
+                  switch_sound='menu', activation_sound='menu')
 menu_listener = MenuListener(dispatcher, terminal=t,
                              menu_widget=menu, menu_pos=(6, 6))
 dispatcher.register_listener(menu_listener, ['key_down', 'tick',
