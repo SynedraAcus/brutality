@@ -357,6 +357,7 @@ class AmmoPickupCollisionComponent(CollisionComponent):
                 right_item.item_behaviour.ammo = right_item.item_behaviour.max_ammo
                 used = True
             if used:
+                self.dispatcher.add_event(BearEvent('play_sound', 'reload'))
                 self.owner.destructor.destroy()
 
 
@@ -1309,7 +1310,7 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     def use_item(self):
         if self.max_ammo:
             if self.ammo == 0:
-                # TODO: sound or something to indicate a lack of ammo
+                self.dispatcher.add_event(BearEvent('play_sound', 'reload'))
                 return
             else:
                 self.ammo -= 1

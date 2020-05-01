@@ -444,6 +444,7 @@ class MenuListener(Listener):
         self.dispatcher.register_listener(self.menu_widget,
                                   ['tick', 'service', 'misc_input', 'key_down'])
         self.currently_showing = True
+        self.dispatcher.add_event(BearEvent('play_sound', 'menu'))
         # Disabling character input
         try:
             EntityTracker().entities['cop_1'].controller.accepts_input = False
@@ -455,6 +456,7 @@ class MenuListener(Listener):
         self.terminal.remove_widget(self.screen_widget)
         self.dispatcher.unregister_listener(self.menu_widget, 'all')
         self.currently_showing = False
+        self.dispatcher.add_event(BearEvent('play_sound', 'menu'))
         for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
             entity.controller.accepts_input = True
 

@@ -618,8 +618,7 @@ class EntityFactory:
         cop_entity.add_component(CharacterHealthComponent(self.dispatcher,
                                                           corpse='cop_corpse',
                                                           hitpoints=10,
-                                                          hit_sounds=('cop_hit', ),
-                                                          death_sounds=('cop_death', )))
+                                                          hit_sounds=('cop_hit', )))
         cop_entity.add_component(DestructorComponent(self.dispatcher))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl', 'cop_hand_forward',
@@ -1046,10 +1045,10 @@ class EntityFactory:
         # item drop during character destruction. Plus, I may want to add some
         # attack that forces enemies to drop their weapons
         left_fist = self._create_fist(f'fist_{entity_id}_left',
-                                      owning_entity=nunchaku)
+                                      owning_entity=scientist)
         self.dispatcher.add_event(BearEvent('ecs_create', left_fist))
         right_fist = self._create_fist(f'fist_{entity_id}_right',
-                                       owning_entity=nunchaku)
+                                       owning_entity=scientist)
         self.dispatcher.add_event(BearEvent('ecs_create', right_fist))
         if prefix == 'scientist_m2':
             right_item = self._create_fist(f'fist_{entity_id}_right',
@@ -1399,6 +1398,7 @@ class EntityFactory:
                                     grab_offset={'r': (0, -1),
                                                  'l': (0, -1)},
                                     use_delay=0.6,
+                                    use_sound='nunchaku',
                                     item_name='Nunchaku',
                                     item_description='Two sticks and a length of\nchain. Great range, but\nuseless in close quarters.'))
         entity.add_component(HidingComponent(self.dispatcher,

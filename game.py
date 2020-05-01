@@ -125,11 +125,14 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
-# dispatcher.register_listener(logger, ['ecs_create'])
+dispatcher.register_listener(logger, ['set_bg_sound'])
 sound_files = {'step': 'step.wav',
                'shot': 'shot.wav',
                'punch': 'punch.wav',
                'spark': 'spark.wav',
+               'nunchaku': 'nunchaku_wave.wav',
+               'reload': 'pistol_reload.wav',
+               'pistol_empty': 'pistol_trigger.wav',
                'molotov_break': 'molotov_brake.wav',
                'molotov_fire': 'molotov_fire.wav',
                'molotov_throw': 'molotov_throw.wav',
@@ -157,7 +160,8 @@ sound_files = {'step': 'step.wav',
                'bandage': 'bondage.wav',
                'target_hit': 'target.wav',
                'item_drop': 'item_drop.wav',
-               'item_grab': 'item_grab.wav'}
+               'item_grab': 'item_grab.wav',
+               'menu': 'menu_switch.wav'}
 if not args.disable_sound:
     from bear_hug.sound import SoundListener
     sounds = {}
@@ -294,3 +298,7 @@ except Exception as e:
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
 
 # TODO: Enemy taunts (in-combat phrases)
+
+# TODO: drop coins or something from downed enemies
+# This should create an incentive to avoid running through the level without
+# fighting enemies

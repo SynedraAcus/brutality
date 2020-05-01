@@ -300,6 +300,7 @@ class TalkAIState(AIState):
         # Index of the next phrase to be said
         self.next_phrase = 0
         self.phrase_delay = phrase_delay
+        self.last_used_sound = None
 
     def switch_state(self):
         # See if there is someone to run away from
@@ -310,7 +311,7 @@ class TalkAIState(AIState):
             return self.enemy_arrival_state
         if self.next_phrase >= len(self.monologue):
             return self.wait_state
-        # If not, look if pc_id is within radius
+        # If not, look if player is within radius
         try:
             player = EntityTracker().entities[self.player_id]
         except KeyError:
@@ -333,9 +334,16 @@ class TalkAIState(AIState):
             self.owner.position.turn('r')
         # Center on the first line
         x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0]) - self.owner.widget.width) / 2)
-        if self.phrase_sounds:
+        if self.phrase_sounds and (self.next_phrase % 2 == 0):
+            if len(self.phrase_sounds) > 1:
+                sound = choice(self.phrase_sounds)
+                while sound == self.last_used_sound:
+                    sound = choice(self.phrase_sounds)
+                self.last_used_sound = sound
+            else:
+                sound = self.phrase_sounds[0]
             self.dispatcher.add_event(BearEvent('play_sound',
-                                                choice(self.phrase_sounds)))
+                                                sound))
         self.owner.spawner.spawn('message', (-x_offset, 0),
                                  text=self.monologue[self.next_phrase],
                                  vy=-2,
