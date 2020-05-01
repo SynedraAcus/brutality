@@ -388,7 +388,7 @@ class CombatAIState(AIState):
         self.right_range = right_range
         self.left_range = left_range
         self.wait_state = wait_state
-        self.dy_preference = 0.15
+        self.dy_preference = 0.1
         self.walk_direction = None
         self.steps_left = 0
         self.dispatcher.register_listener(self, 'ecs_collision')
@@ -422,7 +422,7 @@ class CombatAIState(AIState):
             if self.walk_direction != (0, 0) and self.steps_left > 0:
                 self.owner.position.walk(self.walk_direction)
                 self.steps_left -= 1
-                return 0.2
+                return 0.15
             else:
                 # Reconsidering direction
                 self.steps_left = min(abs(dx) + 1, abs(dy) + 1,

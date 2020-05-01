@@ -349,7 +349,7 @@ class LevelManager(metaclass=Singleton):
             pass # Empty piece of land
         elif element < 0.75:
             # A simple battle
-            punk_count = random.randint(2, 4)
+            punk_count = random.randint(2, 3)
             positions = [(random.randint(left_edge + 5,
                                          left_edge + room_width-5),
                                 random.randint(10, 25))]
@@ -372,7 +372,7 @@ class LevelManager(metaclass=Singleton):
                 # Maybe add them a barrel to hang around
                 barrel_pos = (left_edge + room_width // 2, 25)
                 self.factory.create_entity('barrel', barrel_pos)
-                for _ in range(random.randint(3, 5)):
+                for _ in range(random.randint(1, 3)):
                     # Sprinkle with some garbage
                     self.factory.create_entity(random.choice(('can', 'can2',
                                                               'cigarettes',
@@ -716,7 +716,7 @@ class LevelManager(metaclass=Singleton):
                                 'lifetime': 8,
                                 'vy': -1}),
                   SpawnItem(item='message',
-                            pos=(40, 20),
+                            pos=(50, 20),
                             size=(10, 20),
                             kwargs={
                                 'text': 'Jump with spacebar',
@@ -782,8 +782,8 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_wall_inner', (215, 11))
         # Corridor
         self.factory.create_entity('dept_bench', (240, 18))
-        self.factory.create_entity('dept_wall_inner', (265, 0))
-        self.factory.create_entity('dept_wall_inner', (254, 11))
+        self.factory.create_entity('dept_wall_inner', (270, 0))
+        self.factory.create_entity('dept_wall_inner', (259, 11))
         # Office
         self.factory.create_entity('dept_chair_1', (287, 17))
         self.factory.create_entity('dept_table_1', (290, 12))

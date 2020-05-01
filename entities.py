@@ -383,11 +383,11 @@ class EntityFactory:
         target_entity.add_component(VisualDamageHealthComponent(
                             self.dispatcher,
                             hit_sounds=('target_hit', ),
-                            widgets_dict={1: 'destroyed',
-                             2: 'severe',
-                             3: 'slight',
-                             4: 'intact'},
-                            hitpoints=4))
+                            widgets_dict={5: 'destroyed',
+                             10: 'severe',
+                             15: 'slight',
+                             20: 'intact'},
+                            hitpoints=20))
         target_entity.add_component(PositionComponent(self.dispatcher))
         target_entity.add_component(DestructorComponent(self.dispatcher))
         target_entity.add_component(CollisionComponent(self.dispatcher,
