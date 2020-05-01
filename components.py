@@ -1310,7 +1310,8 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
     def use_item(self):
         if self.max_ammo:
             if self.ammo == 0:
-                self.dispatcher.add_event(BearEvent('play_sound', 'reload'))
+                self.dispatcher.add_event(BearEvent('play_sound',
+                                                    'pistol_empty'))
                 return
             else:
                 self.ammo -= 1
