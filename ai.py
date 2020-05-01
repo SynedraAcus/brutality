@@ -201,7 +201,11 @@ class WaitAIState(AIState):
             if self.current_closest:
                 return self.enemy_arrival_state
         if self.player_arrival_state:
-            player = EntityTracker().entities[self.player_id]
+            try:
+                player = EntityTracker().entities[self.player_id]
+            except KeyError:
+                # If the player is not available, he's likely dead
+                return None
             dx = player.position.x - self.owner.position.x
             dy = player.position.y - self.owner.position.y
             dist = sqrt(dx ** 2 + dy ** 2)
@@ -307,9 +311,13 @@ class TalkAIState(AIState):
         if self.next_phrase >= len(self.monologue):
             return self.wait_state
         # If not, look if pc_id is within radius
-        pc = EntityTracker().entities[self.player_id]
-        dist = sqrt((self.owner.position.x - pc.position.x) ** 2 +
-                    (self.owner.position.y - pc.position.y) ** 2)
+        try:
+            player = EntityTracker().entities[self.player_id]
+        except KeyError:
+            # If the player is not available, he's likely dead
+            return None
+        dist = sqrt((self.owner.position.x - player.position.x) ** 2 +
+                    (self.owner.position.y - player.position.y) ** 2)
         # Wait if he is not
         if dist > self.player_perception_distance:
             return self.wait_state
