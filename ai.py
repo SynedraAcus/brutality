@@ -274,9 +274,6 @@ class TalkAIState(AIState):
 
     :param phrase_delay: float. Delay, in seconds, between phrases.
 
-    :param phrase_color: A bearlibterminal-compatible color. What color should
-    the phrases be.
-
     :param phrase_sounds: an iterable of str or None. If not None, one of these
     lines, chosen randomly at equal probabilities, is played via `play_sound`
     event. Sound validity is not checked and could create crashes if
@@ -287,7 +284,6 @@ class TalkAIState(AIState):
                  enemy_arrival_state=None,
                  monologue=('Line one', 'Line two'),
                  phrase_delay=1.2,
-                 phrase_color = 'gray',
                  phrase_sounds=None,
                  **kwargs):
         super().__init__(*args, **kwargs)
@@ -298,7 +294,6 @@ class TalkAIState(AIState):
                 raise ValueError(f'monologue for a CivilianTalkState should be an iterable of strs')
         self.monologue = monologue
         self.phrase_sounds = phrase_sounds
-        self.phrase_color = phrase_color
         # Index of the next phrase to be said
         self.next_phrase = 0
         self.phrase_delay = phrase_delay
@@ -350,7 +345,7 @@ class TalkAIState(AIState):
                                  text=self.monologue[self.next_phrase],
                                  vy=-2,
                                  vx=0,
-                                 color=self.phrase_color,
+                                 color=self.owner.faction.phrase_color,
                                  destroy_condition='timeout',
                                  lifetime=5.0)
         # Could have waited a lot during combat or waiting, but it still

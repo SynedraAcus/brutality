@@ -734,13 +734,21 @@ class FactionComponent(Component):
     """
     Stores the faction data to see who should attack whom.
 
-    Currently just contains a single string, but later will probably be extended
-    to allow for things such as alliances, varying levels of agression, etc.
+    :param faction: str. The faction name. Defaults to 'placeholder'
+
+    :param phrase_color: str. The color that should be used in speech
     """
-    
-    def __init__(self, *args, faction='items', **kwargs):
+    colors = {'police': '#aaaaaa',
+              'scientists': '#0059B2',
+              'punks': '#ffffff',
+              'placeholder': '#ffffff'}
+
+    def __init__(self, *args, faction='placeholder',
+                 phrase_color='white',
+                 **kwargs):
         super().__init__(*args, name='faction', **kwargs)
         self.faction = faction
+        self.phrase_color = self.colors[faction]
         
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,

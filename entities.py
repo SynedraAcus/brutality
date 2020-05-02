@@ -673,7 +673,6 @@ class EntityFactory:
                                                                    'male_phrase_4',
                                                                    'male_phrase_5'),
                                                     monologue=monologue,
-                                                    phrase_color='#aaaaaa',
                                                     phrase_delay=1.5)},
                          current_state='wait',
                          owner=cop_entity)
@@ -704,7 +703,7 @@ class EntityFactory:
                                               face_size=(24, 10), depth=10,
                                               z_shift=(1, -1)))
         boss.add_component(DestructorComponent(self.dispatcher))
-        boss.add_component(FactionComponent(self.dispatcher, faction='cops'))
+        boss.add_component(FactionComponent(self.dispatcher, faction='police'))
         boss.add_component(SpawnerComponent(self.dispatcher, factory=self))
         ai = AIComponent(self.dispatcher,
                          states={'wait': WaitAIState(self.dispatcher,
@@ -722,7 +721,6 @@ class EntityFactory:
                                                                    'male_phrase_4',
                                                                    'male_phrase_5'),
                                                     monologue=monologue,
-                                                    phrase_color='#aaaaaa',
                                                     phrase_delay=1.5)},
                          current_state='wait',
                          owner=boss)
@@ -980,7 +978,6 @@ class EntityFactory:
                                                      monologue=monologue,
                                                      enemy_factions=('punks, '),
                                                      enemy_perception_distance=50,
-                                                     phrase_color='#0059B2',
                                                      phrase_sounds=(
                                                      'female_phrase_1',
                                                      'female_phrase_2',
