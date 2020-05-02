@@ -362,8 +362,7 @@ class CombatAIState(AIState):
     there are enemies and dy <=2, checks whether dx is valid for either hand.
     If dx falls within at least one of the ranges, valid hand is used. If both
     hands are useful at current dx, one is chosen at random. To permanently
-    disable a hand, set its range to (0, 0) or any other tuple such that
-    range[0] <= dx <= range[1] is never True
+    disable a hand, set its range to (0, 0).
 
     If no attack is possible, tries to walk towards enemy.
 
@@ -385,7 +384,7 @@ class CombatAIState(AIState):
         self.right_range = right_range
         self.left_range = left_range
         self.wait_state = wait_state
-        self.dy_preference = 0.1
+        self.dy_preference = 0
         self.walk_direction = None
         self.steps_left = 0
         self.dispatcher.register_listener(self, 'ecs_collision')
@@ -404,12 +403,13 @@ class CombatAIState(AIState):
         dy = self.owner.position.y - self.current_closest.position.y
         self.owner.position.turn(dx < 0 and 'r' or 'l')
         valid_hands = []
-        if abs(dy) <= 2:
+        if -1 <= dy <= 2:
             # If within dy range, check whether dx is valid for either hand
             if self.left_range[0] <= abs(dx) <= self.left_range[1]:
                 valid_hands.append('left')
             if self.right_range[0] <= abs(dx) <= self.right_range[1]:
                 valid_hands.append('right')
+        # Phrases emitted randomly when attacking
         if len(valid_hands) == 2:
             if random() < 0.3:
                 phrase = choice(PlotManager().attack_phrases
@@ -435,6 +435,15 @@ class CombatAIState(AIState):
                 self.steps_left -= 1
                 return 0.15
             else:
+                if (not self.right_range[0] or abs(dx) < self.right_range[0]) and \
+                        (not self.left_range[0] or abs(dx) < self.left_range[0]):
+                    # If too close to use any available weapon, tweak dx for
+                    # walk direction calculations
+                    print('too close')
+                    ranges = (self.left_range[0] if self.left_range[0] else 1000,
+                              self.right_range[0] if self.right_range[0] else 1000)
+                    r = min(ranges)
+                    dx += r * -1 if dx > 0 else 1
                 # Reconsidering direction
                 self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
                                       randint(4, 7))

@@ -317,7 +317,7 @@ class LevelManager(metaclass=Singleton):
             for i in range(4):
                 self.factory.create_entity('science_device_1', (left_edge + 20 * i - 4, 4))
                 self.factory.create_entity('science_device_1', (left_edge + 20 * i - 9, 10))
-                if i < 3 and random.random() < 1:
+                if i < 3 and random.random() < 0.3:
                     self.factory.create_entity('bandage', (left_edge + 20 * i + 5, 25))
         elif room_type == 4:
             self.factory.create_entity('science_table_4', (left_edge - 6, 12))
@@ -345,9 +345,9 @@ class LevelManager(metaclass=Singleton):
             # A broken car
             self.factory.create_entity('broken_car', (left_edge+(room_width - 44) // 2,
                                                       12))
-        elif element < 0.25:
+        elif element < 0.15:
             pass # Empty piece of land
-        elif element < 0.75:
+        elif element < 0.7:
             # A simple battle
             punk_count = random.randint(2, 3)
             positions = [(random.randint(left_edge + 5,
