@@ -6,6 +6,7 @@ import random
 
 from bear_hug.ecs import Singleton
 
+
 # TODO: Goal description in the main menu
 
 # TODO: Get the goal-based levelgen to actually work
@@ -52,7 +53,7 @@ class PlotManager(metaclass=Singleton):
     A master class in control of the plot
     """
     def __init__(self, goals=(), initial_goal={}):
-        # TODO: more general phrases
+        # TODO: more phrases
         # Phrases useful in any kind of plot - random faction-specific chatter
         self.general_phrases = {'cops': (('Captain\'s an ass,\nif you ask me.', ),
                                          ('Hey there', 'How\'s it going?'),
@@ -66,12 +67,31 @@ class PlotManager(metaclass=Singleton):
                                                 'I have no time for\nplaying hide-n-seek',
                                                 'Especially with my tools'),
                                                ('Calibrating...', ),
-                                               ('Careful around the emitter',
+                                               ('Careful around the spikes',
                                                 'Wouldn\'t want you fried'),
                                                ('Hey, what\'s it \nwith the alpha spark\nand sodium lamps?',
                                                 'Why are they even...',
                                                 'Oh, nevermind,',
                                                 'Just thinking aloud'))}
+        # TODO: connect attack phrases to plot state
+        # Attack phrases - something for the enemies to shout when they beat you
+        # Single-line, long monologue would seem stupid mid-battle
+        self.attack_phrases = {'punks': ('Oink oink, motherfucker!',
+                                         'Here, piggy, piggy...',
+                                         'This is OUR turf!',
+                                         'Down with you!',
+                                         'Asshole',
+                                         'You shoulda\nstayed out of here',
+                                         'Go die already'),
+                               'scientists': ('Stay out of my lab!',
+                                              'Who has even\nlet you in?',
+                                              'No way I let some asshole\nplay with my equipment',
+                                              'Here\'s for you',
+                                              'And stay down'),
+                               'cops': ('One less asshole',
+                                        'Feeling lucky?',
+                                        'Here\'s for you',
+                                        'You\'re SO fucked')}
         # for goal in goals:
         #     if not isinstance(goal, Goal):
         #         raise TypeError(f'{type(goal)} used instead of Goal in PlotManager')

@@ -7,6 +7,8 @@ from random import choice, randint, random
 from bear_hug.ecs import Component, EntityTracker
 from bear_hug.event import BearEvent
 
+from plot import PlotManager
+
 
 def find_closest_enemy(entity, perception_distance, enemy_factions=None):
     """
@@ -414,8 +416,22 @@ class CombatAIState(AIState):
             if self.right_range[0] <= abs(dx) <= self.right_range[1]:
                 valid_hands.append('right')
         if len(valid_hands) == 2:
+            if random() < 0.3:
+                phrase = choice(PlotManager().attack_phrases
+                                [self.owner.faction.faction])
+                self.owner.spawner.spawn('message', (0, -2), text=phrase,
+                                         vy=-4,
+                                         destroy_condition='timeout',
+                                         lifetime=0.5)
             return self.owner.hands.use_hand(choice(valid_hands))
         elif len(valid_hands) == 1:
+            if random() < 0.3:
+                phrase = choice(PlotManager().attack_phrases
+                                [self.owner.faction.faction])
+                self.owner.spawner.spawn('message', (0, -2),
+                                         text=phrase, vy=-4,
+                                         destroy_condition='timeout',
+                                         lifetime=0.5)
             return self.owner.hands.use_hand(valid_hands[0])
         else:
             # walk toward the enemy
