@@ -184,7 +184,8 @@ class EntityFactory:
         message.add_component(PositionComponent(self.dispatcher, vx=vx, vy=vy,
                                                 affect_z=False))
         message.add_component(DestructorComponent(self.dispatcher))
-        message.add_component(DecayComponent(self.dispatcher, destroy_condition=destroy_condition,
+        message.add_component(DecayComponent(self.dispatcher,
+                                             destroy_condition=destroy_condition,
                                              lifetime=lifetime))
         return message
 
@@ -292,10 +293,7 @@ class EntityFactory:
 
     def _create_dept_range_table(self, entity_id, **kwargs):
         """
-        Doesn't have CollisionComponent to permit shooting
-        :param entity_id:
-        :param kwargs:
-        :return:
+        A low table that can be shot over.
         """
         e = Entity(id=entity_id)
         widget = Widget(*self.atlas.get_element('dept_range_table'))
@@ -368,7 +366,7 @@ class EntityFactory:
 
     def _create_target(self, entity_id, **kwargs):
         """
-        A target
+        A target which changes its appearance when damaged
         :return:
         """
         target_entity = Entity(id=entity_id)
@@ -678,7 +676,8 @@ class EntityFactory:
                          owner=cop_entity)
         return cop_entity
 
-    def _create_dept_boss(self, entity_id, monologue=('Line 1', 'Line 2'), **kwargs):
+    def _create_dept_boss(self, entity_id, monologue=('Line 1', 'Line 2'),
+                          **kwargs):
         """
         A monologue NPC boss
         :param entity_id:
@@ -727,7 +726,6 @@ class EntityFactory:
         boss.add_component(ai)
         return boss
 
-    
     def _create_nunchaku_punk(self, entity_id, **kwargs):
         nunchaku = Entity(id=entity_id)
         widget = SwitchingWidget(images_dict={'r_1': self.atlas.get_element('nunchaku_punk_r_1'),
@@ -764,7 +762,8 @@ class EntityFactory:
         nunchaku.add_component(ai)
         nunchaku.add_component(FactionComponent(self.dispatcher,
                                                   faction='punks'))
-        weapon = self._create_nunchaku(f'nunchaku_{entity_id}', owning_entity=nunchaku)
+        weapon = self._create_nunchaku(f'nunchaku_{entity_id}',
+                                       owning_entity=nunchaku)
         self.dispatcher.add_event(BearEvent('ecs_create', weapon))
         # Even if not used, both fists should exist for correct processing of
         # item drop during character destruction. Plus, I may want to add some
@@ -789,23 +788,23 @@ class EntityFactory:
         self.dispatcher.add_event(BearEvent('ecs_create', b_l))
         self.dispatcher.add_event(BearEvent('ecs_create', b_r))
         nunchaku.add_component(HandInterfaceComponent(self.dispatcher,
-                                                        hand_entities={
-                                                            'forward_l': f_l.id,
-                                                            'forward_r': f_r.id,
-                                                            'back_l': b_l.id,
-                                                            'back_r': b_r.id},
-                                                        hands_offsets={
-                                                            'forward_l': (-1, 5),
-                                                            'forward_r': (0, 4),
-                                                            'back_l': (-1, 5),
-                                                            'back_r': (0, 4)},
-                                                        item_offsets={
-                                                            'forward_l': (0, 0),
-                                                            'forward_r': (8, 1),
-                                                            'back_l': (0, -1),
-                                                            'back_r': (4, 0)},
-                                                        right_item=weapon.id,
-                                                        left_item=left_fist.id))
+                                                      hand_entities={
+                                                        'forward_l': f_l.id,
+                                                        'forward_r': f_r.id,
+                                                        'back_l': b_l.id,
+                                                        'back_r': b_r.id},
+                                                      hands_offsets={
+                                                        'forward_l': (-1, 5),
+                                                        'forward_r': (0, 4),
+                                                        'back_l': (-1, 5),
+                                                        'back_r': (0, 4)},
+                                                      item_offsets={
+                                                        'forward_l': (0, 0),
+                                                        'forward_r': (8, 1),
+                                                        'back_l': (0, -1),
+                                                        'back_r': (4, 0)},
+                                                      right_item=weapon.id,
+                                                      left_item=left_fist.id))
         return nunchaku
 
     def _create_bottle_punk(self, entity_id, **kwargs):
@@ -947,8 +946,7 @@ class EntityFactory:
                                                             'back_l': b_l.id,
                                                             'back_r': b_r.id},
                                                        hands_offsets={
-                                                            'forward_l': (
-                                                            -2, 5),
+                                                            'forward_l': (-2, 5),
                                                             'forward_r': (0, 5),
                                                             'back_l': (-3, 4),
                                                             'back_r': (3, 4)},
@@ -1111,7 +1109,7 @@ class EntityFactory:
 
     def _create_cop_jump(self, entity_id, direction='r', **kwargs):
         e = Entity(id=entity_id)
-        widget=Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
+        widget = Widget(*self.atlas.get_element(f'cop_jump_{direction}'))
         e.add_component(WidgetComponent(self.dispatcher, widget))
         vx = 60 if direction == 'r' else -60
         e.add_component(PositionComponent(self.dispatcher,
@@ -1211,8 +1209,8 @@ class EntityFactory:
         spark.add_component(DestructorComponent(self.dispatcher))
         return spark
 
-    def _create_tall_spark(self, entity_id, z_level=10, direction=None,
-                      vx=25, vy=25, **kwargs):
+    def _create_tall_spark(self, entity_id, direction=None,
+                           vx=25, vy=25, **kwargs):
         """
         Analogous to the spark, but has 12 empty spaces below the spark to
         enable proper collisions during non-horizontal movement
@@ -1308,9 +1306,9 @@ class EntityFactory:
         entity.add_component(SpawningItemBehaviourComponent(self.dispatcher,
                                 owning_entity=owning_entity,
                                 spawned_items={'bullet': {'r': (1, 0),
-                                                         'l': (-2, 0)},
+                                                          'l': (-2, 0)},
                                                'muzzle_flash': {'r': (5, -1),
-                                                               'l': (-2, -1)}},
+                                                                'l': (-2, -1)}},
                                 max_ammo=6,
                                 use_sound='shot',
                                 use_delay = 0.5,
@@ -1425,7 +1423,7 @@ class EntityFactory:
                                     use_sound='molotov_throw',
                                     item_name='Molotov',
                                     use_delay=1,
-                                    item_description='Looks cool in a riot, but\ncannot be aimed other than\n"In that general direction".'))
+                                    item_description='Looks cool in a riot, but\ncan only be aimed in\nthis or that general\ndirection.'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
                                              lifetime=0.25,

@@ -140,7 +140,7 @@ class WalkerComponent(PositionComponent):
 
 class AttachedPositionComponent(PositionComponent):
     """
-    A PositionComponent that maintains its position relative to some other entity.
+    A PositionComponent that maintains its position relative to other entity.
 
     This component can have its own vx and vy, but it also listens to the
     other's ``ecs_move`` events and repeats them.
@@ -211,7 +211,8 @@ class ProjectileCollisionComponent(CollisionComponent):
         elif hasattr(EntityTracker().entities[entity], 'collision'):
             self.dispatcher.add_event(BearEvent('play_sound', 'punch'))
             self.dispatcher.add_event(BearEvent(event_type='brut_damage',
-                                                event_value=(entity, self.damage)))
+                                                event_value=(entity,
+                                                             self.damage)))
             self.owner.destructor.destroy()
         
     def __repr__(self):
@@ -293,7 +294,8 @@ class HazardCollisionComponent(CollisionComponent):
                 return
             if hasattr(other, 'health'):
                 self.dispatcher.add_event(BearEvent(event_type='brut_damage',
-                                                    event_value=(entity, self.damage)))
+                                                    event_value=(entity,
+                                                                 self.damage)))
             self.on_cooldown = True
 
     def on_event(self, event):
@@ -398,13 +400,13 @@ class GrenadeComponent(Component):
     def __repr__(self):
         d = loads(super().__repr__())
         d.update({'spawned_item': self.spawned_item,
-                   'target_y': self.target_y})
+                  'target_y': self.target_y})
         return dumps(d)
 
     
 class HealthComponent(Component):
     """
-    A component that monitors owner's health and updates whatever needs updating
+    A component that monitors owner's health and processes its changes.
     """
     def __init__(self, *args, hitpoints=3, **kwargs):
         super().__init__(*args, name='health', **kwargs)
@@ -413,9 +415,11 @@ class HealthComponent(Component):
         self._hitpoints = hitpoints
 
     def on_event(self, event):
-        if event.event_type == 'brut_damage' and event.event_value[0] == self.owner.id:
+        if event.event_type == 'brut_damage' and \
+                event.event_value[0] == self.owner.id:
             self.hitpoints -= event.event_value[1]
-        elif event.event_type == 'brut_heal' and event.event_value[0] == self.owner.id:
+        elif event.event_type == 'brut_heal' and \
+                event.event_value[0] == self.owner.id:
             self.hitpoints += event.event_value[1]
 
     @property
@@ -640,7 +644,8 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
                     dx = self.owner.position.x - machine.position.x
                     dy = self.owner.position.y - machine.position.y
                     dist = sqrt(dx ** 2 + dy ** 2)
-                    if dist <= self.range and machine.id != self.owner.id and machine.id not in self.target_names:
+                    if dist <= self.range and machine.id != self.owner.id and \
+                            machine.id not in self.target_names:
                         self.targets[machine.id] = (machine.position.pos[0],
                                                     machine.position.pos[1])
                         self.target_names.append(machine.id)
@@ -662,11 +667,11 @@ class SpikePowerInteractionComponent(PowerInteractionComponent):
             target = self.targets[choice(self.target_names)]
             dx = target[0] - self.owner.position.x - 2
             dy = target[1] - self.owner.position.y - 7
+            dx_sign = abs(dx) // dx if dx != 0 else 0
+            dy_sign = abs(dy) // dy if dy != 0 else 0
             # Trivially proven from:
             # 1) V**2 = vx**2 + vy ** 2
             # 2) vx/vy = dx/dy
-            dx_sign = abs(dx)//dx if dx != 0 else 0
-            dy_sign = abs(dy)//dy if dy != 0 else 0
             vy = sqrt(1600 / (1 + dx**2/dy**2)) if dy != 0 else 0
             vx = sqrt(1600 / (1 + dy**2/dx**2)) if dx != 0 else 0
             self.owner.spawner.spawn('tall_spark', (2 + 2*dx_sign,
@@ -767,7 +772,8 @@ class LevelSwitchComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'next_level': self.next_level})
-        
+
+
 class InputComponent(Component):
     """
     A component that handles input.
@@ -805,23 +811,24 @@ class InputComponent(Component):
             if self.current_action_delay > 0:
                 self.current_action_delay -= event.event_value
         if event.event_type == 'key_down' and self.accepts_input:
-            if self.owner.health.hitpoints > 0:
+            if self.owner.health.hitpoints > 0 and \
+                        self.current_action_delay <= 0:
                 # These actions are only available to a non-dead player char
-                if event.event_value == 'TK_Q' and self.current_action_delay <= 0:
+                if event.event_value == 'TK_Q':
                     # left-handed attack
                     self.current_action_delay = self.owner.hands.use_hand('left')
-                elif event.event_value == 'TK_E' and self.current_action_delay <= 0:
+                elif event.event_value == 'TK_E':
                     # Right-handed attack
                     self.current_action_delay = self.owner.hands.use_hand('right')
-                elif event.event_value == 'TK_Z' and self.current_action_delay <= 0:
+                elif event.event_value == 'TK_Z':
                     # Left-handed pickup
                     self.owner.hands.pick_up(hand='left')
                     self.current_action_delay = self.action_delay
-                elif event.event_value == 'TK_C' and self.current_action_delay <= 0:
+                elif event.event_value == 'TK_C':
                     # Right-handed pickup
                     self.owner.hands.pick_up(hand='right')
                     self.current_action_delay = self.action_delay
-                elif event.event_value == 'TK_SPACE' and self.current_action_delay <= 0:
+                elif event.event_value == 'TK_SPACE':
                     self.owner.position.jump()
                     self.current_action_delay = self.action_delay
             # These actions are available whether or not the player is dead
@@ -1182,14 +1189,14 @@ class ItemBehaviourComponent(Component):
     """
 
     def __init__(self, *args, owning_entity=None,
-                 single_use = False,
-                 max_ammo = None,
-                 grab_offset = {'r': (0, 0),
-                                'l': (0, 0)},
-                 item_name = 'PLACEHOLDER',
-                 item_description = 'Someone failed to write\nan item description',
-                 use_sound = None,
-                 use_delay = 0.1,
+                 single_use=False,
+                 max_ammo=None,
+                 grab_offset={'r': (0, 0),
+                              'l': (0, 0)},
+                 item_name='PLACEHOLDER',
+                 item_description='Someone failed to write\nan item description',
+                 use_sound=None,
+                 use_delay=0.1,
                  **kwargs):
         super().__init__(*args, name='item_behaviour', **kwargs)
         self.single_use = single_use
@@ -1202,7 +1209,7 @@ class ItemBehaviourComponent(Component):
         self.item_name = item_name
         self.use_delay = use_delay
         d = item_description.split('\n')
-        if len(d) > 5 or any(len(x)>28 for x in d):
+        if len(d) > 5 or any(len(x) > 28 for x in d):
             raise ValueError(f'Item description for {item_name} too long. Should be <=5 lines, <=28 chars each')
         self.item_description = item_description
         self._owning_entity = None
@@ -1339,3 +1346,5 @@ class SpawningItemBehaviourComponent(ItemBehaviourComponent):
         d = loads(super().__repr__())
         d['spawned_items'] = self.spawned_items
         return dumps(d)
+
+# TODO: SpeechComponent

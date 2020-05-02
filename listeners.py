@@ -112,7 +112,7 @@ class ScrollListener(Listener, metaclass=Singleton):
                 return BearEvent(event_type='ecs_scroll_by',
                                  event_value=(x + self.layout.entities[self.target_entity].widget.size[0] \
                                               - self.layout.view_pos[0] + self.distance \
-                                                - self.layout.view_size[0],
+                                              - self.layout.view_size[0],
                                               0))
         elif event.event_type == 'ecs_move' and event.event_value[0] == self.target_entity:
             # Routine scrolling is done here and not in tick, because otherwise
@@ -137,8 +137,6 @@ class ScrollListener(Listener, metaclass=Singleton):
                                               - self.layout.view_pos[0] + self.distance \
                                                 - self.layout.view_size[0],
                                               0))
-
-
 
 
 # This data class contains all information about what should be spawned and when
@@ -429,7 +427,7 @@ class MenuListener(Listener):
                 and event.event_value == 'TK_ESCAPE' \
                 and self.current_delay >= self.input_delay:
             self.current_delay = 0
-            if self.currently_showing == False:
+            if not self.currently_showing:
                 self.show_menu()
             else:
                 self.hide_menu()
@@ -442,7 +440,8 @@ class MenuListener(Listener):
         self.terminal.add_widget(self.menu_widget, self.menu_pos, layer=3)
         self.terminal.add_widget(self.screen_widget, self.menu_pos, layer=2)
         self.dispatcher.register_listener(self.menu_widget,
-                                  ['tick', 'service', 'misc_input', 'key_down'])
+                                          ['tick', 'service',
+                                           'misc_input', 'key_down'])
         self.currently_showing = True
         self.dispatcher.add_event(BearEvent('play_sound', 'item_grab'))
         # Disabling character input
@@ -471,7 +470,7 @@ class ItemDescriptionListener(Listener):
     :return:
     """
     def __init__(self, dispatcher, terminal,  tracked_entity='cop_1',
-                 text_pos = (25, 12), **kwargs):
+                 text_pos=(25, 12), **kwargs):
         self.register_terminal(terminal)
         self.dispatcher = dispatcher
         self.dispatcher.register_listener(self, ['brut_show_items',

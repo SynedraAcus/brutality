@@ -40,7 +40,7 @@ class HitpointBar(Layout):
             self.need_update = True
         elif event.event_type == 'brut_heal' and event.event_value[0] == self.target_entity:
             self.current_hp += event.event_value[1]
-            #TODO: HitpointBar should track changes in max hp
+            # TODO: HitpointBar should track changes in max hp
             # Currently it stores maximum HP independently of HealthComponent,
             # which it should not. I need to either create a hitpoint change
             # event or request current and max HP via EntityTracker during every
@@ -74,7 +74,8 @@ class ItemWindow(Widget):
 
     def on_event(self, event):
         if event.event_type == 'brut_pick_up':
-            if event.event_value[0] == self.target_entity and event.event_value[1] == self.target_hand:
+            if event.event_value[0] == self.target_entity and \
+                    event.event_value[1] == self.target_hand:
                 self.current_item = event.event_value[2]
                 icon_id = f"{event.event_value[2].split('_')[0]}_icon"
                 self.chars, self.colors = self.atlas.get_element(icon_id)

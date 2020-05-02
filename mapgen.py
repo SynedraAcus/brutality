@@ -13,7 +13,6 @@ from listeners import SpawnItem, SpawningListener
 from plot import PlotManager
 
 
-# TODO: make restart that doesn't require directly interacting with the guts of every system
 def restart(level_manager, factory, dispatcher, loop):
     """
     Restart the game
@@ -35,7 +34,6 @@ def restart(level_manager, factory, dispatcher, loop):
         dispatcher.add_event(BearEvent('brut_close_menu', None))
         loop._run_iteration(0)
     level_manager.set_level('main_menu')
-
 
 
 class LevelManager(metaclass=Singleton):
@@ -62,7 +60,6 @@ class LevelManager(metaclass=Singleton):
                         'final': '_final',
                         'ghetto_one': '_ghetto_one',
                         'ghetto_test': '_ghetto_test',
-                        'ghetto_tutorial': '_ghetto_tutorial',
                         'lab_fight': '_lab_fight',
                         'department': '_department',
                         'boss_leave_it': '_boss_leave_it',
@@ -76,7 +73,6 @@ class LevelManager(metaclass=Singleton):
                                    'final': (10, 10),
                                    'main_menu': (10, 20),
                                    'ghetto_one': (20, 20),
-                                   'ghetto_tutorial': (5, 25),
                                    'department': (10, 20),
                                    'lab_fight': (10, 20),
                                    'boss_leave_it': (70, 20),
@@ -105,8 +101,8 @@ class LevelManager(metaclass=Singleton):
                 if entity.item_behaviour.owning_entity.id == self.player_entity:
                     return False
             except AttributeError:
-                 if entity.item_behaviour._future_owner == self.player_entity:
-                     return False
+                if entity.item_behaviour._future_owner == self.player_entity:
+                    return False
             return True
         if f'{self.player_entity}_hand' in entity.id:
             return False
@@ -153,6 +149,7 @@ class LevelManager(metaclass=Singleton):
         Generate the next goal level
         :return:
         """
+        # Boilerplate to be used in future development
         goal = PlotManager().current_goal
         player_pos = self.generate_level(goal.location,
                                          goal.level_types[goal.current_stage])
@@ -172,7 +169,6 @@ class LevelManager(metaclass=Singleton):
             raise ValueError(f'Invalid level style "{style}" for levelgen')
         if level_type not in self.types:
             raise ValueError(f'Invalid level type "{level_type}" for levelgen')
-        # TODO: decompose generate_level into methods
         player_pos = (20, 20)
         # Since the ScrollingECSLayout does not support resizing, "smaller"
         # levels will still need to be 500 chars wide. To simulate less
@@ -185,8 +181,8 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 51), size=(500, 9))
-            # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
-            # other items (possibly incuding more bags)
+            # Add some garbage. Each heap contains at least one garbage bag
+            # and 2 to 5 other items (possibly including more bags)
             garbage_pos = []
             for _ in range(6):
                 # Make sure garbage heaps are properly spaced
@@ -599,13 +595,13 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('scientist_enemy', (150, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
 
-
-
     # A dirty hack around passing the monologue to boss-talk properly. Three
     # methods cover three possible dialogues without affecting level itself
     # Later this hack would be replaced with properly drawing dialogue from
     # PlotManager directly in generate_level.
     # Same for _ghetto_expo_* methods
+
+
     def _boss_leave_it(self):
         """
         :return:
@@ -668,7 +664,6 @@ class LevelManager(metaclass=Singleton):
     def _lab_fight(self):
         self.generate_level('lab', 'corridor', 'boss_leave_it')
 
-
     def _boss_talk(self, monologue=('Line one', 'Line two'),
                    next_level='main_menu'):
         self.dispatcher.add_event(BearEvent('set_bg_sound',
@@ -696,6 +691,9 @@ class LevelManager(metaclass=Singleton):
                                    next_level=next_level)
 
     def _department(self):
+        """
+        A tutorial level
+        """
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
         self.factory.create_entity('level_switch', (415, 20),
                                    size=(85, 30), next_level='ghetto_one')
@@ -796,72 +794,3 @@ class LevelManager(metaclass=Singleton):
                                               'There is probably a reason these assholes\ngot out of their dens',))
         self.factory.create_entity('dept_wall_inner', (415, 0))
         self.factory.create_entity('dept_wall_inner', (395, 20))
-
-    def _ghetto_tutorial(self):
-        self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
-        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
-        self.factory.create_entity('floor', (0, 20), size=(500, 30))
-        # The purpose of this invisible collider is to have some space below the
-        # screen in case eg corpses are spawned at the very bottom
-        self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.spawner.add_spawn(SpawnItem(item='message',
-                                         pos=(150, 20),
-                                         size=(10, 30),
-                                         kwargs={
-                      'text': 'I don\'t see any punks',
-                      'destroy_condition': 'timeout',
-                      'lifetime': 5,
-                      'vy': -2}))
-        self.spawner.add_spawn(SpawnItem(item='message',
-                                         pos=(240, 20),
-                                         size=(10, 30),
-                                         kwargs={
-                                             'text': 'Oh, here\'s one',
-                                             'destroy_condition': 'timeout',
-                                             'lifetime': 5,
-                                             'vy': -2}))
-        self.spawner.add_spawn(SpawnItem(item='message',
-                                         pos=(430, 20),
-                                         size=(10, 30),
-                                         kwargs={
-                                             'text': 'That\'s all for now. Thanks for playing!',
-                                             'destroy_condition': 'timeout',
-                                             'lifetime': 5,
-                                             'vy': -2}))
-        # Add some garbage. Each heap contains at least one garbage bag and 2 to 5
-        # other items (possibly incuding more bags)
-        garbage_pos = []
-        for _ in range(6):
-            # Make sure garbage heaps are properly spaced
-            while True:
-                x = random.randint(0, 240)
-                max_dist = len(garbage_pos) > 0 \
-                           and max((abs(x - i) for i in garbage_pos)) \
-                           or 1000
-                if max_dist > 50:
-                    garbage_pos.append(x)
-                    break
-            self.factory.create_entity('garbage_bag', (x, 18))
-            for i in range(random.randint(3, 6)):
-                t = random.choice(('can', 'can2', 'cigarettes', 'garbage_bag',
-                                   'bucket', 'pizza_box'))
-                self.factory.create_entity(t, (x + random.randint(-5, 5),
-                                          22 + random.randint(-2, 2)))
-        # Central area
-        self.factory.create_entity('broken_car', (150, 12))
-        self.factory.create_entity('barricade_3', (250, 35))
-        self.factory.create_entity('bottle_punk', (270, 30))
-        # factory.create_entity('nunchaku_punk', (300, 20))
-        # Main enemy fortification
-        self.factory.create_entity('barricade_2', (320, 15))
-        self.factory.create_entity('barricade_1', (319, 23))
-        self.factory.create_entity('barricade_2', (340, 36))
-        self.factory.create_entity('barricade_3', (346, 25))
-        self.factory.create_entity('bottle_punk', (380, 32))
-        self.factory.create_entity('bottle_punk', (380, 25))
-        self.factory.create_entity('nunchaku_punk', (330, 15))
-        self.factory.create_entity('nunchaku_punk', (330, 25))
-        self.factory.create_entity('nunchaku_punk', (380, 15))
-        # Teleporter to the next level, probably
-        # Setting BG sound
-        self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))

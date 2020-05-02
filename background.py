@@ -66,8 +66,13 @@ def generate_tiled(atlas, pattern, size):
     """
     Generate a chars/colors pair, tiled with a given pattern.
     The pattern is always aligned up and left.
+
+    :param atlas: Atlas. Where assets should be taken from
+
     :param pattern: either str or a tuple. If a tuple, should be chars
     and colors; if str, should be a valid ID in self.atlas.
+
+    :param size: 2-tuple of ints. Size of the tiled widget
     :return:
     """
     if isinstance(pattern, str):
@@ -92,10 +97,7 @@ def generate_tiled(atlas, pattern, size):
 
 def tile_randomly(atlas, *patterns, size):
     """
-    Tile with patterns in random order
-    :param patterns:
-    :param size:
-    :return:
+    Tile with patterns in random order.
     """""
     tile_chars = []
     tile_colors = []
@@ -180,7 +182,7 @@ def choose_next(transitions):
     The dict should have the form of ``{element: probability}``, ie
     ``{'e1': 0.5, 'e2': 0.1, ...}``. Assumes that probabilities sum to unity.
     :param transitions: Probability dict
-    :return:
+    :return: element ID
     """
     roll = random.random()
     total = 0
@@ -234,8 +236,10 @@ def generate_bg(atlas, transition_dict, width):
             running_x += len(element[0][0])
         else:
             subwidth = width - running_x
-            ch = [[element[0][y][x] for x in range(subwidth)] for y in range(len(element[0]))]
-            col = [[element[1][y][x] for x in range(subwidth)] for y in range(len(element[1]))]
+            ch = [[element[0][y][x] for x in range(subwidth)]
+                                    for y in range(len(element[0]))]
+            col = [[element[1][y][x] for x in range(subwidth)]
+                                     for y in range(len(element[1]))]
             boxes.append((ch, col))
             running_x += subwidth
     return stack_boxes(*boxes, order='horizontal')

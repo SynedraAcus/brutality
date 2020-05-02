@@ -32,8 +32,8 @@ args = parser.parse_args()
 
 path_base = path.split(sys.argv[0])[0]
 #Bear_hug boilerplate
-t = BearTerminal(font_path=path.join(path_base, 'cp437_12x12.png'), size='81x61',
-                 title='Brutality', filter=['keyboard', 'mouse'])
+t = BearTerminal(font_path=path.join(path_base, 'cp437_12x12.png'),
+                 size='81x61', title='Brutality', filter=['keyboard', 'mouse'])
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
@@ -102,8 +102,10 @@ dispatcher.register_listener(right_item_window,
                              ('brut_pick_up', 'brut_change_ammo'))
 t.add_widget(right_item_window, (66, 51), layer=2)
 # Pseudo-events to let HUD know about the default fists
-dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'left', 'fist_pseudo')))
-dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'right', 'fist_pseudo')))
+dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'left',
+                                                'fist_pseudo')))
+dispatcher.add_event(BearEvent('brut_pick_up', ('cop_1', 'right',
+                                                'fist_pseudo')))
 t.add_widget(hp_bar, (19, 54), layer=2)
 
 ################################################################################
@@ -126,43 +128,44 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(sys.stderr)
 dispatcher.register_listener(logger, ['set_bg_sound'])
-sound_files = {'step': 'step.wav',
-               'shot': 'shot.wav',
-               'punch': 'punch.wav',
-               'spark': 'spark.wav',
-               'nunchaku': 'nunchaku_wave.wav',
-               'reload': 'pistol_reload.wav',
-               'pistol_empty': 'pistol_trigger.wav',
-               'molotov_break': 'molotov_brake.wav',
-               'molotov_fire': 'molotov_fire.wav',
-               'molotov_throw': 'molotov_throw.wav',
-               'balloon': 'balloon.wav',
-               'blue_machine': 'blue_machine.wav',
-               'drive': 'drive.wav',
-               'supercop_bg': 'supercop.wav',
-               'ghetto_walk_bg': 'ghetto_walk.wav',
-               'punk_bg': 'punk_bg.wav',
-               'punk_hit': 'punk_hey.wav',
-               'punk_death': 'punk_ho.wav',
-               'cop_hit': 'cop_dmg.wav',
-               'cop_death': 'cop_death.wav',
-               'male_dmg': 'male_dmg.wav',
-               'male_phrase_1': 'male_phrase_1.wav',
-               'male_phrase_2': 'male_phrase_2.wav',
-               'male_phrase_3': 'male_phrase_3.wav',
-               'male_phrase_4': 'male_phrase_4.wav',
-               'male_phrase_5': 'male_phrase_5.wav',
-               'female_phrase_1': 'f_scientist_1.wav',
-               'female_phrase_2': 'f_scientist_2.wav',
-               'female_phrase_3': 'f_scientist_3.wav',
-               'female_phrase_4': 'f_scientist_4.wav',
-               'female_phrase_5': 'f_scientist_5.wav',
-               'bandage': 'bondage.wav',
-               'target_hit': 'target.wav',
-               'item_drop': 'item_drop.wav',
-               'item_grab': 'item_grab.wav',
-               'menu': 'menu_switch.wav'}
+# Sound
 if not args.disable_sound:
+    sound_files = {'step': 'step.wav',
+                   'shot': 'shot.wav',
+                   'punch': 'punch.wav',
+                   'spark': 'spark.wav',
+                   'nunchaku': 'nunchaku_wave.wav',
+                   'reload': 'pistol_reload.wav',
+                   'pistol_empty': 'pistol_trigger.wav',
+                   'molotov_break': 'molotov_brake.wav',
+                   'molotov_fire': 'molotov_fire.wav',
+                   'molotov_throw': 'molotov_throw.wav',
+                   'balloon': 'balloon.wav',
+                   'blue_machine': 'blue_machine.wav',
+                   'drive': 'drive.wav',
+                   'supercop_bg': 'supercop.wav',
+                   'ghetto_walk_bg': 'ghetto_walk.wav',
+                   'punk_bg': 'punk_bg.wav',
+                   'punk_hit': 'punk_hey.wav',
+                   'punk_death': 'punk_ho.wav',
+                   'cop_hit': 'cop_dmg.wav',
+                   'cop_death': 'cop_death.wav',
+                   'male_dmg': 'male_dmg.wav',
+                   'male_phrase_1': 'male_phrase_1.wav',
+                   'male_phrase_2': 'male_phrase_2.wav',
+                   'male_phrase_3': 'male_phrase_3.wav',
+                   'male_phrase_4': 'male_phrase_4.wav',
+                   'male_phrase_5': 'male_phrase_5.wav',
+                   'female_phrase_1': 'f_scientist_1.wav',
+                   'female_phrase_2': 'f_scientist_2.wav',
+                   'female_phrase_3': 'f_scientist_3.wav',
+                   'female_phrase_4': 'f_scientist_4.wav',
+                   'female_phrase_5': 'f_scientist_5.wav',
+                   'bandage': 'bondage.wav',
+                   'target_hit': 'target.wav',
+                   'item_drop': 'item_drop.wav',
+                   'item_grab': 'item_grab.wav',
+                   'menu': 'menu_switch.wav'}
     from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:
@@ -171,7 +174,9 @@ if not args.disable_sound:
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
 
-# Message spawner for tutorial messages
+# Spawner for creating various stuff when player walks to a predetermined area
+# currently only used for tutorial messages, but can be employed by mapgen to eg
+# drop enemies behind the player's back
 spawner = SpawningListener('cop_1', factory=factory)
 dispatcher.register_listener(spawner, 'ecs_move')
 
@@ -255,6 +260,7 @@ item_descriptions = ItemDescriptionListener(dispatcher, terminal=t,
 dispatcher.register_listener(item_descriptions, ['brut_show_items',
                                                  'brut_close_menu',
                                                  'key_down'])
+
 ################################################################################
 # Creating initial entities
 ################################################################################
@@ -264,8 +270,8 @@ if args.s:
 
 else:
     factory.create_entity('cop', (5, 25))
-    # RUn a single tick so EntityTracker is aware of everything before level
-    # is being generated
+    # Run a single tick so EntityTracker is aware of player before level
+    # starts generating
     loop._run_iteration(0)
     levelgen.set_level('main_menu')
 
@@ -282,11 +288,11 @@ except Exception as e:
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
 
-#TODO: write appropriate item descriptions
+# TODO: write appropriate item descriptions
 # Not really pressing, but it's better to avoid stupid jokes in item
 # descriptions. The general tone should be *somewhat* serious.
 
-#TODO: highlight collectables somehow
+# TODO: highlight collectables somehow
 # Currently they are not very visible, especially with bright punk corpses.
 
 # TODO: some new enemy types
@@ -297,8 +303,6 @@ except Exception as e:
 # indoor level
 
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
-
-# TODO: Enemy taunts (in-combat phrases)
 
 # TODO: drop coins or something from downed enemies
 # This should create an incentive to avoid running through the level without

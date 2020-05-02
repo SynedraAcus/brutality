@@ -24,10 +24,12 @@ def find_closest_enemy(entity, perception_distance, enemy_factions=None):
     """
     if enemy_factions:
         enemies = EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction in enemy_factions)
+            lambda x: hasattr(x, 'faction')
+                      and x.faction.faction in enemy_factions)
     else:
         enemies = EntityTracker().filter_entities(
-            lambda x: hasattr(x,'faction') and x.faction.faction != entity.faction.faction)
+            lambda x: hasattr(x, 'faction')
+                      and x.faction.faction != entity.faction.faction)
     current_closest = None
     min_dist = None
     for enemy in enemies:
@@ -235,8 +237,8 @@ class RunawayAIState(AIState):
 
     def switch_state(self):
         self.current_closest = find_closest_enemy(self.owner,
-                                             self.enemy_perception_distance,
-                                             self.enemy_factions)
+                                                  self.enemy_perception_distance,
+                                                  self.enemy_factions)
         if self.current_closest:
             return None
         else:
@@ -330,7 +332,8 @@ class TalkAIState(AIState):
         else:
             self.owner.position.turn('r')
         # Center on the first line
-        x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0]) - self.owner.widget.width) / 2)
+        x_offset = round((len(self.monologue[self.next_phrase].split('\n')[0])
+                          - self.owner.widget.width) / 2)
         if self.phrase_sounds and (self.next_phrase % 2 == 0):
             if len(self.phrase_sounds) > 1:
                 sound = choice(self.phrase_sounds)
@@ -439,7 +442,6 @@ class CombatAIState(AIState):
                         (not self.left_range[0] or abs(dx) < self.left_range[0]):
                     # If too close to use any available weapon, tweak dx for
                     # walk direction calculations
-                    print('too close')
                     ranges = (self.left_range[0] if self.left_range[0] else 1000,
                               self.right_range[0] if self.right_range[0] else 1000)
                     r = min(ranges)
@@ -454,6 +456,10 @@ class CombatAIState(AIState):
     def on_event(self, event):
         # This part is for switching direction upon collision. It prevents
         # enemies from stupidly banging into the first wall they encounter
-        if event.event_type == 'ecs_collision' and event.event_value[0] == self.owner.id:
+        if event.event_type == 'ecs_collision' and \
+                event.event_value[0] == self.owner.id:
+            if EntityTracker().entities[event.event_value[1]].collision.passable:
+                # Ignore collisions into passable objects
+                return
             self.walk_direction = (randint(-1, 1), randint(-1, 1))
             self.steps_left = randint(4, 7)

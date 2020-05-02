@@ -4,7 +4,8 @@ An ASCII-art beat'em'up.
 
 ### Installation
 
-Download, unpack and launch `game.py`
+Download, unpack and launch `game.py`. Alternatively, builds for Windows and
+64-bit Linux can be downloaded from [Itch](https://synedra.itch.io/brutality)
 
 ### Dependencies
 
@@ -28,6 +29,6 @@ are available under CC-BY 3.0.
 
 TL;DR: you are free to use both code and graphics however you please
 (including commercially), on the condition that you provide a note saying
-that it was originally created by A.A. Morozov aka synedraacus.
+that it was originally created by A. A. Morozov aka *synedraacus*.
 
-If you wanna use sounds, ask Tesalado for the permission. 
+If you wanna use sounds, ask Tesalado for the permission.
