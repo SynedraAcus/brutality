@@ -458,8 +458,12 @@ class CombatAIState(AIState):
         # enemies from stupidly banging into the first wall they encounter
         if event.event_type == 'ecs_collision' and \
                 event.event_value[0] == self.owner.id:
-            if EntityTracker().entities[event.event_value[1]].collision.passable:
-                # Ignore collisions into passable objects
+            try:
+                if EntityTracker().entities[event.event_value[1]].collision.passable:
+                    # Ignore collisions into passable objects
+                    return
+            except KeyError:
+                # Another appearance of collision into just-destroyed entity
                 return
             self.walk_direction = (randint(-1, 1), randint(-1, 1))
             self.steps_left = randint(4, 7)
