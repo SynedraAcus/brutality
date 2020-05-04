@@ -529,8 +529,8 @@ class CharacterHealthComponent(HealthComponent):
             EntityTracker().entities[self.owner.hands.right_item].destructor.destroy()
             # Dump score ball, if any
             if self.score:
-                self.owner.spawner.spawn('score_pickup', (randint(-5, 5),
-                                                          self.owner.widget.height),
+                self.owner.spawner.spawn('score_pickup', (randint(-3, 6),
+                                                          self.owner.widget.height-2),
                                          score=self.score)
             if self.death_sounds:
                 if self.owner.id == 'cop_1':

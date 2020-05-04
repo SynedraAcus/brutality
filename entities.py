@@ -1468,6 +1468,7 @@ class EntityFactory:
         entity.add_component(HealingItemBehaviourComponent(self.dispatcher,
                                                     single_use=True,
                                                     use_sound='bandage',
+                                                    healing=5,
                                                     owning_entity=owning_entity,
                                                     item_name='Bandage',
                                                     item_description='A piece of sterile bandage.\nIt isn\'t much, but still \na lot better than nothing.'))
