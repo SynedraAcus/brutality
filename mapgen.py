@@ -521,6 +521,7 @@ class LevelManager(metaclass=Singleton):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'supercop_bg'))
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
+        self.factory.create_entity('invis', (0, 51), size=(500, 9))
         self.factory.create_entity('female_scientist', (20, 15),
                                    monologue=('Welcome to the BRUTALITY prototype',
                                               'Try Esc to access menu\nand WASD/arrows to walk',
@@ -536,6 +537,14 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('level_switch', (49, 23),
                                    size=(60, 8),
                                    next_level='department')
+        # Debug lab teleport and scores
+        # Remove from release code!
+        self.factory.create_entity('level_switch', (120, 23),
+                                   size=(20, 8),
+                                   next_level='lab_fight')
+        for i in range(120, 150, 5):
+            self.factory.create_entity('score_pickup', (i, 30))
+        self.factory.create_entity('nunchaku_punk', (170, 10))
 
     def _final(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))

@@ -512,3 +512,56 @@ class ItemDescriptionListener(Listener):
             self.is_showing = False
             self.terminal.remove_widget(self.widget)
             self.dispatcher.unregister_listener(self.widget, 'all')
+
+
+class ScoreListener(Listener):
+    """
+    A listener that keeps track of the score.
+
+    It orders score_widget to redraw itself as necessary and emits healing
+    events.
+    """
+    def __init__(self, *args, terminal,
+                 dispatcher,
+                 score_widget,
+                 score=0,
+                 player_entity='cop_1',
+                 heal_frequency=50,
+                 healing=1,
+                 **kwargs):
+        super().__init__()
+        self.dispatcher = dispatcher
+        self.terminal = terminal
+        self.score_widget = score_widget
+        self.player_entity = player_entity
+        self.heal_frequency = heal_frequency
+        self.healing = healing
+        self.score = score
+        self.last_heal = 0
+        self.is_highlighting = False
+        self.highlighted_for = 0
+
+    def on_event(self, event):
+        if event.event_type == 'brut_reset_score':
+            self.score = event.event_value
+            self.score_widget.score = self.score
+            self.terminal.update_widget(self.score_widget)
+        elif event.event_type == 'brut_score':
+            self.score += event.event_value
+            self.score_widget.score = self.score
+            self.terminal.update_widget(self.score_widget)
+            if self.score // self.heal_frequency > self.last_heal:
+                self.last_heal = self.score // self.heal_frequency
+                self.dispatcher.add_event(BearEvent('brut_heal',
+                                                    (self.player_entity, 1)))
+                # Blink score widget
+                self.score_widget.colors = [['green' for _ in range(5)]]
+                self.terminal.update_widget(self.score_widget)
+                self.is_highlighting = True
+                self.highlighted_for = 0
+        elif event.event_type == 'tick' and self.is_highlighting:
+            self.highlighted_for += event.event_value
+            if self.highlighted_for >= 0.5:
+                self.score_widget.colors = [['#9E9E9E' for _ in range(5)]]
+                self.terminal.update_widget(self.score_widget)
+                self.is_highlighting = False

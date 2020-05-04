@@ -107,6 +107,36 @@ class ItemWindow(Widget):
             self.chars[i][13] = ' '
 
 
+class ScoreWidget(Widget):
+    """
+    A widget that shows score
+    """
+    def __init__(self, score=0):
+        self._score = 0
+        self.score = score
+        chars = [['0' for _ in range(5)]]
+        colors = copy_shape(chars, '#9E9E9E')
+        self.update_chars()
+        super().__init__(chars, colors)
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise TypeError(f'ScoreWidget score set to {type(value)} instead of int')
+        self._score = value
+        self.update_chars()
+
+    def update_chars(self):
+        self.chars = [[x for x in str(self.score).zfill(5)]]
+
+    def blink(self):
+        pass
+
+
 class TypingLabelWidget(Layout):
     """
     Looks like a Label, but prints its content with little animation. It is

@@ -518,6 +518,22 @@ class EntityFactory:
                                                      depth=2))
         return e
 
+    def _create_score_pickup(self, entity_id, **kwargs):
+        e = Entity(entity_id)
+        widget = SimpleAnimationWidget(Animation((self.atlas.get_element('coin_1'),
+                                                  self.atlas.get_element('coin_3'),
+                                                  self.atlas.get_element('coin_2')),
+                                                 4),
+                                       emit_ecs=True)
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component((DestructorComponent(self.dispatcher)))
+        e.add_component(ScorePickupCollisionComponent(self.dispatcher,
+                                                      passable=True,
+                                                      score=5,
+                                                      player_entity='cop_1'))
+        return e
+
 ################################################################################
 # CHARACTERS AND HANDS
 ################################################################################

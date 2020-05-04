@@ -16,10 +16,11 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
 
 from entities import EntityFactory
 from listeners import ScrollListener, SavingListener, LoadingListener, \
-    SpawningListener, LevelSwitchListener, MenuListener, ItemDescriptionListener
+    SpawningListener, LevelSwitchListener, MenuListener, \
+    ItemDescriptionListener, ScoreListener
 from mapgen import LevelManager, restart
 from plot import Goal
-from widgets import HitpointBar, ItemWindow
+from widgets import HitpointBar, ItemWindow, ScoreWidget
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
@@ -67,6 +68,8 @@ dispatcher.register_event_type('brut_use_item') # Entity ID of used item
 dispatcher.register_event_type('brut_use_hand') #hand entity ID
 dispatcher.register_event_type('brut_pick_up') # owner entity ID, which hand (left or right), picked up entity ID
 dispatcher.register_event_type('brut_change_ammo') # Item entity ID, new ammo value
+dispatcher.register_event_type('brut_score') # Value (add to score)
+dispatcher.register_event_type('brut_reset_score') # Value (set score to)
 # View operations
 dispatcher.register_event_type('brut_focus')  # See listeners.ScrollListener
 dispatcher.register_event_type('brut_temporary_focus') # Entity ID
@@ -197,7 +200,17 @@ levelgen.level_switch = level_switch
 saving = SavingListener()
 dispatcher.register_listener(saving, 'brut_save_game')
 loading = LoadingListener(dispatcher, factory, levelgen, loop)
-dispatcher.register_listener(loading, 'brut_load_game')
+dispatcher.register_listener(loading, 'brut_load_game')\
+
+# Score tracking
+score_widget = ScoreWidget(score=0)
+t.add_widget(score_widget, (41, 51))
+score = ScoreListener(dispatcher=dispatcher,
+                      terminal=t,
+                      score_widget=score_widget,
+                      score=0,
+                      player_entity='cop_1', heal_frequency=10)
+dispatcher.register_listener(score, ('tick', 'brut_score', 'brut_reset_score'))
 
 ################################################################################
 # Goals

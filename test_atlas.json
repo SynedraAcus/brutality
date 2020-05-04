@@ -203,6 +203,27 @@
     "ysize": 2
   },
   {
+    "name": "coin_1",
+    "x": 1,
+    "y": 57,
+    "xsize": 3,
+    "ysize": 3
+  },
+  {
+    "name": "coin_2",
+    "x": 1,
+    "y": 61,
+    "xsize": 3,
+    "ysize": 3
+  },
+  {
+    "name": "coin_3",
+    "x": 1,
+    "y": 65,
+    "xsize": 3,
+    "ysize": 3
+  },
+  {
     "name": "nunchaku_punk_l_1",
     "x": 30,
     "y": 19,

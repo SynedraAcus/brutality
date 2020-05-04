@@ -363,6 +363,24 @@ class AmmoPickupCollisionComponent(CollisionComponent):
                 self.owner.destructor.destroy()
 
 
+class ScorePickupCollisionComponent(CollisionComponent):
+    """
+    A collision component for score pickup
+    """
+    def __init__(self, *args, score=10, player_entity='cop_1', **kwargs):
+        super().__init__(*args, **kwargs)
+        if not isinstance(score, int):
+            raise TypeError(f'Score kwarg for ScorePickupCollisionComponent is {type(score)} instead of int')
+        self.score = score
+        self.player_entity = player_entity
+
+    def collided_by(self, other):
+        # Only work when collided into by the cop
+        if other == self.player_entity:
+            self.dispatcher.add_event(BearEvent('brut_score', self.score))
+            self.owner.destructor.destroy()
+
+
 class GrenadeComponent(Component):
     """
     The grenade behaviour.
