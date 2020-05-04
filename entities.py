@@ -518,7 +518,7 @@ class EntityFactory:
                                                      depth=2))
         return e
 
-    def _create_score_pickup(self, entity_id, **kwargs):
+    def _create_score_pickup(self, entity_id, score=5, **kwargs):
         e = Entity(entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element('coin_1'),
                                                   self.atlas.get_element('coin_3'),
@@ -530,7 +530,7 @@ class EntityFactory:
         e.add_component((DestructorComponent(self.dispatcher)))
         e.add_component(ScorePickupCollisionComponent(self.dispatcher,
                                                       passable=True,
-                                                      score=5,
+                                                      score=score,
                                                       player_entity='cop_1'))
         return e
 
@@ -759,6 +759,7 @@ class EntityFactory:
         nunchaku.add_component(CharacterHealthComponent(self.dispatcher,
                                                         corpse='nunchaku_punk_corpse',
                                                         hitpoints=7,
+                                                        score=5,
                                                         hit_sounds=('punk_hit',
                                                                     'punk_death'),
                                                         death_sounds=('punk_death', )
@@ -841,6 +842,7 @@ class EntityFactory:
         punk.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='bottle_punk_corpse',
                                                     hitpoints=7,
+                                                    score=5,
                                                     hit_sounds=('punk_hit',
                                                                 'punk_death'),
                                                     death_sounds=('punk_death', )))

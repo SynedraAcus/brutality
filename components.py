@@ -500,13 +500,15 @@ class CharacterHealthComponent(HealthComponent):
     DestructorComponent
     """
     def __init__(self, *args, corpse=None, heal_sounds=('bandage', ),
-                 hit_sounds=None, death_sounds=None, **kwargs):
+                 hit_sounds=None, death_sounds=None,
+                 score=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.corpse_type = corpse
         self.hit_sounds = hit_sounds
         self.heal_sounds = heal_sounds
         self.death_sounds = death_sounds
         self.last_hp = self.hitpoints
+        self.score = score
 
     def process_hitpoint_update(self):
         if 0 < self.hitpoints < self.last_hp and self.hit_sounds:
@@ -525,6 +527,11 @@ class CharacterHealthComponent(HealthComponent):
             self.owner.hands.drop('left', restore_fist=True)
             EntityTracker().entities[self.owner.hands.left_item].destructor.destroy()
             EntityTracker().entities[self.owner.hands.right_item].destructor.destroy()
+            # Dump score ball, if any
+            if self.score:
+                self.owner.spawner.spawn('score_pickup', (randint(-5, 5),
+                                                          self.owner.widget.height),
+                                         score=self.score)
             if self.death_sounds:
                 if self.owner.id == 'cop_1':
                     self.dispatcher.add_event(BearEvent('set_bg_sound', None))
