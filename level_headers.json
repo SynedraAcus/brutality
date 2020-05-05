@@ -1,0 +1,14 @@
+[
+  {"name": "ghetto_title",
+  "x": 0,
+  "y": 0,
+  "xsize": 81,
+  "ysize": 13},
+  {
+    "name": "lab_title",
+    "x": 0,
+    "y": 15,
+    "xsize": 81,
+    "ysize": 14
+  }
+]

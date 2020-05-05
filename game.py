@@ -46,7 +46,9 @@ atlas = Multiatlas((Atlas(XpLoader(path.join(path_base, 'test_atlas.xp')),
                     Atlas(XpLoader(path.join(path_base, 'department.xp')),
                           path.join(path_base, 'department.json')),
                     Atlas(XpLoader(path.join(path_base, 'scientists.xp')),
-                          path.join(path_base, 'scientists.json'))))
+                          path.join(path_base, 'scientists.json')),
+                    Atlas(XpLoader(path.join(path_base, 'level_headers.xp')),
+                          path.join(path_base, 'level_headers.json'))))
 
 # Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]
@@ -129,7 +131,7 @@ dispatcher.register_listener(ScrollListener(layout=layout,
                              'ecs_destroy'])
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
-logger = LoggingListener(open('run.log', mode='w'))
+logger = LoggingListener(open(path.join(path_base, 'run.log'), mode='w'))
 dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy'])
 # Sound
 if not args.disable_sound:
@@ -297,11 +299,11 @@ else:
 # Actually starting
 try:
     loop.run()
-except Exception as e:
+except Exception:
     # Should the game crash with an unhandled exception, it is logged to the
     # file
     print(''.join(traceback.format_exception(*sys.exc_info())),
-          file=open('crash_exception.log', mode='w'))
+          file=open(path.join(path_base, 'crash_exception.log'), mode='w'))
 
 # TODO: redraw ghetto BG
 # Currently they look like it's possible to turn into some alley, which it isn't
