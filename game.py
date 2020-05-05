@@ -161,6 +161,8 @@ if not args.disable_sound:
                    'cop_death': 'cop_death.wav',
                    'male_dmg': 'male_dmg.wav',
                    'female_dmg': 'fem_dmg.wav',
+                   'male_death': 'male_death.wav',
+                   'female_death': 'fem_death.wav',
                    'male_phrase_1': 'male_phrase_1.wav',
                    'male_phrase_2': 'male_phrase_2.wav',
                    'male_phrase_3': 'male_phrase_3.wav',

@@ -37,6 +37,8 @@ class HitpointBar(Layout):
     def on_event(self, event):
         if event.event_type == 'brut_damage' and event.event_value[0] == self.target_entity:
             self.current_hp -= event.event_value[1]
+            if self.current_hp < 0:
+                self.current_hp = 0
             self.need_update = True
         elif event.event_type == 'brut_heal' and event.event_value[0] == self.target_entity:
             self.current_hp += event.event_value[1]

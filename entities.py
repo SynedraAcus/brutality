@@ -951,7 +951,7 @@ class EntityFactory:
                                                     hitpoints=5,
                                                     hit_sounds=('female_dmg', ),
                                                     death_sounds=(
-                                                    'punk_death',)))
+                                                    'female_death',)))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl',
                                 'scientist_hand_forward',
@@ -1054,7 +1054,8 @@ class EntityFactory:
                                                          hit_sounds=(
                                                              'male_dmg',),
                                                          death_sounds=(
-                                                             'punk_death',)))
+                                                             'male_death',),
+                                                         score=5))
         # Creating hand entities
         f_l = self._create_hand(f'{entity_id}_hand_fl',
                                 f'{hand_prefix}_forward',
