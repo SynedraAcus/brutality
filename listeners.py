@@ -326,7 +326,7 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
 
     Currently only able to switch them in a fixed sequence.
     """
-    def __init__(self, player_id,  current_level=None,
+    def __init__(self, player_id, factory, current_level=None,
                  level_manager=None, level_sequence={}, **kwargs):
         # This will permit multiple exits per level
         super().__init__(**kwargs)
@@ -334,6 +334,7 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
         self.player_entity = None
         # LevelManager type not checked to avoid circular import
         self.level_manager = level_manager
+        self.factory = factory
         self.current_level = current_level
         for x in level_sequence:
             if x not in self.level_manager.methods:
@@ -357,11 +358,18 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
             if event.event_value[1] and 'level_switch' in event.event_value[1]:
                 self.is_changing = True
                 self.next_level = EntityTracker().entities[event.event_value[1]].level_switch.next_level
-                return BearEvent('play_sound', 'drive')
+
         elif event.event_type == 'tick' and self.is_changing:
             self.is_changing = False
             # next_level = self.level_sequence[self.current_level]
             self.level_manager.set_level(self.next_level)
+            if self.next_level in self.level_manager.titles:
+                self.factory.create_entity('title', (0, 15),
+                                           image_id=self.level_manager.titles[
+                                               self.next_level],
+                                           bg_sound=self.level_manager.sounds[
+                                               self.next_level])
+            return BearEvent('play_sound', 'drive')
             self.next_level = None
 
     def disable(self):

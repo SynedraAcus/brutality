@@ -80,6 +80,12 @@ class LevelManager(metaclass=Singleton):
                                    'ghetto_expo_h': (20, 20),
                                    'ghetto_expo_d': (20, 20),
                                    'boss_failed': (80, 20)}
+        self.titles = {'ghetto_one': 'ghetto_title',
+                       'ghetto_expo_d': 'ghetto_title',
+                       'lab_fight': 'lab_title'}
+        self.sounds = {'ghetto_one': 'punk_bg',
+                       'ghetto_expo_d': 'punk_bg',
+                       'lab_fight': 'lab_bg'}
         self.styles = {'ghetto', 'dept', 'lab'}
         self.types = {'corridor'}
 
@@ -117,6 +123,7 @@ class LevelManager(metaclass=Singleton):
         self.spawner.remove_spawns()
         # Disable level switch to make sure it doesn't trigger mid-level change
         self.level_switch.disable()
+        self.dispatcher.add_event(BearEvent('set_bg_sound', None))
 
     def set_level(self, level_id):
         """
@@ -177,7 +184,6 @@ class LevelManager(metaclass=Singleton):
 
         # Generate style basics: BG and decorations
         if style == 'ghetto':
-            self.dispatcher.add_event(BearEvent('set_bg_sound', 'punk_bg'))
             self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -208,7 +214,6 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('invis', (0, 50), size=(500, 9))
             # No garbage or similar stuff on the department floor
         elif style == 'lab':
-            self.dispatcher.add_event(BearEvent('set_bg_sound', 'lab_bg'))
             self.factory.create_entity('lab_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
             self.factory.create_entity('invis', (0, 51), size=(500, 9))
@@ -231,7 +236,7 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('barricade_3', (425, 40))
             self.factory.create_entity('bottle_punk', (460, 30))
             self.factory.create_entity('bottle_punk', (460, 25))
-            self.factory.create_entity('bottle_punk', (460, 10))
+            self.factory.create_entity('bottle_punk', (465, 10))
             running_len = 450
         elif style == 'dept' and level_type == 'corridor':
             # In case of the department, the map is made of rooms

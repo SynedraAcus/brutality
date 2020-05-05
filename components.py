@@ -422,7 +422,16 @@ class GrenadeComponent(Component):
                   'target_y': self.target_y})
         return dumps(d)
 
-    
+
+class SoundDestructorComponent(DestructorComponent):
+    def __init__(self, *args, bg_sound='supercop_bg', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bg_sound = bg_sound
+
+    def destroy(self):
+        self.dispatcher.add_event(BearEvent('set_bg_sound', self.bg_sound))
+        super().destroy()
+
 class HealthComponent(Component):
     """
     A component that monitors owner's health and processes its changes.

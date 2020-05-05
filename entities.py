@@ -151,28 +151,70 @@ class EntityFactory:
         :param emit_show: bool. If True, emits ecs_add event
         :return:
         """
-        try:
-            if entity_type in self.counts:
-                self.counts[entity_type] += 1
-            else:
-                self.counts[entity_type] = 1
-            if entity_type in self.decorations:
-                entity = self.generate_inactive_decoration(f'{entity_type}_{self.counts[entity_type]}',
-                                                           entity_type)
-            elif entity_type in self.barriers:
-                entity = self.generate_barrier(f'{entity_type}_{self.counts[entity_type]}',
-                                               entity_type)
-            else:
+        if entity_type in self.counts:
+            self.counts[entity_type] += 1
+        else:
+            self.counts[entity_type] = 1
+        if entity_type in self.decorations:
+            entity = self.generate_inactive_decoration(f'{entity_type}_{self.counts[entity_type]}',
+                                                       entity_type)
+        elif entity_type in self.barriers:
+            entity = self.generate_barrier(f'{entity_type}_{self.counts[entity_type]}',
+                                           entity_type)
+        else:
+            try:
                 entity = getattr(self, f'_create_{entity_type}')(
                     entity_id=f'{entity_type}_{self.counts[entity_type]}',
                     **kwargs)
-        except AttributeError:
-            raise BearECSException(f'Incorrect entity type {entity_type}')
+            except AttributeError:
+                raise BearECSException(f'Incorrect entity type {entity_type}')
         #Setting position of a child
         entity.position.move(*pos, emit_event=False)
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         if emit_show:
             self.dispatcher.add_event(BearEvent('ecs_add', (entity.id, *pos)))
+
+    def generate_inactive_decoration(self, entity_id, entity_type, **kwargs):
+        """
+        Generate a simple Entity with Widget and Position, but nothing else.
+
+        This method is meant for decorative elements (ie some garbage on the
+        floor). All _create_{garbage_type_item} methods will redirect here to
+        avoid writing tons of boilerplate methods.
+        :param entity_id: Entity ID
+        :param type: a type of object.
+        :return:
+        """
+        e = Entity(id=entity_id)
+        widget = Widget(*self.atlas.get_element(entity_type))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(DestructorComponent(self.dispatcher))
+        return e
+
+    def generate_barrier(self, entity_id, entity_type, **kwargs):
+        """
+        Generate a simple Entity with Widget, Position, and CollisionComponent.
+
+        This method is used for various un-passable entities without complex
+        logic or animations, like walls, fences, barriers, trees and whatnot.
+        It relies on the factory class having self.face_positions,
+        self.face_sizes and self.depths dictionaries for CollisionComponents.
+        :param entity_id:
+        :param type:
+        :return:
+        """
+        e = Entity(id=entity_id)
+        widget = Widget(*self.atlas.get_element(entity_type))
+        e.add_component(WidgetComponent(self.dispatcher, widget))
+        e.add_component(PositionComponent(self.dispatcher))
+        e.add_component(CollisionComponent(self.dispatcher,
+                                           face_position=self.face_positions[entity_type],
+                                           face_size=self.face_sizes[entity_type],
+                                           z_shift=(1, -1),
+                                           depth=self.depths[entity_type]))
+        e.add_component(DestructorComponent(self.dispatcher))
+        return e
 
     def _create_message(self, entity_id, text = 'Sample text\nsample text',
                         vx=0, vy=0, destroy_condition='keypress', lifetime=2.0,
@@ -230,47 +272,21 @@ class EntityFactory:
         floor.add_component(DestructorComponent(self.dispatcher))
         return floor
 
-    def generate_inactive_decoration(self, entity_id, entity_type, **kwargs):
-        """
-        Generate a simple Entity with Widget and Position, but nothing else.
-
-        This method is meant for decorative elements (ie some garbage on the
-        floor). All _create_{garbage_type_item} methods will redirect here to
-        avoid writing tons of boilerplate methods.
-        :param entity_id: Entity ID
-        :param type: a type of object.
-        :return:
-        """
-        e = Entity(id=entity_id)
-        widget = Widget(*self.atlas.get_element(entity_type))
-        e.add_component(WidgetComponent(self.dispatcher, widget))
-        e.add_component(PositionComponent(self.dispatcher))
-        e.add_component(DestructorComponent(self.dispatcher))
+    def _create_title(self, entity_id, image_id='ghetto_title',
+                      bg_sound='ghetto_walk_bg'):
+        e = Entity(entity_id)
+        e.add_component(WidgetComponent(self.dispatcher,
+                                        Widget(*self.atlas.get_element(image_id),
+                                               z_level=100)))
+        e.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        e.add_component(SoundDestructorComponent(self.dispatcher,
+                                                 bg_sound=bg_sound))
+        e.add_component(DecayComponent(self.dispatcher,
+                                       destroy_condition='timeout',
+                                       lifetime=1.0))
         return e
 
-    def generate_barrier(self, entity_id, entity_type, **kwargs):
-        """
-        Generate a simple Entity with Widget, Position, and CollisionComponent.
 
-        This method is used for various un-passable entities without complex
-        logic or animations, like walls, fences, barriers, trees and whatnot.
-        It relies on the factory class having self.face_positions,
-        self.face_sizes and self.depths dictionaries for CollisionComponents.
-        :param entity_id:
-        :param type:
-        :return:
-        """
-        e = Entity(id=entity_id)
-        widget = Widget(*self.atlas.get_element(entity_type))
-        e.add_component(WidgetComponent(self.dispatcher, widget))
-        e.add_component(PositionComponent(self.dispatcher))
-        e.add_component(CollisionComponent(self.dispatcher,
-                                           face_position=self.face_positions[entity_type],
-                                           face_size=self.face_sizes[entity_type],
-                                           z_shift=(1, -1),
-                                           depth=self.depths[entity_type]))
-        e.add_component(DestructorComponent(self.dispatcher))
-        return e
 
     def _create_particle_explosion(self, entity_id, size=(10, 10),
                                    character='*', char_count=10, char_speed=5,
