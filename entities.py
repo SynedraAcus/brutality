@@ -1357,6 +1357,7 @@ class EntityFactory:
                                                              'l': (2, -2)}},
                                     damage=3,
                                     use_delay=0.35,
+                                    use_sound='fist',
                                     item_name='Fist',
                                     item_description='Your own hand in punch mode.\nIt is not gonna break down\nany walls, but at least it\'s\nalways with you.'))
         entity.add_component(HidingComponent(self.dispatcher,

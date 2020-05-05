@@ -135,6 +135,7 @@ dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy'])
 if not args.disable_sound:
     sound_files = {'step': 'step.wav',
                    'shot': 'shot.wav',
+                   'fist': 'fist.wav',
                    'punch': 'punch.wav',
                    'spark': 'spark.wav',
                    'nunchaku': 'nunchaku_wave.wav',
@@ -320,7 +321,3 @@ except Exception as e:
 # indoor level
 
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
-
-# TODO: drop coins or something from downed enemies
-# This should create an incentive to avoid running through the level without
-# fighting enemies
