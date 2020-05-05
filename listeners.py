@@ -546,6 +546,7 @@ class ScoreListener(Listener):
             self.score = event.event_value
             self.score_widget.score = self.score
             self.terminal.update_widget(self.score_widget)
+            self.last_heal = 0
         elif event.event_type == 'brut_score':
             self.score += event.event_value
             self.score_widget.score = self.score

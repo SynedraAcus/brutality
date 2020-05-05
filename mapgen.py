@@ -25,14 +25,14 @@ def restart(level_manager, factory, dispatcher, loop):
         missing_hp = player_entity.health.max_hitpoints - player_entity.health.hitpoints
         dispatcher.add_event(BearEvent('brut_heal', ('cop_1',
                                                      missing_hp)))
-        dispatcher.add_event(BearEvent('brut_close_menu', None))
     except KeyError:
         player_entity = factory._create_cop('cop_1')
         dispatcher.add_event(BearEvent('ecs_create', player_entity))
         dispatcher.add_event(BearEvent('ecs_add', ('cop_1', 20, 20)))
         dispatcher.add_event(BearEvent('brut_heal', ('cop_1', 100)))
-        dispatcher.add_event(BearEvent('brut_close_menu', None))
         loop._run_iteration(0)
+    dispatcher.add_event(BearEvent('brut_reset_score', 0))
+    dispatcher.add_event(BearEvent('brut_close_menu', None))
     level_manager.set_level('main_menu')
 
 
