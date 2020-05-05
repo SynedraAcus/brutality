@@ -780,7 +780,7 @@ class FactionComponent(Component):
     :param phrase_color: str. The color that should be used in speech
     """
     colors = {'police': '#aaaaaa',
-              'scientists': '#0059B2',
+              'scientists': '#aaaaaa',
               'punks': '#ffffff',
               'placeholder': '#ffffff'}
 

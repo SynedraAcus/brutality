@@ -351,9 +351,6 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
                 event.event_value[0] == self.player_id:
             if not self.player_entity:
                 self.player_entity = EntityTracker().entities[self.player_id]
-        # TODO: a delay between levels to let sound play out
-        # maybe show something? Like an image? Lots of work to draw, though
-        # Maybe some text re: objectives
         elif event.event_type == 'ecs_collision' and event.event_value[0] == self.player_id:
             if event.event_value[1] and 'level_switch' in event.event_value[1]:
                 self.is_changing = True

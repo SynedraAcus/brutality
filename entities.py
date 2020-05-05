@@ -274,6 +274,7 @@ class EntityFactory:
 
     def _create_title(self, entity_id, image_id='ghetto_title',
                       bg_sound='ghetto_walk_bg'):
+        # TODO: animate title cards
         e = Entity(entity_id)
         e.add_component(WidgetComponent(self.dispatcher,
                                         Widget(*self.atlas.get_element(image_id),
@@ -283,7 +284,7 @@ class EntityFactory:
                                                  bg_sound=bg_sound))
         e.add_component(DecayComponent(self.dispatcher,
                                        destroy_condition='timeout',
-                                       lifetime=1.0))
+                                       lifetime=2.0))
         return e
 
 
