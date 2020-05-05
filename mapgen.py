@@ -208,10 +208,10 @@ class LevelManager(metaclass=Singleton):
             self.factory.create_entity('invis', (0, 50), size=(500, 9))
             # No garbage or similar stuff on the department floor
         elif style == 'lab':
-            self.dispatcher.add_event(BearEvent('set_bg_sound', None))
+            self.dispatcher.add_event(BearEvent('set_bg_sound', 'lab_bg'))
             self.factory.create_entity('lab_bg', (0, 0), size=(500, 20))
             self.factory.create_entity('floor', (0, 20), size=(500, 30))
-            self.factory.create_entity('invis', (0, 50), size=(500, 9))
+            self.factory.create_entity('invis', (0, 51), size=(500, 9))
         # Placing actual game content
         #
         # The level is decomposed into a bunch of prefab-like "rooms".

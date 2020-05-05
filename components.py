@@ -378,6 +378,7 @@ class ScorePickupCollisionComponent(CollisionComponent):
         # Only work when collided into by the cop
         if other == self.player_entity:
             self.dispatcher.add_event(BearEvent('brut_score', self.score))
+            self.dispatcher.add_event(BearEvent('play_sound', 'coin'))
             self.owner.destructor.destroy()
 
 
@@ -529,6 +530,7 @@ class CharacterHealthComponent(HealthComponent):
             EntityTracker().entities[self.owner.hands.right_item].destructor.destroy()
             # Dump score ball, if any
             if self.score:
+                self.dispatcher.add_event(BearEvent('play_sound', 'coin_drop'))
                 self.owner.spawner.spawn('score_pickup', (randint(-3, 6),
                                                           self.owner.widget.height-2),
                                          score=self.score)

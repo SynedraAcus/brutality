@@ -326,7 +326,10 @@ class TalkAIState(AIState):
         # Could've switched into talk state after exhausting the monologue
         if self.next_phrase >= len(self.monologue):
             return 0
-        pc = EntityTracker().entities[self.player_id]
+        try:
+            pc = EntityTracker().entities[self.player_id]
+        except KeyError:
+            return 0
         if self.owner.position.x >= pc.position.x:
             self.owner.position.turn('l')
         else:
@@ -445,7 +448,7 @@ class CombatAIState(AIState):
                     ranges = (self.left_range[0] if self.left_range[0] else 1000,
                               self.right_range[0] if self.right_range[0] else 1000)
                     r = min(ranges)
-                    dx += r * -1 if dx > 0 else 1
+                    dx += r * 1 if dx > 0 else -1
                 # Reconsidering direction
                 self.steps_left = min(abs(dx) + 1, abs(dy) + 1,
                                       randint(4, 7))

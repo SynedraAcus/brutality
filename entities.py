@@ -932,7 +932,7 @@ class EntityFactory:
         scientist.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='scientist_f2_corpse',
                                                     hitpoints=5,
-                                                    hit_sounds=('male_dmg', ),
+                                                    hit_sounds=('female_dmg', ),
                                                     death_sounds=(
                                                     'punk_death',)))
         # Creating hand entities
