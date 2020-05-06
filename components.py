@@ -232,7 +232,11 @@ class PowerProjectileCollisionComponent(ProjectileCollisionComponent):
         if not other:
             self.owner.destructor.destroy()
         else:
-            entity = EntityTracker().entities[other]
+            try:
+                entity = EntityTracker().entities[other]
+            except KeyError:
+                # Another case of collision into nonexistent item
+                return
             if hasattr(entity, 'collision') and not entity.collision.passable:
                 if hasattr(entity, 'powered'):
                     entity.powered.get_power()

@@ -1402,6 +1402,7 @@ class EntityFactory:
                                     use_delay=0.35,
                                     damage=5,
                                     item_name='Shiv',
+                                    use_sound='shiv',
                                     item_description='A sharpened piece of steel,\none end wrapped in duct\ntape. Good enough for\nstabbing people.'))
         entity.add_component(HidingComponent(self.dispatcher,
                                              hide_condition='timeout',
@@ -1528,7 +1529,7 @@ class EntityFactory:
                                                             grab_offset={'r': (-3, -2),
                                                                          'l': (3, -2)},
                                                             use_delay=0.5,
-                                                            use_sound='spark',
+                                                            use_sound='emitter',
                                                             item_name='Spark emitter',
                                                             item_description='A tool for activating\nscientific devices.\nAlso usable as a very weak\ngun with infinite ammo.'))
         return entity

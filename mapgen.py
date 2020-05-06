@@ -759,7 +759,14 @@ class LevelManager(metaclass=Singleton):
                                 'text': 'Walk into ammo balls\n(like these)\nto reload your weapons',
                                 'destroy_condition': 'timeout',
                                 'lifetime': 8,
-                                'vy': -1})
+                                'vy': -1}),
+                  SpawnItem(item='message',
+                            pos=(220, 30),
+                            size=(10, 20),
+                            kwargs={'text': 'Collect coins to increase\nyour score and get\nhealed a little',
+                                    'destroy_condition': 'timeout',
+                                    'lifetime': 8,
+                                    'vy': -1})
                   )
         self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
@@ -781,7 +788,7 @@ class LevelManager(metaclass=Singleton):
         # Shooting range
         self.factory.create_entity('dept_wall_inner', (120, 0))
         self.factory.create_entity('dept_wall_inner', (101, 20))
-        self.factory.create_entity('pistol', (130, 30))
+        self.factory.create_entity('pistol', (130, 31))
         self.factory.create_entity('dept_range_table', (160, 13))
         self.factory.create_entity('target', (210, 14))
         self.factory.create_entity('dept_fence', (163, 22))
@@ -796,12 +803,13 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('dept_bench', (240, 18))
         self.factory.create_entity('dept_wall_inner', (270, 0))
         self.factory.create_entity('dept_wall_inner', (259, 11))
+        self.factory.create_entity('score_pickup', (245, 29), score=5)
         # Office
         self.factory.create_entity('dept_chair_1', (287, 17))
         self.factory.create_entity('dept_table_1', (290, 12))
         self.factory.create_entity('dept_table_2', (305, 12))
         self.factory.create_entity('dept_chair_2', (319, 19))
-        self.factory.create_entity('dept_boss', (350, 7),
+        self.factory.create_entity('dept_boss', (350, 8),
                                    monologue=('Hey, come here',
                                               'We got a damn punk infestation\ndown the street',
                                               'Go do something about it',
