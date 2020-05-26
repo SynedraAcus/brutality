@@ -280,7 +280,7 @@ class LevelSwitchWidget(SimpleAnimationWidget):
     possibly fit inside. If they are equal, resulting parallelogram will have
     width of exactly 1 char.
     """
-    def __init__(self, size=(10, 5)):
+    def __init__(self, size=(10, 5), **kwargs):
         # pregenerate chars
         if size[1] > size[0]:
             raise ValueError('Width of LevelSwitchWidget should be at least as high as its height.')
@@ -310,7 +310,7 @@ class LevelSwitchWidget(SimpleAnimationWidget):
         super().__init__(Animation([(chars, colors3),
                                     (chars, colors2),
                                     (chars, colors)],
-                                   2))
+                                   2), **kwargs)
 
 
 class SignpostWidget(Layout):

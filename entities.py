@@ -72,7 +72,7 @@ class EntityFactory:
                            'dept_fence': (21, 14),
                            'dept_bench': (17, 5),
                            'dept_wall_inner': (3, 21),
-                           'lab_wall_inner': (3, 21),
+                           'lab_wall_inner': (3, 20),
                            'punchbag': (3, 26),
                            'dept_weight': (23, 5),
                            'dept_table_1': (10, 8),
@@ -255,7 +255,7 @@ class EntityFactory:
         wall = Entity(id=entity_id)
         w = generate_bg(self.atlas, lab_transition, size[0])
         wall.add_component(WidgetComponent(self.dispatcher, Widget(*w)))
-        wall.add_component(PositionComponent(self.dispatcher, affect_z=False))
+        wall.add_component(PositionComponent(self.dispatcher, affect_z=True))
         wall.add_component(DestructorComponent(self.dispatcher))
         wall.add_component(CollisionComponent(self.dispatcher, depth=20))
         return wall
@@ -265,7 +265,8 @@ class EntityFactory:
         widget = Widget(*tile_randomly(self.atlas, 'floor_tile_1',
                                                   'floor_tile_2',
                                                   'floor_tile_3',
-                                                  size=size))
+                                                  size=size),
+                        z_level=-1)
         # Disable affect_z so that floor won't overlap everything
         floor.add_component(PositionComponent(self.dispatcher, affect_z=False))
         floor.add_component(WidgetComponent(self.dispatcher, widget))

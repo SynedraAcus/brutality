@@ -533,11 +533,11 @@ class LevelManager(metaclass=Singleton):
                                               'To begin the game, walk into\none of the switches to the right',
                                               'I recommend starting from the\nDEPARTMENT'
                                               ))
-        self.factory.create_entity('signpost', (45, 30), text='Skip\ntutorial')
+        self.factory.create_entity('signpost', (46, 31), text='Skip\ntutorial')
         self.factory.create_entity('level_switch', (37, 39),
                                    size=(60, 9),
                                    next_level='ghetto_one')
-        self.factory.create_entity('signpost', (57, 14), text='DEPARTMENT',
+        self.factory.create_entity('signpost', (58, 15), text='DEPARTMENT',
                                    text_color='blue')
         self.factory.create_entity('level_switch', (49, 23),
                                    size=(60, 8),
