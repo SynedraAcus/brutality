@@ -470,3 +470,4 @@ class CombatAIState(AIState):
                 return
             self.walk_direction = (randint(-1, 1), randint(-1, 1))
             self.steps_left = randint(4, 7)
+# TODO: prevent nunchaku punks from getting lost after close contact with PC

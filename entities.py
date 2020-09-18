@@ -1224,6 +1224,13 @@ class EntityFactory:
         transferred to the entity or `direction` (either 'r' or 'l')  which
         overrides vx and vy to (80, 0) and (-80, 0) respectively
         """
+        # TODO: create a SparkLine kinda thing to optimize powered items
+        # currently they emit about ten sparks per spike per second, thus
+        # creating considerable lags. Could instead establish a permanent spark
+        # line which would be a lot less costly to run. This thing would deal
+        # damage in collided_by. Guess it would require a special spike-created
+        # kind of spark because otherwise pistol sparks would establish
+        # permanent lines from shooter to target.
         spark = Entity(id=entity_id)
         widget = SimpleAnimationWidget(Animation((self.atlas.get_element('spark_1'),
                                                   self.atlas.get_element('spark_2')),
