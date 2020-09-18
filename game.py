@@ -24,7 +24,8 @@ from widgets import HitpointBar, ItemWindow, ScoreWidget
 
 parser = ArgumentParser('A game about beating people')
 parser.add_argument('-s', type=str, help='Save file to load on startup')
-parser.add_argument('--disable_sound', action='store_true')
+parser.add_argument('--disable_sound', action='store_true',
+                    help='Disable all sound. Prevents simpleaudio from importing')
 args = parser.parse_args()
 
 ################################################################################
