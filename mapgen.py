@@ -527,12 +527,12 @@ class LevelManager(metaclass=Singleton):
         self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
-        self.factory.create_entity('female_scientist', (20, 15),
-                                   monologue=('Welcome to the BRUTALITY prototype',
-                                              'Try Esc to access menu\nand WASD/arrows to walk',
-                                              'To begin the game, walk into\none of the switches to the right',
-                                              'I recommend starting from the\nDEPARTMENT'
-                                              ))
+        # self.factory.create_entity('female_scientist', (20, 15),
+        #                            monologue=('Welcome to the BRUTALITY prototype',
+        #                                       'Try Esc to access menu\nand WASD/arrows to walk',
+        #                                       'To begin the game, walk into\none of the switches to the right',
+        #                                       'I recommend starting from the\nDEPARTMENT'
+        #                                       ))
         self.factory.create_entity('signpost', (46, 31), text='Skip\ntutorial')
         self.factory.create_entity('level_switch', (37, 39),
                                    size=(60, 9),
@@ -550,6 +550,7 @@ class LevelManager(metaclass=Singleton):
         for i in range(120, 150, 5):
             self.factory.create_entity('score_pickup', (i, 30))
         self.factory.create_entity('nunchaku_punk', (170, 10))
+        self.dispatcher.add_event(BearEvent('brut_remove_splash', None))
 
     def _final(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
@@ -614,7 +615,6 @@ class LevelManager(metaclass=Singleton):
     # Later this hack would be replaced with properly drawing dialogue from
     # PlotManager directly in generate_level.
     # Same for _ghetto_expo_* methods
-
 
     def _boss_leave_it(self):
         """
@@ -771,7 +771,7 @@ class LevelManager(metaclass=Singleton):
         self.spawner.add_spawns_iterable(spawns)
         # Lockers and benches
         self.factory.create_entity('dept_wall_inner', (0, 0))
-        self.factory.create_entity('dept_locker', (0, 12))
+        self.factory.create_entity('dept_locker', (3, 12))
         self.factory.create_entity('dept_bench', (25, 18))
         self.factory.create_entity('dept_locker', (58, 4))
         self.factory.create_entity('dept_locker', (54, 8))

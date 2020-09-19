@@ -17,7 +17,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
 from entities import EntityFactory
 from listeners import ScrollListener, SavingListener, LoadingListener, \
     SpawningListener, LevelSwitchListener, MenuListener, \
-    ItemDescriptionListener, ScoreListener
+    ItemDescriptionListener, ScoreListener, SplashListener
 from mapgen import LevelManager, restart
 from plot import Goal
 from widgets import HitpointBar, ItemWindow, ScoreWidget
@@ -39,7 +39,36 @@ t = BearTerminal(font_path=path.join(path_base, 'cp437_12x12.png'),
 dispatcher = BearEventDispatcher()
 loop = BearLoop(t, dispatcher)
 dispatcher.register_listener(ClosingListener(), ['misc_input', 'tick'])
+t.start()
 
+################################################################################
+# Showing splash screen while stuff loads
+#
+################################################################################
+
+splash_loader = XpLoader('splash.xp')
+chars, colors = splash_loader.get_image()
+splash_widget = Widget(chars, colors)
+t.add_widget(splash_widget, layer=10)
+chars = [[9608 for x in range(81)] for y in range(61)]
+colors = copy_shape(chars, '#000000')
+splash_underlay = Widget(chars, colors)
+t.add_widget(splash_underlay, layer=9)
+
+# This event type is only emitted by main menu level generator
+dispatcher.register_event_type('brut_remove_splash')
+splash_listener = SplashListener(dispatcher=dispatcher,
+                                 terminal=t,
+                                 widgets=[splash_widget, splash_underlay])
+dispatcher.register_listener(splash_listener, ('key_down',
+                                               'brut_remove_splash'))
+dispatcher.register_listener(splash_widget, 'key_down')
+
+
+################################################################################
+# Loading assets and initializing stuff
+#
+################################################################################
 atlas = Multiatlas((Atlas(XpLoader(path.join(path_base, 'test_atlas.xp')),
                           path.join(path_base, 'test_atlas.json')),
                     Atlas(XpLoader(path.join(path_base, 'ghetto_bg.xp')),
@@ -51,7 +80,6 @@ atlas = Multiatlas((Atlas(XpLoader(path.join(path_base, 'test_atlas.xp')),
                     Atlas(XpLoader(path.join(path_base, 'level_headers.xp')),
                           path.join(path_base, 'level_headers.json'))))
 
-# Init game screen
 chars = [[' ' for _ in range(500)] for y in range(60)]
 colors = copy_shape(chars, 'gray')
 layout = ScrollableECSLayout(chars, colors, view_pos=(0, 0), view_size=(81, 50))
@@ -60,7 +88,7 @@ factory = EntityFactory(atlas, dispatcher, layout)
 
 ################################################################################
 # Game-specific event types
-# Expected values shown for each type
+# Expected values for each type shown in comments
 ################################################################################
 
 # Combat system
@@ -85,10 +113,9 @@ dispatcher.register_event_type('brut_load_game') # Path to savefile
 
 
 ################################################################################
-# Starting the game terminal and adding main widgets
+# Adding main game widgets
 ################################################################################
 
-t.start()
 t.add_widget(layout, (0, 0), layer=1)
 # HUD elements
 t.add_widget(Widget(*atlas.get_element('hud_bg')),
@@ -252,7 +279,7 @@ sc_drugs = Goal(name='scientist_drugs',
 
 
 ################################################################################
-# Test menu
+# Game menu
 ################################################################################
 
 menu_items = [MenuItem('Continue', color='white', highlight_color='blue',
@@ -328,3 +355,6 @@ except Exception:
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
 
 # TODO: bank level
+
+# TODO: settings system
+# At least something minimal, like enable/disable sound and fullscreen

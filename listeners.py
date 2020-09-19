@@ -12,7 +12,7 @@ from bear_hug.ecs import EntityTracker, Singleton
 from bear_hug.ecs_widgets import ScrollableECSLayout
 from bear_hug.event import BearEvent
 from bear_hug.sound import SoundListener
-from bear_hug.widgets import Widget, Listener, MenuWidget
+from bear_hug.widgets import Widget, Listener, MenuWidget, Label
 
 from widgets import TypingLabelWidget
 
@@ -463,6 +463,32 @@ class MenuListener(Listener):
         self.dispatcher.add_event(BearEvent('play_sound', 'item_drop'))
         for entity in EntityTracker().filter_entities(lambda x: x.id=='cop_1'):
             entity.controller.accepts_input = True
+
+
+class SplashListener(Listener):
+    """
+    Waits for `brut_remove_splash` event and removes its two widgets.
+    """
+    def __init__(self, dispatcher, widgets, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dispatcher = dispatcher
+        self.widgets = list(widgets)
+        self.may_remove = False
+
+    def on_event(self, event):
+        if event.event_type == 'brut_remove_splash':
+            self.may_remove = True
+            label = Label('PRESS ANY KEY', color='gray')
+            self.terminal.add_widget(label, pos=(30, 32), layer=11,
+                                     refresh=True)
+            self.widgets.append(label)
+        elif event.event_type == 'key_down' and self.may_remove:
+            for widget in self.widgets:
+                print(f'removing')
+                self.dispatcher.unregister_listener(widget)
+                self.terminal.remove_widget(widget)
+            self.terminal.refresh()
+            self.may_remove = False
 
 
 class ItemDescriptionListener(Listener):
