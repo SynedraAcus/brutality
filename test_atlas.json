@@ -663,5 +663,47 @@
     "y": 64,
     "xsize": 3,
     "ysize": 4
+  },
+  {
+    "name": "wall_switch_on",
+    "x": 1,
+    "y": 125,
+    "xsize": 7,
+    "ysize": 22
+  },
+  {
+    "name": "wall_switch_off",
+    "x": 9,
+    "y": 125,
+    "xsize": 7,
+    "ysize": 22
+  },
+  {
+    "name": "dynamic_1",
+    "x": 19,
+    "y": 133,
+    "xsize": 20,
+    "ysize": 14
+  },
+  {
+    "name": "dynamic_2",
+    "x": 10,
+    "y": 133,
+    "xsize": 20,
+    "ysize": 14
+  },
+  {
+    "name": "terminal_switch_on",
+    "x": 61,
+    "y": 130,
+    "xsize": 9,
+    "ysize": 17
+  },
+  {
+    "name": "terminal_switch_off",
+    "x": 71,
+    "y": 130,
+    "xsize": 9,
+    "ysize": 17
   }
 ]
