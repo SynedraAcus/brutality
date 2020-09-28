@@ -476,7 +476,7 @@ class SplashListener(Listener):
         self.may_remove = False
 
     def on_event(self, event):
-        if event.event_type == 'brut_remove_splash':
+        if event.event_type == 'brut_remove_splash' and not self.may_remove:
             self.may_remove = True
             label = Label('PRESS ANY KEY', color='gray')
             self.terminal.add_widget(label, pos=(30, 32), layer=11,
@@ -484,11 +484,12 @@ class SplashListener(Listener):
             self.widgets.append(label)
         elif event.event_type == 'key_down' and self.may_remove:
             for widget in self.widgets:
-                print(f'removing')
                 self.dispatcher.unregister_listener(widget)
                 self.terminal.remove_widget(widget)
+            self.widgets = []
             self.terminal.refresh()
-            self.may_remove = False
+            # Remove self from dispatcher to avoid triggering again
+            self.dispatcher.unregister_listener(self)
 
 
 class ItemDescriptionListener(Listener):
