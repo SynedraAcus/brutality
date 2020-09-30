@@ -548,6 +548,7 @@ class LevelManager(metaclass=Singleton):
         #                            size=(20, 8),
         #                            next_level='lab_fight')
         self.factory.create_entity('wall_switch', (120, 0))
+        self.factory.create_entity('settings_speaker', (150, 10))
         self.factory.create_entity('terminal_switch', (130, 15))
         self.dispatcher.add_event(BearEvent('brut_remove_splash', None))
 

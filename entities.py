@@ -538,6 +538,10 @@ class EntityFactory:
         switch.add_component(PositionComponent(self.dispatcher))
         switch.add_component(SwitchHealthComponent(self.dispatcher,
                                                    initial_state=True,
+                                                   on_event_type='brut_change_config',
+                                                   on_event_value=('sound', True),
+                                                   off_event_type='brut_change_config',
+                                                   off_event_value=('sound', False),
                                                    on_sound='switch_on',
                                                    off_sound='switch_off',
                                                    on_widget='wall_on',
@@ -570,6 +574,20 @@ class EntityFactory:
                                                 depth=2,
                                                 z_shift=(1, -1)))
         return switch
+
+    def _create_settings_speaker(self, entity_id, **kwargs):
+        speaker = Entity(entity_id)
+        widget = SimpleAnimationWidget(
+            Animation((self.atlas.get_element('speaker_1'),
+                       self.atlas.get_element('speaker_2')),
+                      4),
+            emit_ecs=True)
+        speaker.add_component(SpeakerWidgetComponent(self.dispatcher, widget))
+        speaker.add_component(PositionComponent(self.dispatcher))
+        speaker.add_component(DestructorComponent(self.dispatcher))
+        speaker.add_component(CollisionComponent(self.dispatcher, depth=3,
+                                                 z_shift=(1, -1)))
+        return speaker
 
     def _create_ammo_pickup(self, entity_id, **kwargs):
         e = Entity(entity_id)

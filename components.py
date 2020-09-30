@@ -7,7 +7,30 @@ from bear_hug.bear_utilities import BearECSException, rectangles_collide, \
     BearException
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     Entity, EntityTracker, CollisionComponent, \
-    DestructorComponent
+    DestructorComponent, AnimationWidgetComponent
+
+
+class SpeakerWidgetComponent(AnimationWidgetComponent):
+    """
+    A specialized WidgetComponent for the boombox in settings window.
+
+    Triggers its animation upon receiving 'brut_change_config' event with
+    ('sound', False) and ('sound', True) values
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.dispatcher.register_listener(self, 'brut_change_config')
+
+    def on_event(self, event):
+        if event.event_type == 'brut_change_config' and event.event_value[0] == 'sound':
+            print(event.event_value)
+            if event.event_value[1]:
+                self.widget.start()
+            else:
+                self.widget.stop()
+        else:
+            return super().on_event(event)
 
 
 class WalkerComponent(PositionComponent):
@@ -532,14 +555,12 @@ class SwitchHealthComponent(HealthComponent):
             return self.switch_on()
 
     def switch_on(self):
-        print('ON')
         self.current_state = True
         self.owner.widget.switch_to_image(self.on_widget)
         return [BearEvent(self.on_event_type, self.on_event_value),
                 BearEvent('play_sound', self.on_sound)]
 
     def switch_off(self):
-        print('OFF')
         self.current_state = False
         self.owner.widget.switch_to_image(self.off_widget)
         return [BearEvent(self.off_event_type, self.off_event_value),
@@ -566,6 +587,7 @@ class DestructorHealthComponent(HealthComponent):
     def process_hitpoint_update(self):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
             self.owner.destructor.destroy()
+
 
 class SpawnerDestructorHealthComponent(HealthComponent):
     """
