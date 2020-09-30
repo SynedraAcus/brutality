@@ -545,6 +545,19 @@ class SwitchHealthComponent(HealthComponent):
         return [BearEvent(self.off_event_type, self.off_event_value),
                 BearEvent('play_sound', self.off_sound)]
 
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['initial_state'] = self.current_state
+        d['on_event_type'] = self.on_event_type
+        d['on_event_value'] = self.on_event_value
+        d['on_sound'] = self.on_sound
+        d['on_widget'] = self.on_widget
+        d['off_event_type'] = self.off_event_type
+        d['off_event_value'] = self.off_event_value
+        d['off_sound'] = self.off_sound
+        d['off_widget'] = self.off_widget
+        return dumps(d)
+
 
 class DestructorHealthComponent(HealthComponent):
     """
@@ -553,7 +566,6 @@ class DestructorHealthComponent(HealthComponent):
     def process_hitpoint_update(self):
         if self.hitpoints == 0 and hasattr(self.owner, 'destructor'):
             self.owner.destructor.destroy()
-
 
 class SpawnerDestructorHealthComponent(HealthComponent):
     """
