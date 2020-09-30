@@ -544,12 +544,11 @@ class LevelManager(metaclass=Singleton):
                                    next_level='department')
         # Debug lab teleport and scores
         # Remove from release code!
-        self.factory.create_entity('level_switch', (120, 23),
-                                   size=(20, 8),
-                                   next_level='lab_fight')
-        for i in range(120, 150, 5):
-            self.factory.create_entity('score_pickup', (i, 30))
-        self.factory.create_entity('nunchaku_punk', (170, 10))
+        # self.factory.create_entity('level_switch', (120, 23),
+        #                            size=(20, 8),
+        #                            next_level='lab_fight')
+        self.factory.create_entity('wall_switch', (120, 0))
+        self.factory.create_entity('terminal_switch', (130, 15))
         self.dispatcher.add_event(BearEvent('brut_remove_splash', None))
 
     def _final(self):

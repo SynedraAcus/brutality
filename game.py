@@ -110,6 +110,7 @@ dispatcher.register_event_type('brut_close_menu') # Value ignored
 dispatcher.register_event_type('brut_show_items') # Value ignored
 dispatcher.register_event_type('brut_save_game') # Path to savefile
 dispatcher.register_event_type('brut_load_game') # Path to savefile
+dispatcher.register_event_type('brut_change_config') # Config key and new value
 
 
 ################################################################################
@@ -160,7 +161,8 @@ dispatcher.register_listener(ScrollListener(layout=layout,
 dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(open(path.join(path_base, 'run.log'), mode='w'))
-dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy'])
+dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy',
+                                      'brut_change_config', 'play_sound'])
 # Sound
 if not args.disable_sound:
     sound_files = {'step': 'step.wav',
@@ -207,7 +209,9 @@ if not args.disable_sound:
                    'target_hit': 'target.wav',
                    'item_drop': 'item_drop.wav',
                    'item_grab': 'item_grab.wav',
-                   'menu': 'menu_switch.wav'}
+                   'menu': 'menu_switch.wav',
+                   'switch_on': 'switch_on.wav',
+                   'switch_off': 'switch_off.wav'}
     from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:
@@ -358,3 +362,5 @@ except Exception:
 
 # TODO: settings system
 # At least something minimal, like enable/disable sound and fullscreen
+
+#TODO: neon sound in splash screen

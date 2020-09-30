@@ -525,6 +525,52 @@ class EntityFactory:
         healer.add_component(DestructorComponent(self.dispatcher))
         return healer
 
+    def _create_wall_switch(self, entity_id, initial_state=True, **kwargs):
+        switch = Entity(entity_id)
+        if initial_state:
+            initial_image = 'wall_on'
+        else:
+            initial_image = 'wall_off'
+        widget = SwitchingWidget(images_dict={'wall_on': self.atlas.get_element('wall_switch_on'),
+                                              'wall_off': self.atlas.get_element('wall_switch_off')},
+                                 initial_image=initial_image)
+        switch.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        switch.add_component(PositionComponent(self.dispatcher))
+        switch.add_component(SwitchHealthComponent(self.dispatcher,
+                                                   initial_state=True,
+                                                   on_sound='switch_on',
+                                                   off_sound='switch_off',
+                                                   on_widget='wall_on',
+                                                   off_widget='wall_off'))
+        switch.add_component(DestructorComponent(self.dispatcher))
+        switch.add_component(CollisionComponent(self.dispatcher,
+                                                depth=2,
+                                                z_shift=(1, -1)))
+        return switch
+
+    def _create_terminal_switch(self, entity_id, initial_state=True, **kwargs):
+        switch = Entity(entity_id)
+        if initial_state:
+            initial_image = 'terminal_on'
+        else:
+            initial_image = 'terminal_off'
+        widget = SwitchingWidget(images_dict={'terminal_on': self.atlas.get_element('terminal_switch_on'),
+                                              'terminal_off': self.atlas.get_element('terminal_switch_off')},
+                                 initial_image=initial_image)
+        switch.add_component(SwitchWidgetComponent(self.dispatcher, widget))
+        switch.add_component(PositionComponent(self.dispatcher))
+        switch.add_component(SwitchHealthComponent(self.dispatcher,
+                                                   initial_state=True,
+                                                   on_sound='switch_on',
+                                                   off_sound='switch_off',
+                                                   on_widget='terminal_on',
+                                                   off_widget='terminal_off'))
+        switch.add_component(DestructorComponent(self.dispatcher))
+        switch.add_component(CollisionComponent(self.dispatcher,
+                                                depth=2,
+                                                z_shift=(1, -1)))
+        return switch
+
     def _create_ammo_pickup(self, entity_id, **kwargs):
         e = Entity(entity_id)
         e.add_component(WidgetComponent(self.dispatcher,

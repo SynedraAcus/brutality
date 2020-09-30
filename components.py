@@ -3,7 +3,8 @@ from json import dumps, loads
 from math import sqrt
 from random import randint, choice
 
-from bear_hug.bear_utilities import BearECSException, rectangles_collide
+from bear_hug.bear_utilities import BearECSException, rectangles_collide, \
+    BearException
 from bear_hug.ecs import Component, PositionComponent, BearEvent, \
     Entity, EntityTracker, CollisionComponent, \
     DestructorComponent
@@ -478,6 +479,71 @@ class HealthComponent(Component):
     def __repr__(self):
         return dumps({'class': self.__class__.__name__,
                       'hitpoints': self.hitpoints})
+
+
+class SwitchHealthComponent(HealthComponent):
+    """
+    A health component for various switches, triggers and so on.
+
+    When damaged (ie collided into by a combat projectile), switches its state
+    and orders the widget to change. Does not work as an actual damageable
+    item.
+
+    This logic is not implemented in CollisionComponent because the item needs
+    that one for correct interaction with walkers and such. OTOH, I don't see
+    any need for destructible switches, so they aren't likely to need a
+    regular HealthComponent.
+
+    Expects owner's widget component to be SwitchWidgetComponent
+    """
+    def __init__(self, *args,
+                 initial_state=False,
+                 on_event_type='brut_change_config',
+                 on_event_value=(None, None),
+                 on_sound='switch_on',
+                 on_widget='wall_switch_on',
+                 off_event_type='brut_change_config',
+                 off_event_value=(None, None),
+                 off_sound='switch_off',
+                 off_widget='wall_switch_off',
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        if not isinstance(initial_state, bool):
+            raise BearException(f'{type(initial_state)} used as initial_state for SwitchHealthComponent instead of bool')
+        self.current_state = initial_state
+        self.on_event_type = on_event_type
+        self.on_event_value = on_event_value
+        self.on_sound = on_sound
+        self.on_widget = on_widget
+        self.off_event_type = off_event_type
+        self.off_event_value = off_event_value
+        self.off_sound = off_sound
+        self.off_widget = off_widget
+
+    def on_event(self, event):
+        if event.event_type == 'brut_damage' and \
+                event.event_value[0] == self.owner.id:
+            return self.trigger()
+
+    def trigger(self):
+        if self.current_state:
+            return self.switch_off()
+        else:
+            return self.switch_on()
+
+    def switch_on(self):
+        print('ON')
+        self.current_state = True
+        self.owner.widget.switch_to_image(self.on_widget)
+        return [BearEvent(self.on_event_type, self.on_event_value),
+                BearEvent('play_sound', self.on_sound)]
+
+    def switch_off(self):
+        print('OFF')
+        self.current_state = False
+        self.owner.widget.switch_to_image(self.off_widget)
+        return [BearEvent(self.off_event_type, self.off_event_value),
+                BearEvent('play_sound', self.off_sound)]
 
 
 class DestructorHealthComponent(HealthComponent):
