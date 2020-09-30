@@ -318,6 +318,19 @@ class LoadingListener(Listener):
             self.loop._run_iteration(0)
 
 
+class ConfigListener(Listener, metaclass=Singleton):
+    """
+    Listens to config changes and tweaks things accordingly
+    """
+    def on_event(self, event):
+        if event.event_type == 'brut_change_config':
+            if event.event_value[0] == 'sound':
+                if event.event_value[1]:
+                    SoundListener().turn_on()
+                else:
+                    SoundListener().turn_off()
+
+
 class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     Changes level when player walks into a predefined area.

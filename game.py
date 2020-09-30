@@ -17,7 +17,7 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
 from entities import EntityFactory
 from listeners import ScrollListener, SavingListener, LoadingListener, \
     SpawningListener, LevelSwitchListener, MenuListener, \
-    ItemDescriptionListener, ScoreListener, SplashListener
+    ItemDescriptionListener, ScoreListener, SplashListener, ConfigListener
 from mapgen import LevelManager, restart
 from plot import Goal
 from widgets import HitpointBar, ItemWindow, ScoreWidget
@@ -163,6 +163,9 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 logger = LoggingListener(open(path.join(path_base, 'run.log'), mode='w'))
 dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy',
                                       'brut_change_config', 'play_sound'])
+# Config
+config = ConfigListener()
+dispatcher.register_listener(config, 'brut_change_config')
 # Sound
 if not args.disable_sound:
     sound_files = {'step': 'step.wav',
