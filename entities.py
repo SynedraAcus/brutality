@@ -1014,7 +1014,6 @@ class EntityFactory:
         scientist.add_component(DestructorComponent(self.dispatcher))
         scientist.add_component(FactionComponent(self.dispatcher,
                                                  faction='scientists'))
-        # TODO: give scientists their own hit and death sounds
         scientist.add_component(CharacterHealthComponent(self.dispatcher,
                                                     corpse='scientist_f2_corpse',
                                                     hitpoints=5,
@@ -1116,7 +1115,6 @@ class EntityFactory:
         scientist.add_component(DestructorComponent(self.dispatcher))
         scientist.add_component(FactionComponent(self.dispatcher,
                                                  faction='scientists'))
-        # TODO: give scientists their own hit and death sounds
         scientist.add_component(CharacterHealthComponent(self.dispatcher,
                                                          corpse=f'{prefix}_corpse',
                                                          hitpoints=4,

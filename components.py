@@ -542,11 +542,20 @@ class SwitchHealthComponent(HealthComponent):
         self.off_event_value = off_event_value
         self.off_sound = off_sound
         self.off_widget = off_widget
+        self.dispatcher.register_listener(self, 'brut_change_config')
 
     def on_event(self, event):
         if event.event_type == 'brut_damage' and \
                 event.event_value[0] == self.owner.id:
             return self.trigger()
+        elif event.event_type == 'brut_change_config' and \
+                event.event_value[0] == self.on_event_value[0]:
+            # Assumes the event_value is always (str, bool). It not necessarily
+            # is, but that's the kind of option switches are for.
+            if event.event_value[1]:
+                self.switch_on()
+            else:
+                self.switch_off()
 
     def trigger(self):
         if self.current_state:

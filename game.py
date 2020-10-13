@@ -217,7 +217,8 @@ if not args.disable_sound:
                    'item_grab': 'item_grab.wav',
                    'menu': 'menu_switch.wav',
                    'switch_on': 'switch_on.wav',
-                   'switch_off': 'switch_off.wav'}
+                   'switch_off': 'switch_off.wav',
+                   'neon': 'neon.wav'}
     from bear_hug.sound import SoundListener
     sounds = {}
     for file in sound_files:
@@ -381,8 +382,5 @@ except Exception:
 # TODO: additional control layouts (arrows + ASZX? WASD + JKL;?)
 
 # TODO: bank level
-
-# TODO: settings system
-# At least something minimal, like enable/disable sound and fullscreen
 
 #TODO: neon sound in splash screen
