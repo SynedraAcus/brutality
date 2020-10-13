@@ -333,6 +333,46 @@ class ConfigListener(Listener, metaclass=Singleton):
                 self.terminal.fullscreen = event.event_value[1]
 
 
+class ConfigStorage(Listener):
+    """
+    Keeps track of config changes.
+
+    This class is responsible for storing config options in file and reading
+    them from there, not actually applying changes (which ``ConfigListener``
+    does).
+
+    On creation, instance reads all available options from the file. Writes them
+    back when the game is shutting down.
+    """
+    def __init__(self, *args, config_file='config.json', **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config_file = config_file
+        try:
+            with open(config_file) as handle:
+                self.options = load(handle)
+        except FileNotFoundError:
+            # ignore nonexistent config file. This can only happen during
+            # development, a shipped release should always have config file
+            self.options = {}
+
+    def on_event(self, event):
+        if event.event_type == 'brut_change_config':
+            self.options[event.event_value[0]] = event.event_value[1]
+        elif event.event_type == 'service' and event.event_value == 'shutdown':
+            # Dump settings on shutdown
+            with open(self.config_file, mode='w') as handle:
+                dump(self.options, handle)
+
+    def events(self):
+        """
+        Return an iterator of events announcing every option.
+
+        Intended to be used during game start
+        :return:
+        """
+        for option in self.options:
+            yield BearEvent('brut_change_config', (option, self.options[option]))
+
 class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     Changes level when player walks into a predefined area.

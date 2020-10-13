@@ -17,7 +17,8 @@ from bear_hug.widgets import Widget, ClosingListener, LoggingListener, \
 from entities import EntityFactory
 from listeners import ScrollListener, SavingListener, LoadingListener, \
     SpawningListener, LevelSwitchListener, MenuListener, \
-    ItemDescriptionListener, ScoreListener, SplashListener, ConfigListener
+    ItemDescriptionListener, ScoreListener, SplashListener, ConfigListener, \
+    ConfigStorage
 from mapgen import LevelManager, restart
 from plot import Goal
 from widgets import HitpointBar, ItemWindow, ScoreWidget
@@ -222,6 +223,12 @@ if not args.disable_sound:
     for file in sound_files:
         sounds[file] = path.join(path_base, 'sounds', sound_files[file])
     jukebox = SoundListener(sounds=sounds)
+    # SoundListener starts disabled because otherwise it may play a little chunk
+    # of BG sound even with sound disabled through options. Basically, creation
+    # of SoundListener instance happens before reading in the options (which has
+    # to happen late to make sure every interested party already exists), so it
+    # gets to play about 100 ms of music in this window
+    jukebox.turn_off()
     dispatcher.register_listener(jukebox,
                                  ['play_sound', 'tick', 'set_bg_sound'])
 
@@ -334,6 +341,16 @@ else:
     loop._run_iteration(0)
     levelgen.set_level('main_menu')
 
+################################################################################
+# Applying config.
+#
+# This is done after entity creation because some entities (eg option switches)
+# might care to know their resprective options' values
+################################################################################
+config = ConfigStorage()
+dispatcher.register_listener(config, ['brut_change_config', 'service'])
+for event in config.events():
+    dispatcher.add_event(event)
 
 # Actually starting
 try:
