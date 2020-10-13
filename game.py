@@ -56,10 +56,12 @@ splash_underlay = Widget(chars, colors)
 t.add_widget(splash_underlay, layer=9)
 
 # This event type is only emitted by main menu level generator
-dispatcher.register_event_type('brut_remove_splash')
+
 splash_listener = SplashListener(dispatcher=dispatcher,
                                  terminal=t,
                                  widgets=[splash_widget, splash_underlay])
+# Defined here to start showing while other event types initialize
+dispatcher.register_event_type('brut_remove_splash')
 dispatcher.register_listener(splash_listener, ('key_down',
                                                'brut_remove_splash'))
 dispatcher.register_listener(splash_widget, 'key_down')
@@ -164,7 +166,7 @@ logger = LoggingListener(open(path.join(path_base, 'run.log'), mode='w'))
 dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy',
                                       'brut_change_config', 'play_sound'])
 # Config
-config = ConfigListener()
+config = ConfigListener(terminal=t)
 dispatcher.register_listener(config, 'brut_change_config')
 # Sound
 if not args.disable_sound:

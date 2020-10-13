@@ -568,7 +568,11 @@ class EntityFactory:
                                                    on_sound='switch_on',
                                                    off_sound='switch_off',
                                                    on_widget='terminal_on',
-                                                   off_widget='terminal_off'))
+                                                   off_widget='terminal_off',
+                                                   on_event_type='brut_change_config',
+                                                   on_event_value=('fullscreen', True),
+                                                   off_event_type='brut_change_config',
+                                                   off_event_value=('fullscreen', False)))
         switch.add_component(DestructorComponent(self.dispatcher))
         switch.add_component(CollisionComponent(self.dispatcher,
                                                 depth=2,

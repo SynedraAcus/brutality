@@ -329,6 +329,8 @@ class ConfigListener(Listener, metaclass=Singleton):
                     SoundListener().turn_on()
                 else:
                     SoundListener().turn_off()
+            if event.event_value[0] == 'fullscreen':
+                self.terminal.fullscreen = event.event_value[1]
 
 
 class LevelSwitchListener(Listener, metaclass=Singleton):

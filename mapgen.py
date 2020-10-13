@@ -524,7 +524,7 @@ class LevelManager(metaclass=Singleton):
 
     def _menu(self):
         self.dispatcher.add_event(BearEvent('set_bg_sound', 'ghetto_walk_bg'))
-        self.factory.create_entity('ghetto_bg', (0, 0), size=(500, 20))
+        self.factory.create_entity('dept_bg', (0, 0), size=(500, 20))
         self.factory.create_entity('floor', (0, 20), size=(500, 30))
         self.factory.create_entity('invis', (0, 51), size=(500, 9))
         # self.factory.create_entity('female_scientist', (20, 15),
@@ -547,9 +547,10 @@ class LevelManager(metaclass=Singleton):
         # self.factory.create_entity('level_switch', (120, 23),
         #                            size=(20, 8),
         #                            next_level='lab_fight')
-        self.factory.create_entity('wall_switch', (120, 0))
+        self.factory.create_entity('wall_switch', (140, 0))
         self.factory.create_entity('settings_speaker', (150, 10))
-        self.factory.create_entity('terminal_switch', (130, 15))
+        self.factory.create_entity('terminal_switch', (120, 10))
+        # self.factory.create_entity('terminal_switch', (130, 15))
         self.dispatcher.add_event(BearEvent('brut_remove_splash', None))
 
     def _final(self):

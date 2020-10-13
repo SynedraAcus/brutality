@@ -995,6 +995,12 @@ class InputComponent(Component):
             elif event.event_value == 'TK_KP_5':
                 r.append(BearEvent(event_type='ecs_scroll_to',
                                    event_value=(0, 0)))
+            elif event.event_value == 'TK_ENTER':
+                r.append(BearEvent(event_type='brut_change_config',
+                                   event_value=('fullscreen', True)))
+            elif event.event_value == 'TK_SHIFT':
+                r.append(BearEvent(event_type='brut_change_config',
+                                   event_value=('fullscreen', False)))
         return r
 
 
