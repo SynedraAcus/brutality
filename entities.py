@@ -116,6 +116,15 @@ class EntityFactory:
         :return:
         """
         entity = deserialize_entity(json_string, self.dispatcher)
+        # make sure there is no collision with entity names that would be
+        # generated later
+        l = entity.id.split('_')
+        name = '_'.join(l[:-1])
+        if name in self.counts:
+            num = int(l[-1])
+            if num > self.counts[name]:
+                print(name, num)
+                self.counts[name] = num
         self.dispatcher.add_event(BearEvent('ecs_create', entity))
         # Following hack is necessary because the SpawnerComponent adresses the
         # factory directly. If the factory could respond to events, the

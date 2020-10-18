@@ -259,7 +259,7 @@ class SavingListener(Listener):
             # Loading spawns from SpawnListener
             r['spawns'] = SpawningListener().spawns
             r['bg_sound'] = SoundListener().bg_sound
-        dump(r, open(event.event_value, mode='w'))
+        dump(r, open(event.event_value, mode='w'), indent=2)
 
 
 class LoadingListener(Listener):
@@ -373,6 +373,7 @@ class ConfigStorage(Listener):
         for option in self.options:
             yield BearEvent('brut_change_config', (option, self.options[option]))
 
+
 class LevelSwitchListener(Listener, metaclass=Singleton):
     """
     Changes level when player walks into a predefined area.
@@ -438,8 +439,6 @@ class LevelSwitchListener(Listener, metaclass=Singleton):
 
     def get_state(self):
         return {'player_id': self.player_id,
-                'switch_pos': self.switch_pos,
-                'switch_size': self.switch_size,
                 'level_sequence': self.level_sequence,
                 'current_level': self.current_level,
                 'enabled': self.enabled}

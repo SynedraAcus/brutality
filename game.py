@@ -165,7 +165,8 @@ dispatcher.register_listener(EntityTracker(), ['ecs_create', 'ecs_destroy'])
 # Debug event logger
 logger = LoggingListener(open(path.join(path_base, 'run.log'), mode='w'))
 dispatcher.register_listener(logger, ['ecs_add', 'ecs_remove', 'ecs_destroy',
-                                      'brut_change_config', 'play_sound'])
+                                      'brut_change_config', 'play_sound',
+                                      'brut_load_game'])
 # Config
 config = ConfigListener(terminal=t)
 dispatcher.register_listener(config, 'brut_change_config')

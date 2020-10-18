@@ -280,37 +280,42 @@ class LevelSwitchWidget(SimpleAnimationWidget):
     possibly fit inside. If they are equal, resulting parallelogram will have
     width of exactly 1 char.
     """
-    def __init__(self, size=(10, 5), **kwargs):
-        # pregenerate chars
-        if size[1] > size[0]:
-            raise ValueError('Width of LevelSwitchWidget should be at least as high as its height.')
-        chars = []
-        offset = size[1] - 1
-        running_offset = offset
-        for _ in range(size[1]):
-            chars.append([' '] * running_offset
-                         + ['>'] * (size[0] - offset)
-                         + [' '] * (offset - running_offset))
-            running_offset -= 1
-        colors = copy_shape(chars, 'white')
-        colors2 = copy_shape(chars, '#D900D9')
-        colors3 = copy_shape(chars, '#D900D9')
-        color_list = ('#400040', '#8C008C', '#D900D9')
-        offset = 0
-        for y in range(len(colors)):
-            for x in range(len(colors[0])):
-                # print((x + offset) % 3, end=',')
-                colors[y][x] = color_list[(x + offset) % 3]
-                colors2[y][x] = color_list[(x + 1 + offset) % 3]
-                colors3[y][x] = color_list[(x + 2 + offset) % 3]
-            # print('\n')
-            offset += 1
-            if offset == 3:
-                offset = 0
-        super().__init__(Animation([(chars, colors3),
-                                    (chars, colors2),
-                                    (chars, colors)],
-                                   2), **kwargs)
+    def __init__(self, *args, size=(10, 5), **kwargs):
+        if 'animation' in kwargs:
+            # If loaded from json dump, animation is already pregenerated and
+            # stored during the previous run
+            super().__init__(*args, **kwargs)
+        else:
+            # pregenerate chars
+            if size[1] > size[0]:
+                raise ValueError('Width of LevelSwitchWidget should be at least as high as its height.')
+            chars = []
+            offset = size[1] - 1
+            running_offset = offset
+            for _ in range(size[1]):
+                chars.append([' '] * running_offset
+                             + ['>'] * (size[0] - offset)
+                             + [' '] * (offset - running_offset))
+                running_offset -= 1
+            colors = copy_shape(chars, 'white')
+            colors2 = copy_shape(chars, '#D900D9')
+            colors3 = copy_shape(chars, '#D900D9')
+            color_list = ('#400040', '#8C008C', '#D900D9')
+            offset = 0
+            for y in range(len(colors)):
+                for x in range(len(colors[0])):
+                    # print((x + offset) % 3, end=',')
+                    colors[y][x] = color_list[(x + offset) % 3]
+                    colors2[y][x] = color_list[(x + 1 + offset) % 3]
+                    colors3[y][x] = color_list[(x + 2 + offset) % 3]
+                # print('\n')
+                offset += 1
+                if offset == 3:
+                    offset = 0
+            super().__init__(Animation([(chars, colors3),
+                                        (chars, colors2),
+                                        (chars, colors)],
+                                       2), **kwargs)
 
 
 class SignpostWidget(Layout):
@@ -330,7 +335,7 @@ class SignpostWidget(Layout):
         # changing children or whatever), it might as well save as a simple
         # widget. This code from bear_hug.widgets.Widget is repeated here since
         # the default layout throws exception on __repr__
-        char_strings = [''.join(x) for x in self.chars]
+        char_strings = [self._serialize_charline(x) for x in self.chars]
         for string in char_strings:
             string.replace('\"', '\u0022"').replace('\\', '\u005c')
         d = {'class': self.__class__.__name__,

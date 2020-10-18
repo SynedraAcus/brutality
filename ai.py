@@ -1,9 +1,12 @@
 """
 AI components
 """
+import inspect
+from json import dumps, loads
 from math import sqrt
 from random import choice, randint, random
 
+from bear_hug.bear_utilities import BearJSONException
 from bear_hug.ecs import Component, EntityTracker
 from bear_hug.event import BearEvent
 
@@ -67,15 +70,33 @@ class AIComponent(Component):
 
     """
 
-    def __init__(self, *args, states={}, current_state='inactive', **kwargs):
-        super().__init__(*args, name='controller', **kwargs)
+    def __init__(self, *args, states={}, state_dump=None,
+                 current_state='inactive', **kwargs):
+        self._owner = None
         self.states = {}
+        super().__init__(*args, name='controller', **kwargs)
+        if state_dump:
+            for state in state_dump:
+                self._add_state(state,
+                        deserialize_state(state_dump[state], self.dispatcher))
         for state in states:
             self._add_state(state, states[state])
         self.current_state = current_state
         self.delay = 0
         self.have_waited = 0
         self.dispatcher.register_listener(self, 'tick')
+
+    # Wrapping owner so that it gets correctly set for states if they were
+    # added to owner-less component (eg during loading from JSON dump)
+    @property
+    def owner(self):
+        return self._owner
+
+    @owner.setter
+    def owner(self, value):
+        self._owner = value
+        for state in self.states:
+            self.states[state].owner = self._owner
 
     def _add_state(self, state_name, state):
         if not isinstance(state, AIState):
@@ -102,6 +123,14 @@ class AIComponent(Component):
             self.delay = self.states[self.current_state].take_action()
             self.have_waited = 0
     # TODO: __repr__ AIComponent and AIState
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['current_state'] = self.current_state
+        d['state_dump'] = {}
+        for state in self.states:
+            d['state_dump'][state] = repr(self.states[state])
+        return dumps(d)
 
 
 class AIState:
@@ -158,6 +187,14 @@ class AIState:
         :return:
         """
         raise NotImplementedError('AIState.switch_state should be overridden')
+
+    def __repr__(self):
+        d = {'class': self.__class__.__name__,
+             'enemy_factions': self.enemy_factions,
+             'enemy_perception_distance': self.enemy_perception_distance,
+             'player_id': self.player_id,
+             'player_perception_distance': self.player_perception_distance}
+        return dumps(d)
 
 
 class WaitAIState(AIState):
@@ -217,6 +254,13 @@ class WaitAIState(AIState):
                 return self.player_arrival_state
         return None
 
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['player_arrival_state'] = self.player_arrival_state
+        d['enemy_arrival_state'] = self.enemy_arrival_state
+        d['check_delay'] = self.check_delay
+        return dumps(d)
+
 
 class RunawayAIState(AIState):
     """
@@ -256,6 +300,12 @@ class RunawayAIState(AIState):
         else:
             self.owner.position.walk((0, dy < 0 and -1 or 1))
         return self.step_delay
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['wait_state'] = self.wait_state
+        d['step_delay'] = self.step_delay
+        return dumps(d)
 
 
 class TalkAIState(AIState):
@@ -358,6 +408,15 @@ class TalkAIState(AIState):
         # should not spawn all phrases at once
         self.next_phrase += 1
         return self.phrase_delay
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['wait_state'] = self.wait_state
+        d['enemy_arrival_state'] = self.enemy_arrival_state
+        d['monologue'] = self.monologue
+        d['phrase_delay'] = self.phrase_delay
+        d['phrase_sounds'] = self.phrase_sounds
+        return dumps(d)
 
 
 class CombatAIState(AIState):
@@ -471,3 +530,68 @@ class CombatAIState(AIState):
             self.walk_direction = (randint(-1, 1), randint(-1, 1))
             self.steps_left = randint(4, 7)
 # TODO: prevent nunchaku punks from getting lost after close contact with PC
+
+    def __repr__(self):
+        d = loads(super().__repr__())
+        d['right_range'] = self.right_range
+        d['left_range'] = self.left_range
+        d['wait_state'] = self.wait_state
+        return dumps(d)
+
+
+def deserialize_state(serial, dispatcher):
+    """
+    Load the AIState from a JSON string or dict.
+
+    This is a stripped-down version of `bear_hug.ecs.deserialize_component`
+    without support for converters.
+
+    Expects the dict or string to contain ``class`` key with the class name.
+    This class will be used for an AIState instance; it should be imported by
+    the code that calls this function, or somewhere within its call stack. This
+    class should be a subclass of AIState.
+
+    All other keys are used as kwargs for a newly created object. Keys ``owner``
+    and ``dispatcher`` are forbidden and cause an exception to be raised.
+
+    :param serial: A valid JSON string or a dict produced by deserializing such a string.
+
+    :param dispatcher: A queue passed to the ``AIState.__init__``
+
+    :returns: an AIState instance.
+    """
+    if isinstance(serial, str):
+        d = loads(serial)
+    elif isinstance(serial, dict):
+        d = serial
+    else:
+        raise BearJSONException(f'Attempting to deserialize {type(serial)} to AIState')
+    for forbidden_key in ('owner', 'dispatcher'):
+        if forbidden_key in d.keys():
+            raise BearJSONException(f'Forbidden key {forbidden_key} in AIState JSON')
+    if 'class' not in d:
+        raise BearJSONException('No class provided in component JSON')
+    types = [x for x in d if '_type' in x]
+    for t in types:
+        del(d[t])
+    # Try to get the Component class from where the function was imported, or
+    # the importers of *that* frame. Without this, the function would only see
+    # classes from this very file, or ones imported into it, and that would
+    # break the deserialization of custom components.
+    class_var = None
+    for frame in inspect.getouterframes(inspect.currentframe()):
+        if d['class'] in frame.frame.f_globals:
+            class_var = frame.frame.f_globals[d['class']]
+            break
+    del frame
+    if not class_var:
+        raise BearJSONException(f"Class name {class_var} not imported anywhere in the frame stack")
+    if not issubclass(class_var, AIState):
+        raise BearJSONException(f"Class name {class_var}mapped to something other than a AIState subclass")
+    kwargs = {}
+    for key in d:
+        if key == 'class':
+            continue
+        else:
+            kwargs[key] = d[key]
+    return class_var(dispatcher, **kwargs)
